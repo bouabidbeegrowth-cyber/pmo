@@ -1,0 +1,364 @@
+// PMO Mastery — Prisma schema
+// Portable: switch datasource provider to "postgresql" and set DATABASE_URL
+// to a Postgres connection string for production deployment.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Authentication
+// ---------------------------------------------------------------------------
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  role         String    @default("ADMIN") // ADMIN | SUPER_ADMIN
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Event (supports multiple editions — PMO Mastery 2025, 2026, 2027, …)
+// ---------------------------------------------------------------------------
+
+model Event {
+  id                  String   @id @default(cuid())
+  slug                String   @unique
+  editionName         String   // e.g. "PMO Mastery 2025"
+  titleFr             String
+  titleEn             String
+  subtitleFr          String?
+  subtitleEn          String?
+  themeTaglineFr      String?
+  themeTaglineEn      String?
+  descriptionFr       String?
+  descriptionEn       String?
+
+  startDate           DateTime
+  endDate             DateTime?
+  startTime           String?  // "09:00"
+  endTime             String?  // "18:00"
+  timezone            String   @default("Africa/Tunis")
+  countdownTarget     DateTime? // exact moment the countdown counts down to
+
+  venue               String?
+  address             String?
+  city                String?
+  country             String?
+  latitude            Float?
+  longitude           Float?
+  mapUrl              String?
+
+  heroImageDesktop    String?
+  heroImageMobile     String?
+  heroLogo            String?
+  ogImage             String?
+
+  registrationEnabled Boolean  @default(true)
+  status              String   @default("UPCOMING") // UPCOMING | LIVE | ENDED
+  isActive            Boolean  @default(true)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  speakers            Speaker[]
+  programmeDays       ProgrammeDay[]
+  passes              Pass[]
+  organizers          Organizer[]
+  partners            Partner[]
+  contactInfo         ContactInfo?
+  websiteSections     WebsiteSection[]
+
+  @@index([isActive])
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+// ---------------------------------------------------------------------------
+// Speakers / Intervenants
+// ---------------------------------------------------------------------------
+
+model Speaker {
+  id            String   @id @default(cuid())
+  eventId       String
+  slug          String
+  firstName     String
+  lastName      String
+  photo         String?
+  positionFr    String?
+  positionEn    String?
+  company       String?
+  biographyFr   String?
+  biographyEn   String?
+  country       String?
+  linkedinUrl   String?
+  websiteUrl    String?
+  twitterUrl    String?
+  isFeatured    Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  displayOrder  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  sessions      SessionSpeaker[]
+  moderatedSessions ProgrammeSession[] @relation("SessionModerator")
+
+  @@unique([eventId, slug])
+  @@index([eventId, isActive, displayOrder])
+}
+
+// ---------------------------------------------------------------------------
+// Programme (Days → Sessions, with M2M speaker assignment)
+// ---------------------------------------------------------------------------
+
+model ProgrammeDay {
+  id           String   @id @default(cuid())
+  eventId      String
+  nameFr       String
+  nameEn       String?
+  date         DateTime
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  sessions     ProgrammeSession[]
+
+  @@index([eventId, displayOrder])
+}
+
+model ProgrammeSession {
+  id              String   @id @default(cuid())
+  programmeDayId  String
+  startTime       String   // "09:00"
+  endTime         String?  // "10:15"
+  titleFr         String
+  titleEn         String?
+  titleAr         String?
+  descriptionFr   String?
+  descriptionEn   String?
+  sessionType     String   @default("SESSION") // KEYNOTE | PANEL | BREAK | NETWORKING | CLOSING | WORKSHOP | SESSION
+  language        String?  // FR | EN | AR | MIXED
+  room            String?
+  topic           String?
+  displayOrder    Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  programmeDay    ProgrammeDay @relation(fields: [programmeDayId], references: [id], onDelete: Cascade)
+  speakers        SessionSpeaker[]
+  moderator       Speaker?    @relation("SessionModerator", fields: [moderatorId], references: [id])
+  moderatorId     String?
+
+  @@index([programmeDayId, displayOrder])
+}
+
+model SessionSpeaker {
+  sessionId  String
+  speakerId  String
+
+  session    ProgrammeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  speaker    Speaker          @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, speakerId])
+}
+
+// ---------------------------------------------------------------------------
+// Passes / Tickets (with payment URL management)
+// ---------------------------------------------------------------------------
+
+model Pass {
+  id              String   @id @default(cuid())
+  eventId         String
+  slug            String
+  nameFr          String
+  nameEn          String?
+  descriptionFr   String?
+  descriptionEn   String?
+  price           Float
+  currency        String   @default("TND")
+  vatRate         Float    @default(0.19)
+  featuresFr      String?  // newline-separated list
+  featuresEn      String?
+  paymentUrl      String?  // external registration/payment URL
+  minQuantity     Int      @default(1)
+  isFeatured      Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  event           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, slug])
+  @@index([eventId, isActive, displayOrder])
+}
+
+// ---------------------------------------------------------------------------
+// Organizers & Partners
+// ---------------------------------------------------------------------------
+
+model Organizer {
+  id                  String   @id @default(cuid())
+  eventId             String
+  name                String
+  logo                String?
+  descriptionFr       String?
+  descriptionEn       String?
+  websiteUrl          String?
+  linkedinUrl         String?
+  facebookUrl         String?
+  instagramUrl        String?
+  founderName         String?
+  founderTitle        String?
+  founderPhoto        String?
+  founderCredentials  String?
+  isActive            Boolean  @default(true)
+  displayOrder        Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  event               Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, isActive, displayOrder])
+}
+
+model Partner {
+  id            String   @id @default(cuid())
+  eventId       String
+  name          String
+  logo          String?
+  category      String   @default("PARTNER") // STRATEGIC | DIAMOND | GOLD | SILVER | MEDIA | INSTITUTIONAL | PARTNER
+  websiteUrl    String?
+  descriptionFr String?
+  descriptionEn String?
+  isActive      Boolean  @default(true)
+  displayOrder  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, isActive, displayOrder])
+}
+
+// ---------------------------------------------------------------------------
+// CMS — editable website sections (Hero, Why Participate, About, Footer)
+// ---------------------------------------------------------------------------
+
+model WebsiteSection {
+  id              String   @id @default(cuid())
+  eventId         String
+  sectionKey      String   // HERO | WHY_PARTICIPATE | ABOUT | FOOTER
+  titleFr         String?
+  titleEn         String?
+  subtitleFr      String?
+  subtitleEn      String?
+  descriptionFr   String?  // long text — supports \n
+  descriptionEn   String?
+  ctaTextFr       String?
+  ctaTextEn       String?
+  ctaUrl          String?
+  backgroundImage String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  event           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  benefits        Benefit[]
+
+  @@unique([eventId, sectionKey])
+}
+
+model Benefit {
+  id                String   @id @default(cuid())
+  websiteSectionId  String
+  icon              String?  // lucide icon name e.g. "Sparkles"
+  titleFr           String
+  titleEn           String?
+  descriptionFr     String?
+  descriptionEn     String?
+  displayOrder      Int      @default(0)
+  isActive          Boolean  @default(true)
+
+  websiteSection    WebsiteSection @relation(fields: [websiteSectionId], references: [id], onDelete: Cascade)
+
+  @@index([websiteSectionId, displayOrder])
+}
+
+// ---------------------------------------------------------------------------
+// Contact information
+// ---------------------------------------------------------------------------
+
+model ContactInfo {
+  id           String   @id @default(cuid())
+  eventId      String
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  country      String?
+  mapUrl       String?
+  linkedinUrl  String?
+  facebookUrl  String?
+  instagramUrl String?
+  youtubeUrl   String?
+  websiteUrl   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId])
+}
+
+// ---------------------------------------------------------------------------
+// Media library
+// ---------------------------------------------------------------------------
+
+model MediaAsset {
+  id           String   @id @default(cuid())
+  filename     String   @unique
+  originalName String?
+  mimeType     String
+  size         Int
+  url          String
+  width        Int?
+  height       Int?
+  alt          String?
+  createdAt    DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Contact form submissions (so the public form has a real backend)
+// ---------------------------------------------------------------------------
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

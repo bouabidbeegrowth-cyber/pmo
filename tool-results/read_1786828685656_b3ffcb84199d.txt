@@ -1,0 +1,402 @@
+     1→   700→                          <div class="info">
+     2→   701→                     <h3>Lee R. Lambert</h3>
+     3→   702→                     <p>CEO LAMBERT CONSULTING GROUP</p>
+     4→   703→
+     5→   704→
+     6→   705→                          </div>
+     7→   706→                        </div>
+     8→   707→
+     9→   708→<div class="box">
+    10→   709→                          <a href="mohamed.html"><img alt="" src="assets/img/team/medd.png"></a>
+    11→   710→                          <div class="info">
+    12→   711→                     <h3>Mohamed Khalifa</h3>
+    13→   712→                     <p>CONSULTANT
+    14→   713→                                                                               FORMATEUR
+    15→   714→Top 8 DES INFLUENCEURS PMO
+    16→   715→</p>
+    17→   716→                   </div>
+    18→   717→                        </div>
+    19→   718→
+    20→   719→
+    21→   720→                        <div class="box">
+    22→   721→                          <a href="heba.html"><img alt="" src="assets/img/team/heba.png"></a>
+    23→   722→                          <div class="info">
+    24→   723→                     <h3>Heba Bilal AlShehhi</h3>
+    25→   724→                     <p>PMO Influencer &amp; Author of Elements&#160;of&#160;Leadership</p>
+    26→   725→
+    27→   726→
+    28→   727→                          </div>
+    29→   728→                        </div>
+    30→   729→
+    31→   730→<div class="box">
+    32→   731→                          <a href="khmaies.html"><img alt="" src="assets/img/team/km.png"></a>
+    33→   732→                          <div class="info">
+    34→   733→                      <h3>Khemaies Bahri</h3>
+    35→   734→                      <p>CEO BAHRI GROUP </p>
+    36→   735→
+    37→   736→                      </div>
+    38→   737→                        </div>
+    39→   738→
+    40→   739→<div class="box">
+    41→   740→                          <a href="imen.html"><img alt="" src="assets/img/team/im.png"></a>
+    42→   741→                          <div class="info">
+    43→   742→                     <h3>Imen Fakhfekh</h3>
+    44→   743→                     <p>PRÉSIDENTE PMITC </p>
+    45→   744→
+    46→   745→                   </div>
+    47→   746→                        </div>
+    48→   747→
+    49→   748→<div class="box">
+    50→   749→                          <a href="eman.html"><img alt="" src="assets/img/team/eman.png"></a>
+    51→   750→                          <div class="info">
+    52→   751→                      <h3>Eman Deabil</h3>
+    53→   752→                      <p>Experte en transformation,auteure et conférencière</p>
+    54→   753→
+    55→   754→
+    56→   755→                          </div>
+    57→   756→
+    58→   757→                      </div>
+    59→   758→
+    60→   759→<div class="box">
+    61→   760→                          <a href="slim.html"><img alt="" src="assets/img/team/Slim.jpg"></a>
+    62→   761→                          <div class="info">
+    63→   762→                      <h3>Slim Masmoudi</h3>
+    64→   763→                      <p>professeur en psychologie cognitive et conseiller stratégique</p>
+    65→   764→
+    66→   765→
+    67→   766→                          </div>
+    68→   767→                        </div>
+    69→   768→
+    70→   769→
+    71→   770→                        <div class="box">
+    72→   771→                                                  <a href="nazir.html"><img alt="" src="assets/img/team/Nizar.jpg"></a>
+    73→   772→                                                  <div class="info">
+    74→   773→                                              <h3>Nazir Lajdel</h3>
+    75→   774→                                              <p>Director of PMO and Transformation - Zitouna Bank - Panel Moderator</p>
+    76→   775→
+    77→   776→
+    78→   777→                                                  </div>
+    79→   778→                                                </div>
+    80→   779→
+    81→   780→                                                <div class="box">
+    82→   781→                                                                          <a href="hebaR.html"><img alt="" src="assets/img/team/hebarekik.png"></a>
+    83→   782→                                                                          <div class="info">
+    84→   783→                                                                      <h3>Henda Essafi Rekik</h3>
+    85→   784→                                                                      <p>CEO Excellia Leadership – Coach ICF – Manager de Transition</p>
+    86→   785→
+    87→   786→
+    88→   787→                                                                          </div>
+    89→   788→                                                                        </div>
+    90→   789→                                                                        <div class="box">
+    91→   790→                                                                                                  <a href="karimK.html"><img alt="" src="assets/img/team/karimK.png"></a>
+    92→   791→                                                                                                  <div class="info">
+    93→   792→                                                                                              <h3>Karim koundi</h3>
+    94→   793→                                                                                              <p data-lang="koundiP">Country Managing Partner Tunisia &amp; TMT Industry Leader Afrique Francophone</p>
+    95→   794→
+    96→   795→
+    97→   796→                                                                                                  </div>
+    98→   797→                                                                                                </div>
+    99→   798→
+   100→   799→                                                                                                <div class="box">
+   101→   800→                                                                                                                          <a href="mouna.html"><img alt="" src="assets/img/team/mouna1.png"></a>
+   102→   801→                                                                                                                          <div class="info">
+   103→   802→                                                                                                                      <h3>Mouna Chaeib</h3>
+   104→   803→                                                                                                                      <p>CEO | Facilitator in Corporate Governance | Social Innovation</p>
+   105→   804→
+   106→   805→
+   107→   806→                                                                                                                          </div>
+   108→   807→                                                                                                                        </div>
+   109→   808→
+   110→   809→                                                                                                                        <div class="box">
+   111→   810→                                                                                                                                              <a href="aicha.html"><img alt="" src="assets/img/team/aicha.png"></a>
+   112→   811→                                                                                                                                                  <div class="info">
+   113→   812→                                                                                                                                              <h3> TAMBOURA DIAWARA Aïcha</h3>
+   114→   813→                                                                                                                                              <p>Chercheure et Experte en Communication et Développement et en Genre et Développement</p>
+   115→   814→
+   116→   815→
+   117→   816→                                                                                                                                                  </div>
+   118→   817→                                                                                                                                                </div>
+   119→   818→
+   120→   819→                                                                                                                                                <div class="box">
+   121→   820→                                                                                                                                                                      <a href="afef.html"><img alt="" src="assets/img/team/afef.png"></a>
+   122→   821→                                                                                                                                                                          <div class="info">
+   123→   822→                                                                                                                                                                      <h3> AFEF Belhadj
+   124→   823→</h3>
+   125→   824→                                                                                                                                                                      <p>senior executive in the telecom industry
+   126→   825→</p>
+   127→   826→
+   128→   827→
+   129→   828→                                                                                                                                                                          </div>
+   130→   829→                                                                                                                                                                        </div>
+   131→   830→
+   132→   831→                                                                                                                                                                                                                                                                                                                        <div class="box">
+   133→   832→                                                                                                                                                                                                                                                                                                                                              <a href="imen-messadi.html"><img alt="" src="assets/img/team/x.png"></a>
+   134→   833→                                                                                                                                                                                                                                                                                                                                                  <div class="info">
+   135→   834→                                                                                                                                                                                                                                                                                                                                              <h3> IMEN Messadi
+   136→   835→                                                                                                                                                                        </h3>
+   137→   836→                                                                                                                                                                                                                                                                                                                                              <p>Experte en Transformation Digitale &amp; Stratégie
+   138→   837→                                                                                                                                                                        </p>
+   139→   838→
+   140→   839→
+   141→   840→                                                                                                                                                                                                                                                                                                                                                  </div>
+   142→   841→                                                                                                                                                                                                                                                                                                                                                </div>
+   143→   842→
+   144→   843→
+   145→   844→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div class="box">
+   146→   845→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <a href="naouel.html"><img alt="" src="assets/img/team/naouel.png"></a>
+   147→   846→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <div class="info">
+   148→   847→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <h3> NAOUEL Ben Zina
+   149→   848→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </h3>
+   150→   849→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <p>Project Management Institute, Regional Mentor MENA
+   151→   850→
+   152→   851→                                                                                                                                                                            </p>
+   153→   852→
+   154→   853→
+   155→   854→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  </div>
+   156→   855→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </div>
+   157→   856→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <div class="box">
+   158→   857→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <a href="omrane.html"><img alt="" src="assets/img/team/omrane.png"></a>
+   159→   858→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <div class="info">
+   160→   859→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <h3> OMRANE kammoun
+   161→   860→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </h3>
+   162→   861→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <p>Telecom Engineer, holding an E-MBA
+   163→   862→
+   164→   863→                                                                                                                                                                                                    </p>
+   165→   864→
+   166→   865→
+   167→   866→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          </div>
+   168→   867→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
+   169→   868→
+   170→   869→                                                                                                                                                                                              
+   171→   870→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <div class="box">
+   172→   871→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <a href="mehachehata.html"><img alt="" src="assets/img/team/mahaC.png"></a>
+   173→   872→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <div class="info">
+   174→   873→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <h3> Maha Chehata
+   175→   874→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </h3>
+   176→   875→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <p>Présidente MEDRH
+   177→   876→
+   178→   877→                                                                                                                                                                                                                                                    </p>
+   179→   878→
+   180→   879→
+   181→   880→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          </div>
+   182→   881→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
+   183→   882→
+   184→   883→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div class="box">
+   185→   884→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <a href="mmoezkamoun.html"><img alt="" src="assets/img/team/moezK.png"></a>
+   186→   885→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <div class="info">
+   187→   886→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <h3> Moez Kamoun
+   188→   887→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </h3>
+   189→   888→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <p>Consulting Partner
+   190→   889→
+   191→   890→
+   192→   891→                                                                                                                                                                                                                                                                            </p>
+   193→   892→
+   194→   893→
+   195→   894→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  </div>
+   196→   895→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </div>
+   197→   896→
+   198→   897→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <div class="box">
+   199→   898→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <a href="ahmedchabchoub.html"><img alt="" src="assets/img/team/ahmedC.png"></a>
+   200→   899→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <div class="info">
+   201→   900→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <h3> Ahmed Chabchoub
+   202→   901→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </h3>
+   203→   902→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <p>Founder &amp; CEO chez DefensyLab
+   204→   903→
+   205→   904→
+   206→   905→                                                                                                                                                                                                                                                                                                    </p>
+   207→   906→
+   208→   907→
+   209→   908→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          </div>
+   210→   909→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
+   211→   910→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div class="box">
+   212→   911→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <a href="rymakermi.html"><img alt="" src="assets/img/team/rymA.png"></a>
+   213→   912→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <div class="info">
+   214→   913→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <h3> Rym Ben Dhief Akremi
+   215→   914→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </h3>
+   216→   915→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <p>Entrepreneure | Consultante en Stratégie RSE &amp; ESG
+   217→   916→
+   218→   917→
+   219→   918→                                                                                                                                                                                                                                                                                                                            </p>
+   220→   919→
+   221→   920→
+   222→   921→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  </div>
+   223→   922→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </div>
+   224→   923→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <div class="box">
+   225→   924→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <a href="sarralamine.html"><img alt="" src="assets/img/team/sarraL.png"></a>
+   226→   925→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <div class="info">
+   227→   926→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <h3> Sarah Lamine
+   228→   927→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </h3>
+   229→   928→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <p>CEO at Convergen Agency
+   230→   929→
+   231→   930→
+   232→   931→                                                                                                                                                                                                                                                                                                                                                    </p>
+   233→   932→
+   234→   933→
+   235→   934→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          </div>
+   236→   935→                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
+   237→   936→
+   238→   937→
+   239→   938→
+   240→   939→                                                                                                                                                                                                                                                  </div>
+   241→   940→                                                                                                                                                                                                                                                </div>
+   242→   941→
+   243→   942→                      </div>
+   244→   943→
+   245→   944→                    </div>
+   246→   945→
+   247→   946→<br>
+   248→   947→
+   249→   948→
+   250→   949→
+   251→   950→                    <div class="text-center mt-5">
+   252→   951→            <a href="team.html" class="cta-button" data-lang="i20">
+   253→   952→Plus de détails<span></span>
+   254→   953→                <i class="fa fa-arrow-right"></i>
+   255→   954→            </a>
+   256→   955→        </div>
+   257→   956→
+   258→   957→                </div>
+   259→   958→            </div>
+   260→   959→        
+   261→   960→
+   262→   961→        <!-- td-team-area-end -->
+   263→   962→
+   264→   963→        <!-- td-banner-area-start -->
+   265→   964→
+   266→   965→        <!-- td-banner-area-end -->
+   267→   966→
+   268→   967→        <!-- td-text-slider-area-start -->
+   269→   968→
+   270→   969→        <!-- td-text-slider-area-end -->
+   271→   970→
+   272→   971→
+   273→   972→
+   274→   973→
+   275→   974→        <!-- td-schedule-area-start -->
+   276→   975→        <div class="td-schedule-area bg-position pt-140 pb-140" style="background: url('assets/img/2.png') no-repeat center center;
+   277→   976→               background-size: cover;">
+   278→   977→            <div class="container">
+   279→   978→                <div class="row">
+   280→   979→                    <div class="col-lg-12">
+   281→   980→                        <div class="td-schedule-title-wrap text-center mb-45 wow fadeInUp" data-wow-duration=".9s" data-wow-delay=".2s">
+   282→   981→                            <h2 class="td-section-title mb-10" style="font-size:35px;" data-lang="i21">Programme détaillé de l'événement</h2>
+   283→   982→                            <p class="td-section-text"></p>
+   284→   983→                        </div>
+   285→   984→                        <div class="nav td-schedule-tab-btn justify-content-center mb-30" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+   286→   985→                            <button class="nav-link active" id="v-pills-home1-tab" data-bs-toggle="pill" data-bs-target="#v-pills-home1" type="button" role="tab" aria-controls="v-pills-home1" aria-selected="false">
+   287→   986→                                JOUR 1-11 Oct, 2025
+   288→   987→                            </button>
+   289→   988→                            <button class="nav-link" id="v-pills-health-tab" data-bs-toggle="pill" data-bs-target="#v-pills-health" type="button" role="tab" aria-controls="v-pills-health " aria-selected="false">
+   290→   989→                                JOUR 2-12 Oct, 2025
+   291→   990→                            </button>
+   292→   991→
+   293→   992→                         </div>
+   294→   993→                        <div class="tp-contact-form-wrapper tp-black-bg9 tab-content" id="v-pills-tabContent">
+   295→   994→                          <div class="tab-pane fade show active" id="v-pills-home1" role="tabpanel" aria-labelledby="v-pills-home1-tab">
+   296→   995→  <div>
+   297→   996→      <div class="td-schedule-item">
+   298→   997→          <div class="row gx-0 align-items-center">
+   299→   998→            <div class="col-lg-14">
+   300→   999→
+   301→  1000→
+   302→  1001→    </div>
+   303→  1002→    <div class="col-lg-2">
+   304→  1003→        <div class="td-schedule-time first text-center" style="background-color:white;">
+   305→  1004→          <div class="mb-12">
+   306→  1005→              <h4 class="text-dark mb-3" data-lang="i22">Langues:</h4>
+   307→  1006→              <ul class="list-unstyled">
+   308→  1007→                  <li data-lang="i23"><strong>Arabe</strong></li>
+   309→  1008→                  <li data-lang="i24"><strong>Français</strong></li>
+   310→  1009→                  <li data-lang="i25"><strong>Français</strong></li>
+   311→  1010→
+   312→  1011→                  <li data-lang="i26"><strong>Anglais</strong></li>
+   313→  1012→              </ul>
+   314→  1013→          </div>
+   315→  1014→        </div>
+   316→  1015→    </div>
+   317→  1016→    <div class="col-lg-10">
+   318→  1017→    <div class="td-schedule-details last" style="background-color:white;">
+   319→  1018→        <!-- Section: Thématiques Proposées -->
+   320→  1019→        <div class="mb-4">
+   321→  1020→            <h4 class="text-dark mb-3" data-lang="i27">Thématiques:</h4>
+   322→  1021→            <ul class="list-unstyled">
+   323→  1022→                <li class="mb-2">
+   324→  1023→                    <strong style="font-size: 22px; font-weight: 900; color: #444444;">كيفية إنشاء مكتب إدارة مشاريع ناجح: الأدوات والتقنيات الأساسية</strong>
+   325→  1024→                </li>                <li class="mb-2" data-lang="i28">    <strong>PMO Hybride et Pilotage de performance : Intégrer Agilité, Traditionnel et KPIs pour un PMO Performant</strong></li>
+   326→  1025→                <li class="mb-2" data-lang="i29">    <strong>Conduire le changement dans les PMO : Stratégies de transformation organisationnelle</strong></li>
+   327→  1026→                <li class="mb-2" data-lang="i30">   <strong>Artificial intelligence (AI) for project management</strong></li>
+   328→  1027→            </ul>
+   329→  1028→        </div>
+   330→  1029→
+   331→  1030→        <!-- Section: Langues -->
+   332→  1031→
+   333→  1032→
+   334→  1033→        <!-- Button Section -->
+   335→  1034→        <div class="text-center">
+   336→  1035→            <a class="td-btn td-left-right" href="events.html">
+   337→  1036→                <span class="mr10 td-text d-inline-block mr-5" data-lang="i31">Détails</span>
+   338→  1037→                <span class="td-arrow-angle">
+   339→  1038→                    <svg class="td-arrow-svg-top-right" width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg" />
+   340→  1039→                </span>
+   341→  1040→            </a>
+   342→  1041→        </div>
+   343→  1042→    </div>
+   344→  1043→</div>
+   345→  1044→
+   346→  1045→          </div>
+   347→  1046→      </div>
+   348→  1047→  </div>
+   349→  1048→</div>
+   350→  1049→
+   351→  1050→                            <div class="tab-pane fade" id="v-pills-health" role="tabpanel" aria-labelledby="v-pills-health-tab">
+   352→  1051→                              <div>
+   353→  1052→                                  <div class="td-schedule-item">
+   354→  1053→                                      <div class="row gx-0 align-items-center">
+   355→  1054→                                        <div class="col-lg-14">
+   356→  1055→
+   357→  1056→
+   358→  1057→                                </div>
+   359→  1058→                                <div class="col-lg-2">
+   360→  1059→                                    <div class="td-schedule-time first text-center" style="background-color:white">
+   361→  1060→                                      <div class="mb-12">
+   362→  1061→                                          <h4 class="text-dark mb-3" data-lang="i32">Langues:</h4>
+   363→  1062→                                          <ul class="list-unstyled">
+   364→  1063→                                              <li data-lang="i33"><strong>Arabe</strong></li>
+   365→  1064→                                              <li data-lang="i34"><strong>Français</strong></li>
+   366→  1065→                                              <li data-lang="i35"><strong>Anglais</strong></li>
+   367→  1066→                                              <li><strong style="color:white">Français</strong></li>
+   368→  1067→                                              <li><strong style="color:white">.</strong></li>
+   369→  1068→<br>
+   370→  1069→
+   371→  1070→
+   372→  1071→
+   373→  1072→                                              <br>
+   374→  1073→                                          </ul>
+   375→  1074→                                      </div>
+   376→  1075→                                    </div>
+   377→  1076→                                </div>
+   378→  1077→                                <div class="col-lg-10">
+   379→  1078→                                <div class="td-schedule-details last" style="background-color:white">
+   380→  1079→                                    <!-- Section: Thématiques Proposées -->
+   381→  1080→                                    <div class="mb-4">
+   382→  1081→          <h4 class="text-dark mb-3" data-lang="i36">Sujets:</h4>
+   383→  1082→          <ul class="list-unstyled">
+   384→  1083→
+   385→  1084→              <li class="mb-2" data-lang="i37"><strong>Session plénière 1 : Excellence des bureaux des projets (PMO) et Création de Valeur</strong></li>
+   386→  1085→
+   387→  1086→              <li class="mb-2" data-lang="i38"><strong>Session plénière 2 : IA &amp; Prise de desicion</strong></li>
+   388→  1087→              <li class="mb-2" data-lang="i39"> <strong>Session plénière 3   : Leadership &amp; Changement : Convergence IA, Humain et Transformation</strong></li>
+   389→  1088→              <li class="mb-2" data-lang="i39Y"> <strong>Session plénière 4   :  IA et transformation sectorielle : secteur bancaire&#160;&amp;&#160;télécom</strong></li>
+   390→  1089→              <li class="mb-2" data-lang="i40Y"> <strong>Session plénière 5   :  ESG et RSE: Un duo stratégique pour des projets responsables&#160;et&#160;durables</strong></li>
+   391→  1090→
+   392→  1091→
+   393→  1092→          <br>
+   394→  1093→          </ul>
+   395→  1094→      </div>
+   396→  1095→
+   397→  1096→
+   398→  1097→                                    <!-- Section: Langues -->
+   399→  1098→
+   400→  1099→
+   401→
+   402→[showing lines 700-1099 of 1685; use offset=1100 with limit to continue reading]
