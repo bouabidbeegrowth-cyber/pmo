@@ -1,0 +1,643 @@
+     1→import { db } from "@/lib/db"
+     2→import { cookies } from "next/headers"
+     3→import { Header } from "@/components/public/header"
+     4→import { Countdown } from "@/components/public/countdown"
+     5→import { SpeakerModal, useSpeakerModal } from "@/components/public/speaker-modal"
+     6→import { ContactForm } from "@/components/public/contact-form"
+     7→import { LocaleToggle } from "@/components/public/locale-toggle"
+     8→import { SpeakersSection } from "@/components/public/sections/speakers-section"
+     9→import { ProgrammeSection } from "@/components/public/sections/programme-section"
+    10→import { PassesSection } from "@/components/public/sections/passes-section"
+    11→import { format } from "date-fns"
+    12→import { fr, enUS } from "date-fns/locale"
+    13→import {
+    14→  Calendar,
+    15→  MapPin,
+    16→  ArrowRight,
+    17→  Sparkles,
+    18→  Rocket,
+    19→  Users,
+    20→  TrendingUp,
+    21→  Target,
+    22→  Award,
+    23→  Lightbulb,
+    24→  Globe,
+    25→  Network,
+    26→  Brain,
+    27→  Zap,
+    28→  Compass,
+    29→  Linkedin,
+    30→  Facebook,
+    31→  Instagram,
+    32→  Youtube,
+    33→  Mail,
+    34→  Phone,
+    35→  Building2,
+    36→  Handshake,
+    37→} from "lucide-react"
+    38→import Link from "next/link"
+    39→import { formatPrice, parseFeatures } from "@/lib/utils"
+    40→
+    41→export const dynamic = "force-dynamic"
+    42→
+    43→const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+    44→  Sparkles, Rocket, Users, TrendingUp, Target, Award, Lightbulb, Globe,
+    45→  Network, Brain, Zap, Compass,
+    46→}
+    47→
+    48→type Locale = "fr" | "en"
+    49→
+    50→async function getLocale(): Promise<Locale> {
+    51→  const cookieStore = await cookies()
+    52→  const raw = cookieStore.get("pmo_locale")?.value
+    53→  if (raw === "fr" || raw === "en") return raw
+    54→  return "fr"
+    55→}
+    56→
+    57→export default async function HomePage() {
+    58→  const locale = await getLocale()
+    59→  const dateLocale = locale === "fr" ? fr : enUS
+    60→
+    61→  const event = await db.event.findFirst({
+    62→    where: { isActive: true },
+    63→    include: {
+    64→      speakers: {
+    65→        where: { isActive: true },
+    66→        orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }],
+    67→      },
+    68→      programmeDays: {
+    69→        where: { isActive: true },
+    70→        orderBy: { displayOrder: "asc" },
+    71→        include: {
+    72→          sessions: {
+    73→            where: { isActive: true },
+    74→            orderBy: { displayOrder: "asc" },
+    75→            include: {
+    76→              speakers: { include: { speaker: true } },
+    77→              moderator: true,
+    78→            },
+    79→          },
+    80→        },
+    81→      },
+    82→      passes: {
+    83→        where: { isActive: true },
+    84→        orderBy: [{ displayOrder: "asc" }, { price: "asc" }],
+    85→      },
+    86→      organizers: {
+    87→        where: { isActive: true },
+    88→        orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }],
+    89→      },
+    90→      partners: {
+    91→        where: { isActive: true },
+    92→        orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
+    93→      },
+    94→      websiteSections: { include: { benefits: { orderBy: { displayOrder: "asc" } } } },
+    95→      contactInfo: true,
+    96→    },
+    97→  })
+    98→
+    99→  const t = locale === "fr"
+   100→    ? {
+   101→        heroBadge: "Événement international",
+   102→        heroCta: "Je m'inscris",
+   103→        heroCtaSecondary: "Découvrir le programme",
+   104→        whyTitle: "Pourquoi y participer ?",
+   105→        aboutTitle: "À propos de l'événement",
+   106→        speakersTitle: "Intervenants",
+   107→        speakersSubtitle: "Des experts reconnus partagent leur vision",
+   108→        programmeTitle: "Programme",
+   109→        programmeSubtitle: "2 jours intensifs d'échanges et d'apprentissage",
+   110→        passesTitle: "Choisissez votre pass",
+   111→        passesSubtitle: "Des formules adaptées à chaque besoin",
+   112→        getPass: "Obtenir ce pass",
+   113→        partnersTitle: "Partenaires",
+   114→        partnersSubtitle: "Ils soutiennent PMO Mastery",
+   115→        organizersTitle: "Organisateurs",
+   116→        contactTitle: "Contact",
+   117→        contactSubtitle: "Une question ? Écrivez-nous.",
+   118→        footerDesc: "Événement international pour les leaders des PMO",
+   119→        learnMore: "En savoir plus",
+   120→        viewAll: "Voir tous les intervenants",
+   121→        day: "Jour",
+   122→      }
+   123→    : {
+   124→        heroBadge: "International event",
+   125→        heroCta: "Register now",
+   126→        heroCtaSecondary: "View programme",
+   127→        whyTitle: "Why participate?",
+   128→        aboutTitle: "About the event",
+   129→        speakersTitle: "Speakers",
+   130→        speakersSubtitle: "Renowned experts share their vision",
+   131→        programmeTitle: "Programme",
+   132→        programmeSubtitle: "2 intensive days of exchange and learning",
+   133→        passesTitle: "Choose your pass",
+   134→        passesSubtitle: "Options for every need",
+   135→        getPass: "Get this pass",
+   136→        partnersTitle: "Partners",
+   137→        partnersSubtitle: "They support PMO Mastery",
+   138→        organizersTitle: "Organizers",
+   139→        contactTitle: "Contact",
+   140→        contactSubtitle: "A question? Write to us.",
+   141→        footerDesc: "International event for PMO leaders",
+   142→        learnMore: "Learn more",
+   143→        viewAll: "View all speakers",
+   144→        day: "Day",
+   145→      }
+   146→
+   147→  const heroSection = event?.websiteSections.find((s) => s.sectionKey === "HERO")
+   148→  const whySection = event?.websiteSections.find((s) => s.sectionKey === "WHY_PARTICIPATE")
+   149→  const aboutSection = event?.websiteSections.find((s) => s.sectionKey === "ABOUT")
+   150→  const footerSection = event?.websiteSections.find((s) => s.sectionKey === "FOOTER")
+   151→  const contact = event?.contactInfo
+   152→
+   153→  const heroTitle = locale === "en"
+   154→    ? heroSection?.titleEn ?? heroSection?.titleFr ?? event?.titleEn ?? event?.titleFr ?? "PMO Mastery"
+   155→    : heroSection?.titleFr ?? heroSection?.titleEn ?? event?.titleFr ?? event?.titleEn ?? "PMO Mastery"
+   156→  const heroSubtitle = locale === "en"
+   157→    ? heroSection?.subtitleEn ?? heroSection?.subtitleFr ?? event?.subtitleEn ?? event?.subtitleEn
+   158→    : heroSection?.subtitleFr ?? heroSection?.subtitleEn ?? event?.subtitleFr ?? event?.subtitleEn
+   159→
+   160→  return (
+   161→    <div className="min-h-screen bg-background text-foreground font-sans">
+   162→      <Header
+   163→        locale={locale}
+   164→        registrationEnabled={event?.registrationEnabled ?? false}
+   165→        logo={event?.heroLogo}
+   166→      />
+   167→
+   168→      {/* HERO */}
+   169→      <section id="hero" className="relative min-h-screen flex items-center overflow-hidden bg-pmo-navy-gradient text-white pt-20">
+   170→        <div className="absolute inset-0 bg-grid opacity-30" />
+   171→        <div className="absolute -top-32 -right-32 w-[40rem] h-[40rem] rounded-full bg-pmo-violet/30 blur-3xl" />
+   172→        <div className="absolute -bottom-32 -left-32 w-[40rem] h-[40rem] rounded-full bg-pmo-gold/20 blur-3xl" />
+   173→        {event?.heroImageDesktop && (
+   174→          <div className="absolute inset-0 opacity-20">
+   175→            { }
+   176→            <img
+   177→              src={event.heroImageDesktop}
+   178→              alt=""
+   179→              className="w-full h-full object-cover"
+   180→            />
+   181→          </div>
+   182→        )}
+   183→
+   184→        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-2 gap-12 items-center w-full">
+   185→          <div className="space-y-6">
+   186→            <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs uppercase tracking-widest text-white/70 backdrop-blur-sm">
+   187→              <span className="w-2 h-2 rounded-full bg-pmo-gold animate-pulse" />
+   188→              {event?.editionName ?? t.heroBadge}
+   189→            </div>
+   190→
+   191→            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] text-balance">
+   192→              {heroTitle}
+   193→            </h1>
+   194→
+   195→            {event?.themeTaglineFr && (
+   196→              <p className="font-display text-lg sm:text-xl text-gradient-violet font-semibold">
+   197→                {locale === "en" ? event.themeTaglineEn ?? event.themeTaglineFr : event.themeTaglineFr}
+   198→              </p>
+   199→            )}
+   200→
+   201→            {heroSubtitle && (
+   202→              <p className="text-lg text-white/70 max-w-xl leading-relaxed">
+   203→                {heroSubtitle}
+   204→              </p>
+   205→            )}
+   206→
+   207→            <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/80">
+   208→              {event && (
+   209→                <div className="flex items-center gap-2">
+   210→                  <Calendar className="w-4 h-4 text-pmo-gold" />
+   211→                  <span className="font-medium">
+   212→                    {format(event.startDate, "dd MMMM yyyy", { locale: dateLocale })}
+   213→                    {event.endDate && ` → ${format(event.endDate, "dd MMMM yyyy", { locale: dateLocale })}`}
+   214→                  </span>
+   215→                </div>
+   216→              )}
+   217→              {event?.venue && (
+   218→                <div className="flex items-center gap-2">
+   219→                  <MapPin className="w-4 h-4 text-pmo-gold" />
+   220→                  <span className="font-medium">
+   221→                    {event.venue}
+   222→                    {event.city ? `, ${event.city}` : ""}
+   223→                  </span>
+   224→                </div>
+   225→              )}
+   226→            </div>
+   227→
+   228→            {event?.countdownTarget && (
+   229→              <Countdown target={event.countdownTarget.toISOString()} locale={locale} />
+   230→            )}
+   231→
+   232→            <div className="flex flex-wrap gap-3 pt-4">
+   233→              {event?.registrationEnabled && (
+   234→                <Link
+   235→                  href="#passes"
+   236→                  className="inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-pmo-navy px-6 py-3 font-semibold shadow-premium-lg hover:scale-[1.02] transition-transform"
+   237→                >
+   238→                  {t.heroCta}
+   239→                  <ArrowRight className="w-4 h-4" />
+   240→                </Link>
+   241→              )}
+   242→              <Link
+   243→                href="#programme"
+   244→                className="inline-flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-6 py-3 font-semibold text-white hover:bg-white/10 transition-colors backdrop-blur-sm"
+   245→              >
+   246→                {t.heroCtaSecondary}
+   247→              </Link>
+   248→            </div>
+   249→          </div>
+   250→
+   251→          {/* Hero visual */}
+   252→          <div className="hidden lg:block relative">
+   253→            <div className="relative aspect-square max-w-lg mx-auto">
+   254→              <div className="absolute inset-0 rounded-[3rem] bg-gradient-to-br from-pmo-violet/40 to-pmo-gold/20 blur-2xl" />
+   255→              {event?.heroImageMobile || event?.heroImageDesktop ? (
+   256→                <div className="relative rounded-[2.5rem] overflow-hidden shadow-premium-lg border border-white/10">
+   257→                  { }
+   258→                  <img
+   259→                    src={event.heroImageMobile ?? event.heroImageDesktop ?? ""}
+   260→                    alt={event.titleFr}
+   261→                    className="w-full h-full object-cover"
+   262→                  />
+   263→                </div>
+   264→              ) : (
+   265→                <div className="relative rounded-[2.5rem] overflow-hidden shadow-premium-lg border border-white/10 bg-white/5 p-8 flex items-center justify-center">
+   266→                  <div className="text-center">
+   267→                    <div className="font-display text-7xl font-bold text-gradient-violet mb-4">
+   268→                      PMO
+   269→                    </div>
+   270→                    <div className="text-white/60 uppercase tracking-widest text-sm">
+   271→                      Mastery Summit
+   272→                    </div>
+   273→                  </div>
+   274→                </div>
+   275→              )}
+   276→            </div>
+   277→          </div>
+   278→        </div>
+   279→      </section>
+   280→
+   281→      {/* WHY PARTICIPATE */}
+   282→      {whySection && (
+   283→        <section id="about" className="py-20 sm:py-28 bg-background relative overflow-hidden">
+   284→          <div className="absolute inset-0 bg-grid-dark opacity-50" />
+   285→          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   286→            <div className="grid lg:grid-cols-2 gap-12 items-start">
+   287→              <div className="space-y-6">
+   288→                <div className="inline-flex items-center gap-2 rounded-full bg-pmo-violet/10 border border-pmo-violet/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-violet">
+   289→                  <Sparkles className="w-3.5 h-3.5" />
+   290→                  {t.whyTitle}
+   291→                </div>
+   292→                <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-balance">
+   293→                  {locale === "en" ? whySection.titleEn ?? whySection.titleFr : whySection.titleFr}
+   294→                </h2>
+   295→                <p className="text-lg text-muted-foreground leading-relaxed">
+   296→                  {locale === "en" ? whySection.descriptionEn ?? whySection.descriptionFr : whySection.descriptionFr}
+   297→                </p>
+   298→                {aboutSection?.backgroundImage && (
+   299→                  <div className="rounded-2xl overflow-hidden shadow-premium-lg mt-8">
+   300→                    { }
+   301→                    <img
+   302→                      src={aboutSection.backgroundImage}
+   303→                      alt=""
+   304→                      className="w-full aspect-[16/9] object-cover"
+   305→                    />
+   306→                  </div>
+   307→                )}
+   308→              </div>
+   309→
+   310→              <div className="grid sm:grid-cols-2 gap-4">
+   311→                {whySection.benefits
+   312→                  .filter((b) => b.isActive)
+   313→                  .map((benefit) => {
+   314→                    const Icon = ICONS[benefit.icon ?? "Sparkles"] ?? Sparkles
+   315→                    return (
+   316→                      <div
+   317→                        key={benefit.id}
+   318→                        className="group rounded-2xl border border-border bg-card p-6 hover:shadow-premium-lg hover:border-primary/30 transition-all hover:-translate-y-1"
+   319→                      >
+   320→                        <div className="w-12 h-12 rounded-xl bg-pmo-violet-gradient flex items-center justify-center text-white mb-4 shadow-premium group-hover:scale-110 transition-transform">
+   321→                          <Icon className="w-5 h-5" />
+   322→                        </div>
+   323→                        <h3 className="font-display font-semibold text-lg mb-2">
+   324→                          {locale === "en" ? benefit.titleEn ?? benefit.titleFr : benefit.titleFr}
+   325→                        </h3>
+   326→                        {benefit.descriptionFr && (
+   327→                          <p className="text-sm text-muted-foreground leading-relaxed">
+   328→                            {locale === "en" ? benefit.descriptionEn ?? benefit.descriptionFr : benefit.descriptionFr}
+   329→                          </p>
+   330→                        )}
+   331→                      </div>
+   332→                    )
+   333→                  })}
+   334→              </div>
+   335→            </div>
+   336→          </div>
+   337→        </section>
+   338→      )}
+   339→
+   340→      {/* SPEAKERS */}
+   341→      {event && event.speakers.length > 0 && (
+   342→        <SpeakersSection
+   343→          speakers={event.speakers}
+   344→          locale={locale}
+   345→          title={t.speakersTitle}
+   346→          subtitle={t.speakersSubtitle}
+   347→        />
+   348→      )}
+   349→
+   350→      {/* PROGRAMME */}
+   351→      {event && event.programmeDays.length > 0 && (
+   352→        <ProgrammeSection
+   353→          days={event.programmeDays}
+   354→          locale={locale}
+   355→          title={t.programmeTitle}
+   356→          subtitle={t.programmeSubtitle}
+   357→          dayLabel={t.day}
+   358→        />
+   359→      )}
+   360→
+   361→      {/* PASSES */}
+   362→      {event && event.passes.length > 0 && (
+   363→        <PassesSection
+   364→          passes={event.passes}
+   365→          locale={locale}
+   366→          title={t.passesTitle}
+   367→          subtitle={t.passesSubtitle}
+   368→          ctaLabel={t.getPass}
+   369→        />
+   370→      )}
+   371→
+   372→      {/* ORGANIZERS */}
+   373→      {event && event.organizers.length > 0 && (
+   374→        <section id="organizers" className="py-20 sm:py-28 bg-pmo-navy-gradient text-white relative overflow-hidden">
+   375→          <div className="absolute inset-0 bg-grid opacity-20" />
+   376→          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   377→            <div className="text-center mb-12">
+   378→              <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs uppercase tracking-widest text-white/70 mb-4">
+   379→                <Building2 className="w-3.5 h-3.5" />
+   380→                {t.organizersTitle}
+   381→              </div>
+   382→              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold">
+   383→                {t.organizersTitle}
+   384→              </h2>
+   385→            </div>
+   386→            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+   387→              {event.organizers.map((org) => (
+   388→                <div
+   389→                  key={org.id}
+   390→                  className="rounded-2xl bg-white/5 border border-white/10 p-6 backdrop-blur-sm hover:bg-white/[0.07] transition-colors"
+   391→                >
+   392→                  <div className="flex items-start gap-4 mb-4">
+   393→                    <div className="w-16 h-16 rounded-xl bg-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+   394→                      {org.logo ? (
+   395→                         
+   396→                        <img src={org.logo} alt={org.name} className="w-full h-full object-contain p-1" />
+   397→                      ) : (
+   398→                        <Building2 className="w-8 h-8 text-white/50" />
+   399→                      )}
+   400→                    </div>
+   401→                    <div className="flex-1 min-w-0">
+   402→                      <h3 className="font-display font-semibold text-lg">{org.name}</h3>
+   403→                      {org.founderName && (
+   404→                        <p className="text-sm text-pmo-gold mt-1">{org.founderName}</p>
+   405→                      )}
+   406→                      {org.founderTitle && (
+   407→                        <p className="text-xs text-white/60">{org.founderTitle}</p>
+   408→                      )}
+   409→                    </div>
+   410→                  </div>
+   411→                  {(org.descriptionFr || org.descriptionEn) && (
+   412→                    <p className="text-sm text-white/70 leading-relaxed line-clamp-4">
+   413→                      {locale === "en" ? org.descriptionEn ?? org.descriptionFr : org.descriptionFr}
+   414→                    </p>
+   415→                  )}
+   416→                  {org.founderCredentials && (
+   417→                    <p className="text-xs text-white/50 mt-3 pt-3 border-t border-white/10">
+   418→                      {org.founderCredentials}
+   419→                    </p>
+   420→                  )}
+   421→                </div>
+   422→              ))}
+   423→            </div>
+   424→          </div>
+   425→        </section>
+   426→      )}
+   427→
+   428→      {/* PARTNERS */}
+   429→      {event && event.partners.length > 0 && (
+   430→        <section id="partners" className="py-20 sm:py-28 bg-background">
+   431→          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   432→            <div className="text-center mb-12">
+   433→              <div className="inline-flex items-center gap-2 rounded-full bg-pmo-violet/10 border border-pmo-violet/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-violet mb-4">
+   434→                <Handshake className="w-3.5 h-3.5" />
+   435→                {t.partnersTitle}
+   436→              </div>
+   437→              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold">
+   438→                {t.partnersTitle}
+   439→              </h2>
+   440→              <p className="text-muted-foreground mt-3">{t.partnersSubtitle}</p>
+   441→            </div>
+   442→            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+   443→              {event.partners.map((p) => (
+   444→                <a
+   445→                  key={p.id}
+   446→                  href={p.websiteUrl ?? "#"}
+   447→                  target={p.websiteUrl ? "_blank" : undefined}
+   448→                  rel="noopener noreferrer"
+   449→                  className="group rounded-2xl border border-border bg-card p-6 hover:shadow-premium hover:border-primary/30 transition-all flex flex-col items-center"
+   450→                >
+   451→                  <div className="aspect-[3/2] w-full flex items-center justify-center mb-3">
+   452→                    {p.logo ? (
+   453→                       
+   454→                      <img
+   455→                        src={p.logo}
+   456→                        alt={p.name}
+   457→                        className="max-h-16 max-w-full object-contain group-hover:scale-105 transition-transform"
+   458→                      />
+   459→                    ) : (
+   460→                      <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+   461→                        <Handshake className="w-6 h-6 text-muted-foreground" />
+   462→                      </div>
+   463→                    )}
+   464→                  </div>
+   465→                  <p className="text-xs font-medium text-center text-muted-foreground group-hover:text-foreground transition-colors">
+   466→                    {p.name}
+   467→                  </p>
+   468→                </a>
+   469→              ))}
+   470→            </div>
+   471→          </div>
+   472→        </section>
+   473→      )}
+   474→
+   475→      {/* LOCATION + CONTACT */}
+   476→      <section id="contact" className="py-20 sm:py-28 bg-pmo-navy-gradient text-white relative overflow-hidden">
+   477→        <div className="absolute inset-0 bg-grid opacity-20" />
+   478→        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   479→          <div className="grid lg:grid-cols-2 gap-12">
+   480→            {/* Left: contact info + map */}
+   481→            <div className="space-y-8">
+   482→              <div>
+   483→                <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs uppercase tracking-widest text-white/70 mb-4">
+   484→                  <MapPin className="w-3.5 h-3.5" />
+   485→                  {t.contactTitle}
+   486→                </div>
+   487→                <h2 className="font-display text-3xl sm:text-4xl font-bold mb-3">
+   488→                  {t.contactSubtitle}
+   489→                </h2>
+   490→                {event?.venue && (
+   491→                  <p className="text-lg text-white/80">
+   492→                    {event.venue}
+   493→                    {event.address ? `, ${event.address}` : ""}
+   494→                    {event.city ? `, ${event.city}` : ""}
+   495→                    {event.country ? `, ${event.country}` : ""}
+   496→                  </p>
+   497→                )}
+   498→              </div>
+   499→
+   500→              <div className="grid sm:grid-cols-2 gap-4">
+   501→                {contact?.email && (
+   502→                  <a
+   503→                    href={`mailto:${contact.email}`}
+   504→                    className="rounded-xl bg-white/5 border border-white/10 p-4 hover:bg-white/10 transition-colors flex items-center gap-3"
+   505→                  >
+   506→                    <div className="w-10 h-10 rounded-lg bg-pmo-violet/20 flex items-center justify-center">
+   507→                      <Mail className="w-5 h-5 text-pmo-gold" />
+   508→                    </div>
+   509→                    <div className="min-w-0">
+   510→                      <div className="text-xs text-white/60 uppercase tracking-wider">Email</div>
+   511→                      <div className="text-sm font-medium truncate">{contact.email}</div>
+   512→                    </div>
+   513→                  </a>
+   514→                )}
+   515→                {contact?.phone && (
+   516→                  <a
+   517→                    href={`tel:${contact.phone}`}
+   518→                    className="rounded-xl bg-white/5 border border-white/10 p-4 hover:bg-white/10 transition-colors flex items-center gap-3"
+   519→                  >
+   520→                    <div className="w-10 h-10 rounded-lg bg-pmo-violet/20 flex items-center justify-center">
+   521→                      <Phone className="w-5 h-5 text-pmo-gold" />
+   522→                    </div>
+   523→                    <div>
+   524→                      <div className="text-xs text-white/60 uppercase tracking-wider">
+   525→                        {locale === "fr" ? "Téléphone" : "Phone"}
+   526→                      </div>
+   527→                      <div className="text-sm font-medium">{contact.phone}</div>
+   528→                    </div>
+   529→                  </a>
+   530→                )}
+   531→              </div>
+   532→
+   533→              {/* Social */}
+   534→              {(contact?.linkedinUrl || contact?.facebookUrl || contact?.instagramUrl || contact?.youtubeUrl) && (
+   535→                <div className="flex gap-2">
+   536→                  {contact?.linkedinUrl && (
+   537→                    <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer"
+   538→                      className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 flex items-center justify-center transition-colors">
+   539→                      <Linkedin className="w-5 h-5" />
+   540→                    </a>
+   541→                  )}
+   542→                  {contact?.facebookUrl && (
+   543→                    <a href={contact.facebookUrl} target="_blank" rel="noopener noreferrer"
+   544→                      className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 flex items-center justify-center transition-colors">
+   545→                      <Facebook className="w-5 h-5" />
+   546→                    </a>
+   547→                  )}
+   548→                  {contact?.instagramUrl && (
+   549→                    <a href={contact.instagramUrl} target="_blank" rel="noopener noreferrer"
+   550→                      className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 flex items-center justify-center transition-colors">
+   551→                      <Instagram className="w-5 h-5" />
+   552→                    </a>
+   553→                  )}
+   554→                  {contact?.youtubeUrl && (
+   555→                    <a href={contact.youtubeUrl} target="_blank" rel="noopener noreferrer"
+   556→                      className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 flex items-center justify-center transition-colors">
+   557→                      <Youtube className="w-5 h-5" />
+   558→                    </a>
+   559→                  )}
+   560→                </div>
+   561→              )}
+   562→
+   563→              {/* Map */}
+   564→              {contact?.mapUrl && (
+   565→                <div className="rounded-2xl overflow-hidden border border-white/10 shadow-premium-lg">
+   566→                  <iframe
+   567→                    src={contact.mapUrl}
+   568→                    width="100%"
+   569→                    height="280"
+   570→                    style={{ border: 0 }}
+   571→                    loading="lazy"
+   572→                    referrerPolicy="no-referrer-when-downgrade"
+   573→                    title="Map"
+   574→                  />
+   575→                </div>
+   576→              )}
+   577→            </div>
+   578→
+   579→            {/* Right: contact form */}
+   580→            <div className="bg-white text-foreground rounded-2xl p-6 sm:p-8 shadow-premium-lg">
+   581→              <ContactForm locale={locale} />
+   582→            </div>
+   583→          </div>
+   584→        </div>
+   585→      </section>
+   586→
+   587→      {/* FOOTER */}
+   588→      <footer className="bg-pmo-navy-gradient text-white border-t border-white/5">
+   589→        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+   590→          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+   591→            <div className="lg:col-span-2">
+   592→              <div className="flex items-center gap-3 mb-4">
+   593→                {event?.heroLogo ? (
+   594→                   
+   595→                  <img src={event.heroLogo} alt="PMO Mastery" className="h-10" />
+   596→                ) : (
+   597→                  <div className="w-9 h-9 rounded-xl bg-pmo-violet-gradient flex items-center justify-center font-display font-bold text-white">
+   598→                    P
+   599→                  </div>
+   600→                )}
+   601→                <span className="font-display font-semibold text-lg">PMO Mastery</span>
+   602→              </div>
+   603→              <p className="text-sm text-white/60 max-w-md leading-relaxed">
+   604→                {locale === "en" ? footerSection?.descriptionEn ?? footerSection?.descriptionFr : footerSection?.descriptionFr}
+   605→              </p>
+   606→              {event?.city && (
+   607→                <p className="text-sm text-white/60 mt-3">
+   608→                  {event.city}{event.country ? `, ${event.country}` : ""}
+   609→                </p>
+   610→              )}
+   611→            </div>
+   612→            <div>
+   613→              <h4 className="font-display font-semibold mb-3 text-sm uppercase tracking-wider text-white/80">
+   614→                {locale === "fr" ? "Navigation" : "Navigation"}
+   615→              </h4>
+   616→              <ul className="space-y-2 text-sm text-white/60">
+   617→                <li><Link href="#hero" className="hover:text-white transition-colors">{locale === "fr" ? "Accueil" : "Home"}</Link></li>
+   618→                <li><Link href="#speakers" className="hover:text-white transition-colors">{locale === "fr" ? "Intervenants" : "Speakers"}</Link></li>
+   619→                <li><Link href="#programme" className="hover:text-white transition-colors">{locale === "fr" ? "Programme" : "Programme"}</Link></li>
+   620→                <li><Link href="#passes" className="hover:text-white transition-colors">{locale === "fr" ? "Passes" : "Passes"}</Link></li>
+   621→              </ul>
+   622→            </div>
+   623→            <div>
+   624→              <h4 className="font-display font-semibold mb-3 text-sm uppercase tracking-wider text-white/80">
+   625→                {locale === "fr" ? "Contact" : "Contact"}
+   626→              </h4>
+   627→              <ul className="space-y-2 text-sm text-white/60">
+   628→                {contact?.email && <li><a href={`mailto:${contact.email}`} className="hover:text-white transition-colors">{contact.email}</a></li>}
+   629→                {contact?.phone && <li><a href={`tel:${contact.phone}`} className="hover:text-white transition-colors">{contact.phone}</a></li>}
+   630→                {contact?.linkedinUrl && <li><a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">LinkedIn</a></li>}
+   631→              </ul>
+   632→            </div>
+   633→          </div>
+   634→          <div className="mt-10 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/40">
+   635→            <p>{locale === "en" ? footerSection?.titleEn ?? footerSection?.titleFr : footerSection?.titleFr ?? `© ${new Date().getFullYear()} PMO Mastery`}</p>
+   636→            <p>{locale === "fr" ? "Empowerment Paths · Tunisie" : "Empowerment Paths · Tunisia"}</p>
+   637→          </div>
+   638→        </div>
+   639→      </footer>
+   640→    </div>
+   641→  )
+   642→}
+   643→

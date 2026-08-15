@@ -1,0 +1,509 @@
+     1→# PMO Mastery Website Audit Report
+     2→
+     3→**Site audited:** https://www.pmomastery.tn/index.html
+     4→**Audit date:** 2025
+     5→**Source files analyzed:** `homepage.html`, `pages/*.html` (11 pages), `speakers/sp_*.html` (5 sample speaker pages), `main.css`, `main.js`, `dectionaier.js` (FR/EN dictionary)
+     6→**Note:** The live site is behind a JavaScript-based bot-protection interstitial (Cloudflare-style "Please wait while your request is being verified…" page that reloads after 5 s and posts a fingerprint form to `/z0f76a1d14fd21a8fb5fd0d03e0fdc3d3cedae52f`). Plain `curl` therefore returns only the challenge HTML. The audit below is based on the real rendered HTML of every page, which was retrieved through a headless browser snapshot.
+     7→
+     8→---
+     9→
+    10→## 1. Existing Architecture
+    11→
+    12→| Aspect | Detail |
+    13→|---|---|
+    14→| **Site type** | Static multi-page HTML website (no CMS, no SPA framework) |
+    15→| **HTML template** | Custom theme using the `td-` prefix (looks like the "Evente – Conference and Event HTML Template" sold on ThemeForest). Comments like `<!-- td-hero-area-start -->`, `<!-- td-schedule-area-start -->` etc. confirm a themed template |
+    16→| **CSS framework** | Bootstrap 5 (`assets/css/bootstrap.min.css`) + custom `main.css` (7 653 lines) + `default.css` |
+    17→| **JS libraries** | jQuery, Bootstrap bundle, Isotope, Ion.rangeSlider, Magnific Popup, Odometer, Swiper bundle, Jarallax, Nice-select, WOW.js, custom `main.js` (14 KB) |
+    18→| **Icons** | Font Awesome 6 Pro + Flaticon custom collection (`flaticon_mycollection.css`) |
+    19→| **Fonts** | **Poppins** (primary UI font, weights 100–900) and **Unbounded** (body font) loaded from Google Fonts |
+    20→| **i18n** | Custom client-side dictionary in `dectionaier.js` (867 lines). All translatable strings carry a `data-lang="key"` attribute. FR/EN toggle in the header swaps `textContent` of every `[data-lang]` element. Some images also swap via `data-lang-img` (e.g. French/English pass images) |
+    21→| **Analytics** | Google Analytics 4 (`G-KPY6YEZ7YS`) |
+    22→| **SEO** | Open Graph + Twitter Card + Schema.org JSON-LD (`WebSite` + `Organization`) |
+    23→| **Hosting** | Behind a bot-protection proxy (challenge at `/z0f76a1d14fd21a8fb5fd0d03e0fdc3d3cedae52f`). Domain registered under `.tn` |
+    24→| **Payment** | Off-site — buttons link out to `https://international-event-for-pmo-leaders.businessroom.io/` (BusinessRoom ticketing platform). The site also has its own `checkout.html` with a custom cart + 19 % VAT calculation that POSTs to the same BusinessRoom endpoint |
+    25→| **Build tooling** | None visible — plain hand-edited HTML/CSS/JS files. No `package.json`, no bundler, no source maps |
+    26→
+    27→---
+    28→
+    29→## 2. Pages / Sections Identified
+    30→
+    31→### Top-level pages (under `https://www.pmomastery.tn/`)
+    32→
+    33→| URL | Page | Purpose |
+    34→|---|---|---|
+    35→| `index.html` | Accueil (Home) | Hero with countdown, "Why participate", 20-speaker carousel, programme preview (Day 1 / Day 2), venue map, partners strip, pricing cards, footer |
+    36→| `events.html` | Événement / Programme | Full 2-day agenda with sessions, times, speakers, descriptions, "Acheter un PASS" CTAs. Three feature cards (Programme Unique / Speakers Prestigieux / Maximisez votre ROI). Pricing teaser at the bottom |
+    37→| `events-venue.html` | Venue / Itinéraire | Map and directions to the venue (linked from home "Obtenez l'itinéraire") |
+    38→| `team.html` | Intervenants (Speakers) | Grid of 17 speaker cards (image-only cards). Pricing teaser at the bottom |
+    39→| `pass.html` | Pass Événement | 3 sub-passes: Individuel / Équipe / Étudiant, each with a price image and "Obtenez votre pass" button → BusinessRoom `ticket_id=154` |
+    40→| `passF.html` | Pass Formation | Single Formation pass → BusinessRoom `ticket_id=153` |
+    41→| `pass2.html` | Pass Duo | 4 combo options (Événement + 1/2/3/4 Formations) → BusinessRoom `ticket_id=155` |
+    42→| `checkout.html` | Checkout / Cart | Custom multi-pass cart with quantity inputs, country selector, promo code, 19 % VAT total. Form fields: nom, email, organisation, pays, téléphone |
+    43→| `organisateurs.html` | Organisateurs | Profile of **Empowerment Paths** (organizing company) + **Yosra Torjmen** (founder) with badges |
+    44→| `sponsor.html` | Partenaires | Partner logos grouped by tier (Stratégiques / Diamond / Média / Partenaires) |
+    45→| `contact.html` | Contact | Contact form (Nom, Email, Message, Privacy checkbox) + social icons |
+    46→| `gallery.html` | Galerie | **"Bientôt disponible" (Coming soon)** — section is hidden via `display:none` |
+    47→| `faq.html` | FAQ | Referenced in code but not in main menu |
+    48→| `product-details.html` | Product details | Template leftover, not used |
+    49→| `yosra.html` | Yosra Torjmen detail | Linked from organisateurs page (founder profile) |
+    50→
+    51→### Speaker detail pages (one HTML file per speaker)
+    52→
+    53→`lambert.html`, `mohamed.html`, `heba.html`, `khmaies.html`, `imen.html`, `eman.html`, `slim.html`, `nazir.html`, `hebaR.html`, `karimK.html`, `mouna.html`, `aicha.html`, `afef.html`, `imen-messadi.html`, `naouel.html`, `omrane.html`, `aimen.html`, `mehachehata.html`, `mmoezkamoun.html`, `ahmedchabchoub.html`, `rymakermi.html`, `sarralamine.html`, `yosra.html`
+    54→
+    55→Each speaker page follows the same layout: large photo (left), name + job title + bio + country (with Google Maps link) + LinkedIn link (right), plus the pricing teaser and footer.
+    56→
+    57→---
+    58→
+    59→## 3. Navigation Menu (CRITICAL — to be reproduced)
+    60→
+    61→This is the exact menu structure taken from the `<ul class="navigation">` block in the header of every page (lines 154–189 of `homepage.html`). The mobile menu is generated automatically by JS from the same source.
+    62→
+    63→```
+    64→Accueil (index.html)                              [data-lang="n1"]
+    65→Événement (events.html)                           [data-lang="n3"]  ▼
+    66→   ├── Programme (events.html)                    [data-lang="Programme"]
+    67→   └── Pass ▶                                     (parent-link, hover → flyout right)
+    68→          ├── Pass Événement (pass.html)          [data-lang="faq9"]
+    69→          ├── Pass formation (passF.html)         [data-lang="faq13"]
+    70→          └── Pass duo (pass2.html)               [data-lang="chinkwa"]
+    71→Intervenants (team.html)                          [data-lang="n5"]
+    72→Organisateurs & Partenaires (organisateurs.html)  [data-lang="n6"]  ▼
+    73→   ├── Organisateurs (organisateurs.html)         [data-lang="Organisateurs"]
+    74→   └── Partenaires (sponsor.html)                 [data-lang="n8"]
+    75→Contact (contact.html)                            [data-lang="n9"]
+    76→```
+    77→
+    78→Header right-hand side:
+    79→- **Language toggle:** `FR | EN` (`#languageToggle`)
+    80→- **CTA button:** "Je m'inscris" → `https://international-event-for-pmo-leaders.businessroom.io/` (`data-lang="i4"`)
+    81→- **Mobile hamburger** that opens `tdmobile__menu` (clone of the desktop menu + "Acheter un pass" button + social icons)
+    82→
+    83→Footer quick-links column (`data-lang="f1"` → "Liens rapides"):
+    84→- À propos de cet événement → `events.html`
+    85→- Intervenants → `team.html`
+    86→- Galerie → `gallery.html`
+    87→- Partenaires → `sponsor.html`
+    88→- Obtenez vos pass → `checkout.html`
+    89→- Contactez-nous → `contact.html`
+    90→
+    91→The CSS for the multi-level "Pass ▶" flyout uses a custom `.menu-item-has-children1` class (defined both inline in `homepage.html` and in `main.css` lines 82–150) that opens the sub-menu to the **right** on hover (desktop) and inline (mobile).
+    92→
+    93→---
+    94→
+    95→## 4. Data That Should Become Dynamic
+    96→
+    97→The current site is entirely static. The following content blocks are hardcoded in HTML and should be moved into a database / CMS for the rebuild:
+    98→
+    99→| Data type | Currently in | Recommended model |
+   100→|---|---|---|
+   101→| **Event metadata** (dates, venue, edition year, theme, countdown target) | Hardcoded in `homepage.html` hero + JSON-LD | `events` table |
+   102→| **Speakers / Intervenants** (name, title, company, country, LinkedIn, bio FR/EN, photo, slug) | 22 individual `*.html` files + `dectionaier.js` entries (`mo1..3`, `kh1..4`, `im1..3`, `imiU1..5`, `emiU1..3`, `smiU1..3`, `hr11..13`, `NZim1..3`, `omrane1..3`, `afef1..3`, `Naouel1..3`, `aicha1..3`, `imenM1..3`, `Koundi1..3`, `Mouna0P..2P`, `ay1..3`) | `speakers` table with FR/EN columns + `speaker_sessions` join |
+   103→| **Programme** (days, sessions, start/end times, title FR/EN, description FR/EN, language, room, speaker link) | Hardcoded in `events.html` (~2 000 lines of tab panes) | `program_days` + `program_sessions` tables |
+   104→| **Passes / Tickets** (name, type, sub-options, price TND, what's included, ticket_id) | Hardcoded in `checkout.html` (`data-price` attrs) and in price images `vip1.png`, `vipp2.png`, `etud.png`, `duoFR/d1-d4.jpg` | `passes` + `pass_options` tables |
+   105→| **Prices & VAT** (19 % TVA, promo codes) | `checkout.html` JS + server-side `code_promo` lookup | `tax_rates` + `promo_codes` |
+   106→| **Organizers** (company, founder, description, badges) | `organisateurs.html` + `dectionaier.js` `or1..9`, `yosraT` | `organizers` table |
+   107→| **Partners / Sponsors** (name, logo, website, tier/category) | `sponsor.html` (Stratégiques / Diamond / Média / Partenaires) | `partners` table with `tier` enum |
+   108→| **Contact info** (email, phone, address, social URLs) | Hardcoded in footer of every page + JSON-LD | `site_settings` table |
+   109→| **Contact form submissions** | Currently a no-op `<form action="">` | `contact_messages` table + email notification |
+   110→| **Registration / orders** | Currently delegated to BusinessRoom; if brought in-house → `orders` + `order_items` + `attendees` |
+   111→| **Gallery images** | Currently empty / "Bientôt disponible" | `gallery_items` table |
+   112→| **Translations** (FR/EN) | 800+ entries in `dectionaier.js` | `translations` table keyed by `lang` + `key` |
+   113→| **Notifications / toast messages** (e.g. Lee Lambert quote, "Offre spéciale -10%") | Inline JS arrays in `events.html` and `pass.html` | `notifications` table |
+   114→
+   115→---
+   116→
+   117→## 5. Speakers / Intervenants
+   118→
+   119→20 speakers appear on the homepage carousel. The `team.html` page shows 17 (it drops Maha, Moez, Ahmed, Rym, Sarah but adds Aimen). The complete list extracted from the homepage + speaker detail pages + dictionary:
+   120→
+   121→| # | Name | Title / Role | Company | Country | LinkedIn | Photo | Detail page |
+   122→|---|---|---|---|---|---|---|---|
+   123→| 1 | **Lee R. Lambert** | CEO, Lambert Consulting Group (PMP co-founder, PMI Fellow) | Lambert Consulting Group | Powell, Ohio, USA | `/in/lelambert/` | `team/lambertt.png` | `lambert.html` |
+   124→| 2 | **Mohamed Khalifa** | Leader Global PMO & Agile Transformation · Top 8 PMO Influencers (PMO Global Awards 2021) · PMP, PgMP, PMI-ACP | Independent | Kuwait | `/in/mkhalifa/` | `team/medd.png` | `mohamed.html` |
+   125→| 3 | **Heba Bilal AlShehhi** | PMO Influencer · Author of "Elements of Leadership" · World PMO Leader 2023 | Govt entity, Dubai | UAE | — | `team/heba.png` | `heba.html` |
+   126→| 4 | **Khemaies Bahri** | CEO, Bahri Group · PMP Trainer · Prosci® Certified | Bahri Group | Tunisia | — | `team/km.png` | `khmaies.html` |
+   127→| 5 | **Imen Fakhfekh** | Présidente PMITC · PMP® · Ingénieure télécom | ICF Management Services | Tunisia | `/in/imen-fakhfekh-pmp®-0a497514/` | `team/im.png` | `imen.html` |
+   128→| 6 | **Eman Deabil** | Experte en transformation, auteure, conférencière · 1st Bahraini PMI-PfMP, SIP & ESG (CGI) · #1 Female Project Leader (GPMF 2024) | Independent | Bahrain | `/in/emandeabil/` | `team/eman.png` | `eman.html` |
+   129→| 7 | **Slim Masmoudi** | Professeur en psychologie cognitive & conseiller stratégique · Founder iLab@NAUSS · 27 yrs exp. | NAUSS / UNODC, IOM, UNOCT | Saudi Arabia | — | `team/Slim.jpg` | `slim.html` |
+   130→| 8 | **Nazir Lajdel** | Directeur des PMO et de la Transformation · Panel Moderator | Zitouna Bank | Tunisia | — | `team/Nizar.jpg` | `nazir.html` |
+   131→| 9 | **Henda Essafi Rekik** | CEO Excellia Leadership · Coach ICF · Manager de Transition · Femme Manager TN 2018 | Excellia Leadership | Tunisia | — | `team/hebarekik.png` | `hebaR.html` |
+   132→| 10 | **Karim Koundi** | Country Managing Partner Deloitte Tunisie · Industry TMT lead Africa | Deloitte | Tunisia | — | `team/karimK.png` | `karimK.html` |
+   133→| 11 | **Mouna Chaieb** | PDG · Facilitatrice en gouvernance d'entreprise · Innovation sociale · Présidente ICC Tunisie (Digital Economy) | ICC Tunisie / CJD Tunisie | Tunisia | — | `team/mouna1.png` | `mouna.html` |
+   134→| 12 | **TAMBOURA DIAWARA Aïcha** | Experte RSE & Chef de Projets Développement Durable · PhD · 22 yrs exp. in 20+ countries | Independent | Tunisia/Africa | — | `team/aicha.png` | `aicha.html` |
+   135→| 13 | **AFEF Belhadj** | Cadre supérieur Télécoms · Sup'Com + Warwick MBA · Strategy ITN & Data AI Jobline (Orange) | Orange | Tunisia | — | `team/afef.png` | `afef.html` |
+   136→| 14 | **IMEN Messadi** | CEO & Co-founder Horama Strategic Advisory · Experte Transformation Digitale | Horama Strategic Advisory | Tunisia | — | `team/x.png` | `imen-messadi.html` |
+   137→| 15 | **NAOUEL Ben Zina** | PMI Regional Mentor MENA · PMP® since 2011 · Ex-Présidente PMI Tunisie | Project Management Institute | Tunisia | — | `team/naouel.png` | `naouel.html` |
+   138→| 16 | **OMRANE Kammoun** | Ingénieur télécom · E-MBA · Master droit des affaires · 40+ yrs TIC · Senior Advisor PwC Tunisie | PwC Tunisie | Tunisia | — | `team/omrane.png` | `omrane.html` |
+   139→| 17 | **Maha Chehata** | (Bio not in dictionary — placeholder photo only) | — | — | — | `team/mahaC.png` | `mehachehata.html` |
+   140→| 18 | **Moez Kamoun** | (Bio not in dictionary — placeholder photo only) | — | — | — | `team/moezK.png` | `mmoezkamoun.html` |
+   141→| 19 | **Ahmed Chabchoub** | (Bio not in dictionary — placeholder photo only) | — | — | — | `team/ahmedC.png` | `ahmedchabchoub.html` |
+   142→| 20 | **Rym Ben Dhief Akremi** | (Bio not in dictionary — placeholder photo only) | — | — | — | `team/rymA.png` | `rymakermi.html` |
+   143→| 21 | **Sarah Lamine** | (Bio not in dictionary — placeholder photo only) | — | — | — | `team/sarraL.png` | `sarralamine.html` |
+   144→| 22 | **Aimen Ktari** | Directeur – Plateforme ESG & Développement Durable | PwC France & Maghreb | Tunisia/France | — | `team/team-2/aimen.png` | `aimen.html` |
+   145→| 23 | **Yosra Torjmen** | Managing Director Empowerment Paths · PgMP®, PMP®, PMO-CP, Coach Pro · **Founder of PMO Mastery 2025** | Empowerment Paths | Tunisia | — | `team/yosra.png` | `yosra.html` |
+   146→| 24 | **Yassine Chaker** | (Speaker of Day-1 Formation session "De la Stratégie aux KPI jusqu'à l'Exécution Agile") | — | — | — | `team/yassine.jpg` | — (no detail page) |
+   147→
+   148→> ⚠️ Speakers #17–21 (Maha, Moez, Ahmed, Rym, Sarah) appear in the homepage carousel with photos but have **no bio in the dictionary** — the detail pages exist but contain only the photo and name. The rebuild should request bios from the client.
+   149→
+   150→> Also note: `assets/img/team/lobna.jpeg` and `assets/img/team/rymF.jpeg` exist on disk, suggesting **Lobna** and a French version of Rym's photo were prepared but never integrated.
+   151→
+   152→---
+   153→
+   154→## 6. Programme
+   155→
+   156→The agenda is on `events.html` and uses Bootstrap pill tabs for the two days. Times come from the dictionary keys `time1`–`time9`.
+   157→
+   158→### Day 1 — 11 October 2025 — **Formation** (Masterclasses, 4 parallel workshops)
+   159→
+   160→| Time | Session title | Speaker | Language |
+   161→|---|---|---|---|
+   162→| 08:30 – 15:30 | **كيفية إنشاء مكتب إدارة مشاريع ناجح: الأدوات والتقنيات الأساسية** (How to set up a successful PMO: essential tools & techniques) | Mohamed Khalifa | Arabic |
+   163→| 11:00 – 11:30 | Pause Café | — | — |
+   164→| 08:30 – 15:30 | **PMO Hybride et Pilotage de performance**: Intégrer Méthode agile, Traditionnel et KPI pour un PMO Performant | Khemaies Bahri | French |
+   165→| 08:30 – 15:30 | **De la Stratégie aux KPI jusqu'à l'Exécution Agile** | Yassine Chaker | French |
+   166→| 08:30 – 15:30 | **Artificial intelligence (AI) for project management** (Optimisez votre performance projet avec les outils d'IA du PMI) | Imen Fakhfekh | French |
+   167→
+   168→### Day 2 — 12 October 2025 — **Événement** (Plenary conference)
+   169→
+   170→| Time | Session | Type | Speaker/Notes |
+   171→|---|---|---|---|
+   172→| 08:00 – 08:45 | Accueil et petit-déjeuner de réseautage | Welcome | — |
+   173→| 08:50 – 09:10 | Mot de bienvenue et ouverture | Opening | Host |
+   174→| **09:15 – 09:45** | **Keynote 1: Excellence des bureaux des projets (PMOs)** — "How PMOs can drive business transformation" | Plenary 1 — *Excellence PMO & Création de Valeur* | Lee R. Lambert (presumed) |
+   175→| 09:50 – 10:35 | **Panel de Discussion 1**: PMO stratégiques — Passer de la gestion à la création de Valeur | Plenary 1 panel | — |
+   176→| 10:40 – 11:15 | **Panel de Discussion 2** (session parallèle): PMO et RSE — Un duo stratégique pour des projets responsables et durables | Parallel panel | — |
+   177→| 11:15 – 11:30 | Pause Café & Networking | Break | — |
+   178→| **11:35 – 12:00** | **Keynote 2**: L'information — la force vitale d'un PMO (Success story IA) | Plenary 2 — *IA & Prise de Décision* | — |
+   179→| 12:05 – 12:40 | **Panel de discussion 2**: Comment l'IA redéfinit les règles des PMO (Data / Prise de décision) — AI au cœur des opérations PMO, Big Data → décisions, cyber-résilience | Plenary 2 panel | — |
+   180→| 12:45 – 13:15 | **Panel 1 (variant)**: IA & Automatisation — Études de cas: concilier sécurité et agilité | Plenary 2 panel | — |
+   181→| 13:15 – 14:25 | Déjeuner & Networking | Lunch | — |
+   182→| **14:30 – 14:55** | **Keynote**: Comment les leaders exceptionnels transforment la résistance en adhésion — *The Fire Factor: Energizing the Human Side of PMOs* | Plenary 3 — *Leadership & Changement: Convergence IA, Humain et Transformation* | — |
+   183→| 15:00 – 15:45 | **Panel de discussion 3**: Synergie Gagnante — Conduite du changement et IA au service des bureaux de gestion de projets (Distributed Leadership & Emotional Intelligence in the Age of AI; Sponsorship) | Plenary 3 panel | — |
+   184→| 15:50 – 16:15 | **Keynote de Clôture**: Le PMO en 2030 — Quel avenir pour les PMOs? (Tendances mondiales et régionales, "Et si Darwin avait raison?") | Closing keynote | — |
+   185→| 16:30 | **Clôture de l'évènement** | Closing | — |
+   186→
+   187→> **Note on Day 2 panels:** the source HTML has two `<h2>` with `data-lang="e37"` and `data-lang="i39Y"` both labelled "Panel de Discussion 1 : IA & Automatisation" — likely a copy/paste leftover that should be reconciled in the rebuild. The dictionary also lists sub-themes `e38YY/e39YY/e40YY` (Big Data, cyber-résilience, case studies) and `e48YYY/e49YYY/e50YYY/e51YYYY/e52YYYY/e53YYYY` for the Day-2 panel sub-bullets.
+   188→
+   189→Also referenced on Day 2 (specialised sub-themes in the dictionary, not yet wired into a session):
+   190→- **Session plénière 4**: IA et transformation sectorielle — secteur bancaire & télécom (sub-bullets: `Nnl1` Banque, `Nnl2` Télécoms & 5G, `Nnl3` Rôle du PMO)
+   191→- **Session plénière 5**: ESG et RSE — Un duo stratégique pour des projets responsables et durables
+   192→
+   193→---
+   194→
+   195→## 7. Passes / Tickets
+   196→
+   197→Three pass families, each linking to BusinessRoom with a different `ticket_id`. Prices are TND (Tunisian Dinar) and are visible in `checkout.html` via `data-price` attributes. **All prices are subject to 19 % TVA** added at checkout (`(total + total*0.19)` in JS).
+   198→
+   199→| Pass family | Page | ticket_id | Sub-option | Price (TND, ex-VAT) | Price (TND, incl. 19% VAT) |
+   200→|---|---|---|---|---|---|
+   201→| **Pass Événement** | `pass.html` | 154 | PASS INDIVIDUEL | 500 | 595 |
+   202→| | | | PASS ÉQUIPE | 450 | 535.50 |
+   203→| | | | PASS ÉTUDIANT | 200 | 238 |
+   204→| **Pass Formation** | `passF.html` | 153 | PASS FORMATION | 400 | 476 |
+   205→| **Pass Duo** | `pass2.html` | 155 | PASS ÉVÉNEMENT + 1 FORMATION | 900 | 1 071 |
+   206→| | | | PASS ÉVÉNEMENT + 2 FORMATIONS | 1 250 | 1 487.50 |
+   207→| | | | PASS ÉVÉNEMENT + 3 FORMATIONS | 1 600 | 1 904 |
+   208→| | | | PASS ÉVÉNEMENT + 4 FORMATIONS | 1 900 | 2 261 |
+   209→
+   210→**What's included (features shown on each pass card on the homepage, identical for all 3):**
+   211→- Collaboration
+   212→- Partage
+   213→- Apprentissage
+   214→- Expertise
+   215→
+   216→> ⚠️ The actual pricing is shown only as **images** (`vip1.png`, `vipp2.png`, `etud.png`, `duoFR/d1.jpg`–`d4.jpg`) on the dedicated pass pages, which is a serious accessibility / SEO issue. The rebuild should render prices as text.
+   217→
+   218→**Special offers:**
+   219→- Promotional popup notification on `pass.html`: "🎉 Offre spéciale : -10% sur tous les Pass" (also has EN variant)
+   220→- Promo code field in `checkout.html` (`code_promo`) — appears to POST to a server endpoint that returns a discounted total
+   221→
+   222→---
+   223→
+   224→## 8. Payment / Registration Links
+   225→
+   226→| Use case | URL |
+   227→|---|---|
+   228→| Generic registration (header "Je m'inscris", mobile "Acheter un pass") | `https://international-event-for-pmo-leaders.businessroom.io/` |
+   229→| Pass Événement buy buttons | `https://international-event-for-pmo-leaders.businessroom.io/?ticket_id=154` |
+   230→| Pass Formation buy buttons | `https://international-event-for-pmo-leaders.businessroom.io/?ticket_id=153` |
+   231→| Pass Duo buy buttons | `https://international-event-for-pmo-leaders.businessroom.io/?ticket_id=155` |
+   232→| In-site checkout (custom cart) | `checkout.html` (POSTs to BusinessRoom) |
+   233→| Bank transfer details (for international attendees) | Attijari Banque — Account holder: **Empowerment Paths** (from dictionary `vipU18`–`vipU25`) |
+   234→| Bank transfer details (for Tunisian attendees) | STB (Société Tunisienne de Banque) — Account holder: **Empowerment Paths** (from dictionary `vipU10`–`vipU17`) |
+   235→
+   236→Payment methods supported (from dictionary `lup1`–`lup4`):
+   237→- Carte bancaire (credit card via BusinessRoom)
+   238→- Virement bancaire (bank transfer to STB / Attijari)
+   239→
+   240→---
+   241→
+   242→## 9. Organizers
+   243→
+   244→### Organizing company — Empowerment Paths
+   245→
+   246→- **Logo:** `assets/img/e.jpg`
+   247→- **Led by:** Mme **Yosra Torjmen** — PgMP®, PMP®, PMO-CP, Coach Professionnelle
+   248→- **Founder of:** PMO Mastery 2025
+   249→- **Three service pillars:**
+   250→  - 🔹 **Conseil** — PMO, évaluation de maturité, modèles opérationnels, conduite du changement
+   251→  - 🔹 **Formation** — PMP®, PgMP®, excellence PMO, agilité, soft skills, leadership
+   252→  - 🔹 **Coaching exécutif & d'équipe** — performance individuelle, collective et managériale
+   253→- **Description (FR):** "Cabinet ATP de conseil et de développement professionnel qui accompagne les organisations dans la conception, la mise en place et l'optimisation de leurs PMOs pour renforcer l'alignement stratégique, la visibilité des portefeuilles et la création de valeur."
+   254→- **Vision:** "Positionner la Tunisie comme un hub régional d'excellence PMO, en offrant une plateforme de formation, de réseautage et d'innovation"
+   255→
+   256→### Founder — Yosra Torjmen
+   257→
+   258→- **Photo:** `assets/img/team/yosra.png`
+   259→- **Title:** Managing Director, Empowerment Paths · Fondatrice de PMO Mastery 2025
+   260→- **Badges shown next to her profile:** `badgeYosra.png`, `8.png`, `P8.png`, `red.png`, `6.png`, `9.jpg` (PMI / PgMP / PMP / PMO-CP / ICF certifications)
+   261→- **Detail page:** `yosra.html`
+   262→
+   263→---
+   264→
+   265→## 10. Partners / Sponsors
+   266→
+   267→Taken from `sponsor.html`. Partners are grouped by tier (the labels use `data-lang="par2"`, `par3F`, `par4F`, `par5` — but the French dictionary shows that `par3F`="Partenaire Diamond" and `par4F`="Partenaire Média", so the visible "Partenaires Stratégiques" headings on the page are mis-labelled and should be fixed in the rebuild).
+   268→
+   269→| Tier | Partner | Logo | Website |
+   270→|---|---|---|---|
+   271→| **Partenaires Stratégiques** | Excellia Leadership | `assets/img/ex.jpg` | https://excellialeadership.com/ |
+   272→| **Partenaires Stratégiques** | Royal Tulip Taj Sultan (venue) | `assets/img/tt.png` | https://royal-tulip-taj-sultan.goldentulip.com/ |
+   273→| **Partenaire Diamond** | Tunisie Telecom | `assets/img/LogoTT.png` | https://www.tunisietelecom.tn/particulier/ |
+   274→| **Partenaire Média** | Managers.tn | `assets/img/manager.png` | https://managers.tn/ |
+   275→| **Partenaires** | Project Management Institute (PMI) | `assets/img/part.jpg` | https://www.pmi.org/ |
+   276→| **Partenaires** | Flowup | `assets/img/flow.jpg` | http://flowup.tn/ |
+   277→| **Partenaires** | Talys Digital | `assets/img/lt.jpg` | https://www.talys.digital/ |
+   278→
+   279→**Full PMI description (FR, from dictionary `par3`/`par4`):**
+   280→> "Project Management Institute (PMI) est la principale association professionnelle au monde pour une communauté mondiale croissante de millions de professionnels de la gestion de projet et d'agents de changement à travers le globe… Organisation à but non lucratif présente dans presque tous les pays du monde, fondée en 1969."
+   281→
+   282→> ⚠️ The homepage partners section (`.sponsors_list` `<ul>` at line 1395 of `homepage.html`) is **empty** — logos are not rendered on the home page, only on `sponsor.html`. The rebuild should populate the homepage strip dynamically.
+   283→
+   284→---
+   285→
+   286→## 11. Contact Information
+   287→
+   288→| Field | Value | Source |
+   289→|---|---|---|
+   290→| **Email** | `contact@pmomastery.tn` | Footer + JSON-LD |
+   291→| **Phone** | `+216 94 108 023` (display) / `+21694108023` (JSON-LD) | Footer + JSON-LD. Note: the `href="tel:+123(55)90067990"` is a leftover template placeholder — must be fixed |
+   292→| **Address** | Tunis, Tunisie | Footer + JSON-LD PostalAddress |
+   293→| **Venue** | Royal Tulip Taj Sultan, Tunis (Google Maps coordinates 36.360058, 10.528937) | `homepage.html` iframe embed |
+   294→| **Facebook** | https://www.facebook.com/pmomastery | Header + footer |
+   295→| **Instagram** | https://www.instagram.com/pmomastery/ | Header + footer |
+   296→| **LinkedIn** | https://www.linkedin.com/company/pmo-mastery-tun/about/ | Header + footer + JSON-LD |
+   297→| **Twitter / X** | (none — placeholder `fab fa-twitter` exists in offCanvas only) | offCanvas |
+   298→| **Contact form fields** | Nom et prénom · Email · Message · Privacy-policy checkbox | `contact.html` |
+   299→| **Contact form action** | `<form action="">` — currently **does not submit anywhere** | must be wired up |
+   300→| **Bank details (Tunisia)** | STB — Empowerment Paths | `dectionaier.js` `vipU10`–`17` |
+   301→| **Bank details (International)** | Attijari Banque — Empowerment Paths | `dectionaier.js` `vipU18`–`25` |
+   302→
+   303→> ⚠️ The "Office Address / Phone / Email" block in the offCanvas sidebar (lines 356–365 of every page) still contains **template placeholder data** (`123/A, Miranda City Likaoli Prikano, Dope`, `+0989 7876 9865 9`, `info@example.com`). Must be replaced.
+   304→
+   305→---
+   306→
+   307→## 12. Images / Media Inventory
+   308→
+   309→All images live under `assets/img/`. The full list of referenced files (deduplicated):
+   310→
+   311→### Logos
+   312→- `assets/img/logo/logo.png` — main footer logo
+   313→- `assets/img/logo/l1.png` — sticky header logo (dark text variant)
+   314→- `assets/img/logo/l2.png` — transparent header logo (light text variant, shown over hero)
+   315→- `assets/img/logo/logo-black.png` — offCanvas logo
+   316→
+   317→### Hero
+   318→- `assets/img/hero/test1.gif` — desktop hero background (animated)
+   319→- `assets/img/hero/test2.gif` — mobile hero background (animated)
+   320→- `assets/img/hero/p.png` — hero illustration (large P / mascot image, animated with `fadeInSlide`)
+   321→- `assets/img/hero/shap.png` — decorative shape
+   322→
+   323→### About / decorative
+   324→- `assets/img/about/about-2/a.png`, `assets/img/about/bg.jpg`, `assets/img/about/flower.png`, `assets/img/about/thumb.jpg`
+   325→- `assets/img/2.png` (programme section background), `assets/img/3.png` (pricing section background)
+   326→
+   327→### Speaker photos (`assets/img/team/`)
+   328→Naming is inconsistent — most speakers have multiple variants:
+   329→`lambert.png`, `lambertt.png`, `med.jpg`, `medd.png`, `heba.png`, `km.png`, `khmaiss.jpg`, `im.png`, `imen.png`, `eman.png`, `Slim.jpg`, `Nizar.jpg`, `hebarekik.png`, `karimK.png`, `mouna1.png`, `aicha.png`, `afef.png`, `x.png` (Imen Messadi), `naouel.png`, `omrane.png`, `mahaC.png`/`.jpeg`, `moezK.png`/`.jpeg`, `ahmedC.png`/`.jpeg`, `rymA.png`/`.jpeg`, `rymF.jpeg`, `sarraL.png`/`.jpg`, `yosra.png`, `yassine.jpg`/`.jpeg`, `lobna.jpeg`, `badgeYosra.png`, plus numbered placeholders `1.png`–`9.jpg`, `P8.png`, `red.png`, `33.png`
+   330→
+   331→A second set used on `team.html` lives in `assets/img/team/team-2/`: `5.png`, `6.png`, `7.png`, `8.png`, `Karim.png`, `afef1.png`, `aichaa.png`, `aimen.png`, `imenMa.png`, `mounaP.png`, `naouelB.png`, `omrane1.png`
+   332→
+   333→### Pass price images
+   334→- `assets/img/vip1.png` (Pass Individuel), `assets/img/vipp2.png` (Pass Équipe), `assets/img/etud.png` (Pass Étudiant)
+   335→- `assets/img/duoFR/d1.jpg`, `d2.jpg`, `d3.jpg`, `d4.jpg`, `d5.jpg` (Pass Duo variants — French versions)
+   336→- An English image-swap is wired via `data-lang-img` (likely `duoEN/…` directory)
+   337→
+   338→### Partner / sponsor logos
+   339→- `assets/img/e.jpg` (Empowerment Paths / organizer)
+   340→- `assets/img/ex.jpg` (Excellia Leadership), `assets/img/tt.png` (Royal Tulip), `assets/img/LogoTT.png` (Tunisie Telecom), `assets/img/manager.png` (Managers.tn), `assets/img/part.jpg` (PMI), `assets/img/flow.jpg` (Flowup), `assets/img/lt.jpg` (Talys Digital)
+   341→
+   342→### Schedule / template assets
+   343→- `assets/img/schedule/schedule-3/perso1.jpg`, `user.jpg`, `user2.jpg`, `user-2.jpg`, `khmaiss.jpg`, `im.png`, `schedule.jpg`, `schedule-2.jpg`
+   344→- `assets/img/schedule/schedule-4/bg.jpg` (programme section background)
+   345→- `assets/img/breadcrumb/About1.jpg`, `About1.png`
+   346→- `assets/img/shop/sm-product-1.jpg`, `sm-product-2.jpg` (cart mini sidebar)
+   347→- `assets/img/blog/postbox/thumb-sm-2.jpg`–`4.jpg`
+   348→- `assets/img/c1.png` (contact page illustration), `assets/img/gal.jpg` (gallery placeholder), `assets/img/intr.jpg`
+   349→
+   350→### Videos
+   351→- `test.mp4` — referenced from homepage about-section play button (`href="test.mp4"`)
+   352→
+   353→### Favicon
+   354→- `assets/img/logo/logo.png`
+   355→
+   356→### OG image
+   357→- `https://www.pmomastery.tn/img/og-image.jpg` (referenced in OpenGraph meta — note the path doesn't match `assets/img/`, may 404)
+   358→
+   359→---
+   360→
+   361→## 13. Event Details
+   362→
+   363→| Field | Value |
+   364→|---|---|
+   365→| **Event name** | Mastering PMO 2025 (also styled "PMO MASTERY" in the events page breadcrumb, `data-lang="e1"`) |
+   366→| **Tagline / Theme** | "Le PMO du Futur : Stratégie, IA et Performance" (`data-lang="i17"`, repeated 3× on home) |
+   367→| **Edition** | 1ère édition (First edition) |
+   368→| **Dates** | **11–12 October 2025** |
+   369→| **Day 1 — 11 Oct 2025** | Formation (4 parallel masterclasses, 08:30–15:30) |
+   370→| **Day 2 — 12 Oct 2025** | Événement (plenary conference, 08:00–16:30) |
+   371→| **Venue** | Royal Tulip Taj Sultan, Tunis |
+   372→| **City / Country** | Tunis / Hammamet, Tunisie (the hero says "hammamet - TUNISIE", `data-lang="i3"`, but the venue address and map point to the Royal Tulip Taj Sultan in Tunis) — **inconsistency to clarify with client** |
+   373→| **Languages of the event** | Arabic · French · English |
+   374→| **Countdown target** | 11 October 2025 (rendered by `#timer` element; the JS computing days/hours/minutes/seconds is in `main.js`) |
+   375→| **Organizer** | Empowerment Paths (founder Yosra Torjmen) |
+   376→| **Expected audience** | 150+ professionals (PMO, DSI, consultants) — from dictionary `ef5` |
+   377→| **Phone (info)** | +216 94 108 023 |
+   378→| **Email (info)** | contact@pmomastery.tn |
+   379→| **Google Map embed** | `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3213.0297502167064!2d10.52893737562402!3d36.36005827237594!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12fd63802d5cf783%3A0xe23ca0e9a03b090d!2sRoyal%20Tulip%20Taj%20Sultan!5e0!3m2!1sfr!2stn!4v1754649505229!5m2!1sfr!2stn` |
+   380→| **Copyright holder** | `Dasinformatique.com` (the agency that built the site) — `Copyright © 2025 Dasinformatique.com Tous droits réservés.` |
+   381→
+   382→---
+   383→
+   384→## 14. Color Scheme / Branding
+   385→
+   386→### CSS variables (from `main.css` `:root` lines 67–81)
+   387→
+   388→| Variable | Hex | Usage |
+   389→|---|---|---|
+   390→| `--td-theme-primary` | `#5033ff` | Theme primary (purple-blue) — used in some template components but **not** the dominant brand color |
+   391→| `--td-theme-secondary` | `#202B67` | **Main brand navy blue** — pass buttons, language toggle, logo accent, CTA buttons (`background-color:#202b67`) |
+   392→| `--td-common-white` | `#fff` | Backgrounds |
+   393→| `--td-common-black` | `#141418` | Dark text |
+   394→| `--td-common-black-2` | `#000` | Pure black |
+   395→| `--td-common-yellow` | `#FCCB0A` | Template accent (rarely used) |
+   396→| `--td-common-blue` | `#1b0166` | Deep blue |
+   397→| `--td-grey-1` | `#444` | Body text |
+   398→| `--td-grey-2` | `#a5a5b0` | Muted text |
+   399→| `--td-border-1` | `#d9d9d9` | Borders |
+   400→
+   401→### Additional brand colors found inline in HTML
+   402→
+   403→| Hex | Usage |
+   404→|---|---|
+   405→| `#071952` | **Footer & "Get directions" section background** (deep navy) |
+   406→| `#e97732` | **Orange CTA button** ("Je m'inscris" in hero) — `.td-btn.td-left-right.d-none.d-xl-block { background-color: #e97732; }` |
+   407→| `#ddb152` | **Gold** — used for session section headings ("SESSION PLENIÈRE 2", "PANEL SESSION 3") |
+   408→| `#00c6ff` → `#0072ff` | Linear gradient on the map container frame |
+   409→| `#0056b3` | `.cta-button:hover` background |
+   410→| `#467C45` | Bot-protection interstitial spinner (not part of brand) |
+   411→
+   412→### Typography
+   413→
+   414→- **Primary font:** `Poppins` (sans-serif, weights 100–900) — used for almost all UI text via `--td-ff-poppins`
+   415→- **Body / display font:** `Unbounded` (variable weight 200–900) — used for `body` via `--td-ff-body`
+   416→- **Icon font:** Font Awesome 6 Pro (`--td-ff-fontawesome`)
+   417→- **Override on pass pages:** `'Segoe UI', sans-serif` is used inline for pass card subtitles
+   418→
+   419→### Other brand assets
+   420→
+   421→- **Favicon:** `assets/img/logo/logo.png`
+   422→- **Logo (header, transparent variant):** `l2.png` (used over the hero) and `l1.png` (used on sticky/white background)
+   423→- **Logo (footer):** `logo.png`
+   424→- **OG image:** `/img/og-image.jpg`
+   425→- **Brand voice:** French-first, formal (vous), with English translations provided for every key piece of copy via `dectionaier.js`
+   426→
+   427→---
+   428→
+   429→## 15. External Links
+   430→
+   431→### Social media
+   432→| Platform | URL |
+   433→|---|---|
+   434→| LinkedIn (company) | https://www.linkedin.com/company/pmo-mastery-tun/about/ |
+   435→| Facebook | https://www.facebook.com/pmomastery |
+   436→| Instagram | https://www.instagram.com/pmomastery/ |
+   437→| Twitter / X | (none — placeholder icon only) |
+   438→
+   439→### Payment / registration
+   440→| Service | URL |
+   441→|---|---|
+   442→| BusinessRoom ticketing (main) | https://international-event-for-pmo-leaders.businessroom.io/ |
+   443→| Pass Événement (ticket_id=154) | https://international-event-for-pmo-leaders.businessroom.io/?ticket_id=154 |
+   444→| Pass Formation (ticket_id=153) | https://international-event-for-pmo-leaders.businessroom.io/?ticket_id=153 |
+   445→| Pass Duo (ticket_id=155) | https://international-event-for-pmo-leaders.businessroom.io/?ticket_id=155 |
+   446→
+   447→### Partner websites
+   448→| Partner | URL |
+   449→|---|---|
+   450→| Excellia Leadership | https://excellialeadership.com/ |
+   451→| Royal Tulip Taj Sultan | https://royal-tulip-taj-sultan.goldentulip.com/fr-fr/ |
+   452→| Tunisie Telecom | https://www.tunisietelecom.tn/particulier/ |
+   453→| Managers.tn | https://managers.tn/ |
+   454→| Project Management Institute | https://www.pmi.org/ |
+   455→| Flowup | http://flowup.tn/ |
+   456→| Talys Digital | https://www.talys.digital/ |
+   457→
+   458→### Speaker LinkedIn profiles (those that are linked)
+   459→| Speaker | LinkedIn |
+   460→|---|---|
+   461→| Lee R. Lambert | https://www.linkedin.com/in/lelambert/ |
+   462→| Mohamed Khalifa | https://www.linkedin.com/in/mkhalifa/ |
+   463→| Imen Fakhfekh | https://www.linkedin.com/in/imen-fakhfekh-pmp®-0a497514/ |
+   464→| Eman Deabil | https://www.linkedin.com/in/emandeabil/ |
+   465→
+   466→### Other
+   467→| Resource | URL |
+   468→|---|---|
+   469→| Google Analytics 4 | tag `G-KPY6YEZ7YS` |
+   470→| Google Maps (Tunis) | https://www.google.com/maps?q=Tunis,+Tunisia |
+   471→| Bot-protection challenge endpoint | `/z0f76a1d14fd21a8fb5fd0d03e0fdc3d3cedae52f` (site-side proxy, not user-facing) |
+   472→| Footer copyright link | https://dasinformatique.com/ (the dev agency) |
+   473→| Map of Powell, Ohio (Lambert) | https://www.google.com/maps/@41.6758525,-86.2531698,18.17z — **bug**: every speaker's "Pays" link points to this same Ohio map regardless of their actual country; must be fixed |
+   474→| FontAwesome kit | https://kit.fontawesome.com/64d58efce2.js (loaded only on `contact.html`) |
+   475→
+   476→---
+   477→
+   478→## Summary of Issues Found (next-actions for the rebuild)
+   479→
+   480→### Critical bugs / inconsistencies
+   481→1. **Bot-protection on the live site** makes it unfetchable by `curl` and harms SEO crawlers — consider whitelisting known crawlers or removing the interstitial.
+   482→2. **Speaker "Pays" Google Maps link is hardcoded** to Powell, Ohio coordinates on every speaker detail page (lines 392, 389 etc.) — must be made per-speaker.
+   483→3. **5 speakers (Maha, Moez, Ahmed, Rym, Sarah) have no bios** — neither in HTML nor in `dectionaier.js`. Client must provide.
+   484→4. **Homepage partners strip is empty** — `<ul class="sponsors_list"></ul>` has no `<li>` children.
+   485→5. **Contact form does not submit** — `<form action="">` is a no-op.
+   486→6. **Template placeholder data** still visible in the offCanvas sidebar (Office Address = "123/A, Miranda City…", phone = "+0989 7876 9865 9", email = "info@example.com").
+   487→7. **`tel:` link is broken** — `href="tel:+123(55)90067990"` on every page's footer phone link.
+   488→8. **Mis-labelled partner tiers** — three different sections are all headed "Partenaires Stratégiques" in the HTML, but the dictionary says one is "Partenaire Diamond" and one is "Partenaire Média".
+   489→9. **Venue city inconsistency** — hero says "hammamet - TUNISIE" but the map and venue address point to Royal Tulip Taj Sultan in Tunis.
+   490→10. **Pricing is shown only as images** (`vip1.png`, `vipp2.png`, `etud.png`, `duoFR/d*.jpg`) — inaccessible to screen readers, not translatable, not SEO-friendly.
+   491→11. **OG image path** (`/img/og-image.jpg`) does not match the assets folder (`assets/img/`) — likely a 404.
+   492→12. **Duplicate programme blocks** — `data-lang="e37"` and `data-lang="i39Y"` both render "Panel de Discussion 1 : IA & Automatisation" — needs reconciliation.
+   493→13. **Day 1 sessions all show 08:30 – 15:30** — these are 4 parallel masterclasses, so the times are correct, but the UI doesn't make the parallel nature obvious.
+   494→14. **Two menu links point to the same place** — both "Événement" parent and "Programme" child link to `events.html`. The footer "Galerie" link also points to `gallery.html` which is "Bientôt disponible".
+   495→15. **The site has no `404.html`, no `sitemap.xml`, no `robots.txt`** detected.
+   496→
+   497→### Architectural recommendations for the rebuild
+   498→- Migrate the 22 static speaker pages + 11 main pages into a CMS or SPA backed by a database (Postgres + a headless CMS like Strapi, or a full Next.js + Prisma stack).
+   499→- Move the FR/EN dictionary out of `dectionaier.js` into a proper i18n system (e.g. `next-intl`, `i18next`, or a `translations` table).
+   500→- Render prices as text, not images.
+   501→- Replace BusinessRoom with a first-party checkout (Stripe / Konnect / Flouci for Tunisia) once the contract allows, or keep BusinessRoom but proxy the registration through the site's own backend.
+   502→- Make the contact form actually submit (POST to an API route that emails `contact@pmomastery.tn`).
+   503→- Re-encode all images as WebP/AVIF and add `width`/`height` attributes to prevent layout shift.
+   504→- Replace the Bootstrap + jQuery + 12-vendor JS stack with a modern framework (Next.js 16 + Tailwind 4 + shadcn/ui per the project's fullstack-dev skill).
+   505→
+   506→---
+   507→
+   508→*End of audit report. Source files retained under `/home/z/my-project/audit/` for the rebuild team: `homepage.html`, `pages/{index,events,team,pass,passF,pass2,checkout,organisateurs,sponsor,contact,gallery}.html`, `speakers/sp_{lambert,mohamed,imen,eman,slim}.html`, `main.css`, `main.js`, `dectionaier.js`, `homepage.json`, `homepage_full.png`, `homepage_hero.png`.*
+   509→

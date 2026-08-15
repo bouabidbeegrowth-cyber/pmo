@@ -97,3 +97,41 @@ Stage Summary:
 - Public site: http://localhost:3000
 - Admin dashboard: http://localhost:3000/admin
 - Screenshots saved to /home/z/my-project/download/ (01-09 series)
+
+---
+Task ID: MULTI-PAGE-1
+Agent: Super Z (main)
+Task: Convert single-page public site to multi-page architecture matching original PMO Mastery menu
+
+Work Log:
+- Read full audit report and existing codebase (schema, seed, page.tsx, header, sections)
+- Created shared data helper `src/lib/site-data.ts` (getLocale, getActiveEvent, pick)
+- Created new multi-page `SiteHeader` with dropdown navigation matching original site menu exactly:
+  - Accueil → / · Événement → /evenement (dropdown: Programme, Pass Événement, Pass Formation, Pass Duo) · Intervenants → /intervenants · Organisateurs & Partenaires (dropdown: Organisateurs, Partenaires) · Contact → /contact
+  - Active route highlighting, FR/EN locale toggle, mobile Sheet menu with nested links, "Je m'inscris" CTA
+- Created `SiteFooter` with dynamic contact info, social links, navigation columns, passes links
+- Created `PageHero` shared component for inner pages (navy gradient + breadcrumbs)
+- Created `(public)` route group layout with shared header + footer (admin layout untouched)
+- Deleted old single-page `src/app/page.tsx`
+- Built 10 public pages:
+  1. `/` Accueil — hero + countdown + why participate + about + speakers preview + programme preview + passes preview + partners
+  2. `/evenement` — countdown, key info grid, about, why participate (full benefits), venue with map embed
+  3. `/programme` — full 2-day programme timeline with day tabs
+  4. `/pass-evenement` — pass detail with sticky purchase card, features, other passes
+  5. `/pass-formation` — same PassDetail component, gold theme
+  6. `/pass-duo` — same PassDetail component, navy theme (featured)
+  7. `/intervenants` — full speakers grid with search + featured filter
+  8. `/organisateurs` — founder card + org details + social links
+  9. `/partenaires` — partners grouped by tier (Strategic, Diamond, Gold, Silver, Media, Institutional, Partner)
+  10. `/contact` — contact form + contact info cards + map + social
+- Created reusable components: SpeakersHomePreview, ProgrammeHomePreview, PassesHomePreview, SpeakersGrid, PassDetail
+- Fixed bugs: SiteHeader export name mismatch (was Header, imported as SiteHeader), unused imports, scroll-behavior warning
+- Verified with agent-browser: all 10 pages return HTTP 200, dropdown nav works, mobile menu works, FR/EN toggle works, admin dashboard unaffected
+
+Stage Summary:
+- Multi-page architecture live: 10 public pages + admin dashboard
+- All content 100% dynamic (from Prisma DB via getActiveEvent helper)
+- Navigation matches original site menu exactly (with dropdowns for Événement and Organisateurs & Partenaires)
+- Premium UI: navy gradient hero, gold accents, glassmorphism cards, responsive (mobile Sheet menu)
+- Lint: 0 errors, 8 warnings (unused eslint-disable comments — harmless)
+- Dev server running on port 3000

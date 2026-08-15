@@ -1,0 +1,402 @@
+   650→                                                        </div>
+   651→                                                        <span class="dvdr"></span>
+   652→
+   653→                                                        <div class="td-schedule-3-user-wrap d-flex align-items-center">
+   654→                                                            <span class="td-schedule-3-user mr-10">
+   655→                                                            </span>
+   656→                                                            <div>
+   657→                                                                <h6 class="name" data-lang="e15">Langue</h6>
+   658→                                                                <span class="position" data-lang="e16">Francais</span>
+   659→                                                            </div>
+   660→
+   661→                                                        </div>
+   662→                                                        <span class="dvdr"></span>
+   663→                                                        <a class="td-btn td-btn-3-squre td-left-right text3 mr-25" href="https://international-event-for-pmo-leaders.businessroom.io/">
+   664→                                                            <span class="mr10 td-text d-inline-block mr-5" data-lang="i1">Acheter un PASS</span>
+   665→                                                            <span class="td-arrow-angle">
+   666→                                                                <svg class="td-arrow-svg-top-right" width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+   667→                                                                    <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   668→                                                                    <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   669→                                                                </svg>
+   670→                                                            </span>
+   671→                                                        </a>
+   672→                                            </div>
+   673→                                        </div>
+   674→                                    </div>
+   675→                                </div>
+   676→                            </div>
+   677→                            <div class="td-schedule-3-wrap mb-30">
+   678→                                <div class="row align-items-center">
+   679→                                    <div class="col-xl-4 col-lg-5">
+   680→                                        <div class="td-schedule-3-thumb p-relative">
+   681→                                            <img class="w-100" src="assets/img/schedule/schedule-3/perso1.jpg" alt="">
+   682→                                            <span class="td-schedule-2-date"><i class="flaticon-calendar"></i> Oct 11, 2025</span>
+   683→                                            <div class="speakers">
+   684→                                        <img src="assets/img/team/yassine.jpeg" alt="Yassine Chaker">
+   685→                                        </div>
+   686→                                        </div>
+   687→                                    </div>
+   688→                                    <div class="col-xl-8 col-lg-7">
+   689→                                        <div class="td-schedule-3-content">
+   690→                                            <h2 class="td-schedule-3-title" data-lang="e17">De la Stratégie aux KPI jusqu’à l’Exécution Agile
+   691→</h2>
+   692→                                            <div class="td-schedule-3-destination mb-10">
+   693→
+   694→                                              <span data-lang="time3">
+   695→                                                    <i class="flaticon-time"></i>
+   696→                                                    08:30 – 15:30
+   697→                                                </span>
+   698→                                            </div>
+   699→                                            <p class="mb-25 para" data-lang="e18">Cette formation transforme les PMO en véritables chefs d'orchestre du changement organisationnel. Elle fournit les outils pour manager la résistance au changement, aligner les parties prenantes et ancrer durablement les transformations.</p>
+   700→                                            <div class="td-schedule-3-btn d-flex align-items-center flex-wrap">
+   701→                                                <div class="td-schedule-3-user-wrap d-flex align-items-center">
+   702→                                                    <span class="td-schedule-3-user mr-10">
+   703→                                                      <img src="assets/img/team/yassine.jpg" alt="">
+   704→                                                    </span>
+   705→                                                    <div>
+   706→                                                        <h6 class="name">Yassine Chaker</h6>
+   707→                                                    </div>
+   708→
+   709→                                                </div>
+   710→                                                <span class="dvdr"></span>
+   711→
+   712→                                                <div class="td-schedule-3-user-wrap d-flex align-items-center">
+   713→                                                    <span class="td-schedule-3-user mr-10">
+   714→                                                    </span>
+   715→                                                    <div>
+   716→                                                        <h6 class="name" data-lang="e19">Langue</h6>
+   717→                                                        <span class="position" data-lang="e20">Francais</span>
+   718→                                                    </div>
+   719→
+   720→                                                </div>
+   721→                                                <span class="dvdr"></span>
+   722→                                                <a class="td-btn td-btn-3-squre td-left-right text3 mr-25" href="https://international-event-for-pmo-leaders.businessroom.io/">
+   723→                                                    <span class="mr10 td-text d-inline-block mr-5" data-lang="i1">Acheter un PASS</span>
+   724→                                                    <span class="td-arrow-angle">
+   725→                                                        <svg class="td-arrow-svg-top-right" width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+   726→                                                            <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   727→                                                            <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   728→                                                        </svg>
+   729→                                                    </span>
+   730→                                                </a>
+   731→                                    </div>
+   732→                                </div>
+   733→                            </div>
+   734→                        </div>
+   735→                    </div>
+   736→                            <div class="td-schedule-3-wrap mb-30">
+   737→                                <div class="row align-items-center">
+   738→                                    <div class="col-xl-4 col-lg-5">
+   739→                                        <div class="td-schedule-3-thumb p-relative">
+   740→                                            <img class="w-100" src="assets/img/schedule/schedule-3/perso1.jpg" alt="">
+   741→                                            <span class="td-schedule-2-date"><i class="flaticon-calendar"></i>Oct 11, 2025</span>
+   742→                                       <div class="speakers">
+   743→    <img src="assets/img/team/im.png" alt="Imen Fakhfekh">
+   744→    <img src="assets/img/team/omrane.png" alt="Omrane">
+   745→</div>
+   746→                                        </div>
+   747→
+   748→
+   749→                                    </div>
+   750→                                    <div class="col-xl-8 col-lg-7">
+   751→                                        <div class="td-schedule-3-content">
+   752→                                            <h2 class="td-schedule-3-title" data-lang="i30">Artificial intelligence (AI) for project management</h2>
+   753→                                            <div class="td-schedule-3-destination mb-10">
+   754→
+   755→
+   756→                                              <span data-lang="time4">
+   757→                                                    <i class="flaticon-time"></i>
+   758→                                                    08:30  – 15:30
+   759→                                                </span>
+   760→                                            </div>
+   761→                                            <p class="mb-25 para" data-lang="e21">L’IA permet ainsi aux chefs de projet et aux PMO de se concentrer davantage sur les aspects stratégiques et humains de leurs missions, en s’appuyant sur des outils puissants pour le pilotage et l’anticipation.</p>
+   762→                                            <div class="td-schedule-3-btn d-flex align-items-center flex-wrap">
+   763→                                              <div class="td-schedule-3-user-wrap d-flex align-items-center">
+   764→                                                  <span class="td-schedule-3-user mr-10">
+   765→                                                      <img src="assets/img/schedule/schedule-3/im.png" alt="">
+   766→                                                  </span>
+   767→                                                  <div>
+   768→                                                      <h6 class="name">Imen Fakhfekh</h6>
+   769→                                                  </div>
+   770→
+   771→                                              </div>
+   772→
+   773→
+   774→
+   775→                                                <span class="dvdr"></span>
+   776→
+   777→                                                <div class="td-schedule-3-user-wrap d-flex align-items-center">
+   778→                                                    <span class="td-schedule-3-user mr-10">
+   779→                                                    </span>
+   780→                                                    <div>
+   781→                                                        <h6 class="name" data-lang="e22">Langue</h6>
+   782→                                                        <span class="position" data-lang="e23">Francais</span>
+   783→                                                    </div>
+   784→
+   785→                                                </div>
+   786→                                                <span class="dvdr"></span>
+   787→                                                <a class="td-btn td-btn-3-squre td-left-right text3 mr-25" href="https://international-event-for-pmo-leaders.businessroom.io/">
+   788→                                                    <span class="mr10 td-text d-inline-block mr-5" data-lang="i1">Acheter un PASS</span>
+   789→                                                    <span class="td-arrow-angle">
+   790→                                                        <svg class="td-arrow-svg-top-right" width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+   791→                                                            <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   792→                                                            <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   793→                                                        </svg>
+   794→                                                    </span>
+   795→                                                </a>
+   796→                                    </div>
+   797→                                </div>
+   798→                            </div>
+   799→                        </div>
+   800→                    </div>
+   801→                  </div>
+   802→                        <div class="tab-pane fade" id="v-pills-health" role="tabpanel" aria-labelledby="v-pills-health-tab">
+   803→                            <div class="td-schedule-3-wrap mb-30">
+   804→                                <div class="row align-items-center">
+   805→                                    <div class="col-xl-4 col-lg-5">
+   806→                                        <div class="td-schedule-3-thumb p-relative">
+   807→                                            <img class="w-100" src="assets/img/schedule/schedule-3/perso1.jpg" alt="">
+   808→                                            <span class="td-schedule-2-date"><i class="flaticon-calendar"></i> Oct 12, 2025</span>
+   809→
+   810→                                        </div>
+   811→                                    </div>
+   812→                                    <div class="col-xl-8 col-lg-7">
+   813→                                        <div class="td-schedule-3-content">
+   814→                                            <h2 class="td-schedule-3-title" data-lang="e24">Accueil et petit-déjeuner de réseautage </h2>
+   815→                                            <div class="td-schedule-3-destination mb-10">
+   816→
+   817→                                                <span>
+   818→                                                    <i class="flaticon-time"></i>
+   819→                                                    08:00  – 08:45
+   820→                                                </span>
+   821→                                            </div>
+   822→
+   823→                                            <p class="mb-25 para" data-lang="e25">Participez à un moment convivial d'inscription dans une ambiance détendue. Profitez d'un délicieux petit-déjeuner pour échanger et faire de nouvelles rencontres.</p>
+   824→                                            <div class="td-schedule-3-btn d-flex align-items-center flex-wrap">
+   825→                                                <span class="dvdr"></span>
+   826→                                                <a class="td-btn td-btn-3-squre td-left-right text3 mr-25" href="https://international-event-for-pmo-leaders.businessroom.io/">
+   827→                                                    <span class="mr10 td-text d-inline-block mr-5" data-lang="i1">Acheter un PASS</span>
+   828→                                                    <span class="td-arrow-angle">
+   829→                                          <svg class="td-arrow-svg-top-right" width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+   830→                                              <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   831→                                              <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   832→                                          </svg>
+   833→                                      </span>
+   834→                                                </a>
+   835→
+   836→
+   837→                                    </div>
+   838→                                </div>
+   839→                            </div>
+   840→                        </div>
+   841→                    </div>
+   842→                            <div class="td-schedule-3-wrap mb-30">
+   843→                                <div class="row align-items-center">
+   844→                                    <div class="col-xl-4 col-lg-5">
+   845→                                        <div class="td-schedule-3-thumb p-relative">
+   846→                                            <img class="w-100" src="assets/img/schedule/schedule-3/perso1.jpg" alt="">
+   847→                                            <span class="td-schedule-2-date"><i class="flaticon-calendar"></i>Oct 12, 2025</span>
+   848→                                            <div class="speakers">
+   849→                                                <img src="assets/img/team/lambert.png" alt=" lee lambert">
+   850→                                                <img src="assets/img/team/yosra.png" alt=" yossra">
+   851→                                            </div>
+   852→                                        </div>
+   853→                                    </div>
+   854→                                    <div class="col-xl-8 col-lg-7">
+   855→                                        <div class="td-schedule-3-content">
+   856→                                            <h2 class="td-schedule-3-title" data-lang="e26">Mot de bienvenue et ouverture</h2>
+   857→                                            <div class="td-schedule-3-destination mb-10">
+   858→
+   859→                                                <span>
+   860→                                                    <i class="flaticon-time"></i>
+   861→                                                    08:50  – 09:10
+   862→                                                </span>
+   863→                                            </div>
+   864→                                            <p class="mb-25 para" data-lang="e27">Discours de bienvenue de l'hôte de la conférence, Mot d’accueil suivi du mot
+   865→d’ouverture et présentation de l'agenda de la journée et les thèmes clés.
+   866→
+   867→
+   868→                                            </p>
+   869→                                            <div class="td-schedule-3-btn d-flex align-items-center flex-wrap">
+   870→
+   871→
+   872→                                                    <span class="dvdr"></span>
+   873→                                                    <a class="td-btn td-btn-3-squre td-left-right text3 mr-25" href="https://international-event-for-pmo-leaders.businessroom.io/">
+   874→                                                        <span class="mr10 td-text d-inline-block mr-5" data-lang="i1">Acheter un PASS</span>
+   875→                                                        <span class="td-arrow-angle">
+   876→                                          <svg class="td-arrow-svg-top-right" width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+   877→                                              <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   878→                                              <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   879→                                          </svg>
+   880→                                      </span>
+   881→                                                    </a>
+   882→
+   883→
+   884→
+   885→                                    </div>
+   886→                                </div>
+   887→                            </div>
+   888→                        </div>
+   889→                    </div>
+   890→         <h2 style=" color: #ddb152;" data-lang="e28">
+   891→           Session Plénière 1 : Excellence des bureaux des projets (PMO) et Création de Valeur
+   892→                            </h2>
+   893→
+   894→
+   895→                            <div class="td-schedule-3-wrap mb-30">
+   896→                      <div class="row align-items-center">
+   897→                          <div class="col-xl-4 col-lg-5">
+   898→                              <div class="td-schedule-3-thumb p-relative">
+   899→                                  <img class="w-100" src="assets/img/schedule/schedule-3/perso1.jpg" alt="">
+   900→                                  <span class="td-schedule-2-date"><i class="flaticon-calendar"></i>Oct 12, 2025</span>
+   901→                                  <div class="speakers">
+   902→                                    <img src="assets/img/team/med.jpg" alt="">
+   903→                                  </div>
+   904→                              </div>
+   905→                          </div>
+   906→                          <div class="col-xl-8 col-lg-7">
+   907→                              <div class="td-schedule-3-content">
+   908→                                  <h2 class="td-schedule-3-title" data-lang="e29">Keynote 1: Excellence des bureaux des projets (PMOs)</h2>
+   909→                                  <div class="td-schedule-3-destination mb-10">
+   910→
+   911→                                      <span>
+   912→                                          <i class="flaticon-time"></i>
+   913→                                          09:15  – 09:45
+   914→                                      </span>
+   915→                                  </div>
+   916→                                  <p class="mb-25 para" data-lang="e30">Comment les PMO peuvent piloter la transformation business.</p>
+   917→                                  <div class="td-schedule-3-btn d-flex align-items-center flex-wrap">
+   918→                                      <div class="td-schedule-3-user-wrap d-flex align-items-center">
+   919→
+   920→                                          <span class="dvdr"></span>
+   921→                                          <a class="td-btn td-btn-3-squre td-left-right text3 mr-25" href="https://international-event-for-pmo-leaders.businessroom.io/">
+   922→                                              <span class="mr10 td-text d-inline-block mr-5" data-lang="i1">Acheter un PASS</span>
+   923→                                              <span class="td-arrow-angle">
+   924→                                          <svg class="td-arrow-svg-top-right" width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+   925→                                              <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   926→                                              <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   927→                                          </svg>
+   928→                                      </span>
+   929→                                          </a>
+   930→                                      </div>
+   931→
+   932→
+   933→
+   934→                          </div>
+   935→                      </div>
+   936→                  </div>
+   937→              </div>
+   938→              </div>
+   939→
+   940→
+   941→
+   942→
+   943→              <div class="td-schedule-3-wrap mb-30">
+   944→                  <div class="row align-items-center">
+   945→                      <div class="col-xl-4 col-lg-5">
+   946→                          <div class="td-schedule-3-thumb p-relative">
+   947→                              <img class="w-100" src="assets/img/schedule/schedule-3/perso1.jpg" alt="">
+   948→                              <span class="td-schedule-2-date"><i class="flaticon-calendar"></i>Oct 12, 2025</span>
+   949→                              <div class="speakers">
+   950→                                <img src="assets/img/team/aicha.png" alt="">
+   951→                                <img src="assets/img/team/lobna.jpeg" alt="">
+   952→                                <img src="assets/img/team/heba.png" alt="">
+   953→                                <img src="assets/img/team/karimK.png" alt="">
+   954→                              </div>
+   955→
+   956→                          </div>
+   957→                      </div>
+   958→                      <div class="col-xl-8 col-lg-7">
+   959→                          <div class="td-schedule-3-content">
+   960→                              <h2 class="td-schedule-3-title" data-lang="e31">Panel de Discussion 1 : PMO stratégiques : Passer de la gestion à la création de
+   961→Valeur</h2>
+   962→                              <div class="td-schedule-3-destination mb-10">
+   963→
+   964→                                  <span>
+   965→                                      <i class="flaticon-time"></i>
+   966→                                      09:50  – 10:35
+   967→                                  </span>
+   968→                              </div>
+   969→                              <p class="mb-25 para">
+   970→                                  <span data-lang="e32II">Diriger avec vision "Commencer par le pourquoi"</span><br>
+   971→                                  <span data-lang="e33II">♦ Modèles concrets: quand les PMO deviennent des centres de revenus</span><br>
+   972→                                  <span data-lang="e34II">♦ Alignement des projets avec la stratégie business</span><br>
+   973→                                  <span data-lang="e35II">♦ ROI du PMO: les métriques parlantes pour les décideurs</span><br>
+   974→                              </p>
+   975→                              <div class="td-schedule-3-btn d-flex align-items-center flex-wrap">
+   976→                                  <div class="td-schedule-3-user-wrap d-flex align-items-center">
+   977→
+   978→                                      <span class="dvdr"></span>
+   979→                                      <a class="td-btn td-btn-3-squre td-left-right text3 mr-25" href="https://international-event-for-pmo-leaders.businessroom.io/">
+   980→                                          <span class="mr10 td-text d-inline-block mr-5" data-lang="i1">Acheter un PASS</span>
+   981→                                          <span class="td-arrow-angle">
+   982→                                          <svg class="td-arrow-svg-top-right" width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+   983→                                              <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   984→                                              <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+   985→                                          </svg>
+   986→                                      </span>
+   987→                                      </a>
+   988→                                  </div>
+   989→
+   990→
+   991→
+   992→                      </div>
+   993→                  </div>
+   994→              </div>
+   995→          </div>
+   996→          </div>
+   997→          <div class="td-schedule-3-wrap mb-30">
+   998→              <div class="row align-items-center">
+   999→                  <div class="col-xl-4 col-lg-5">
+  1000→                      <div class="td-schedule-3-thumb p-relative">
+  1001→                          <img class="w-100" src="assets/img/schedule/schedule-3/perso1.jpg" alt="">
+  1002→                          <span class="td-schedule-2-date"><i class="flaticon-calendar"></i>Oct 12, 2025</span>
+  1003→                          <div class="speakers">
+  1004→                            <img src="assets/img/team/eman.png" alt="">
+  1005→                            <img src="assets/img/team/sarraL.jpg" alt="">
+  1006→                            <img src="assets/img/team/rymA.jpeg" alt="">
+  1007→                            <img src="assets/img/team/aicha.png" alt="">
+  1008→                          </div>
+  1009→
+  1010→                      </div>
+  1011→                  </div>
+  1012→                  <div class="col-xl-8 col-lg-7">
+  1013→                      <div class="td-schedule-3-content">
+  1014→                          <h2 class="td-schedule-3-title" data-lang="e31I">Panel de Discussion 2 (Session parallèle) : PMO et RSE – Un duo stratégique pour des projets responsables et durables</h2>
+  1015→                          <div class="td-schedule-3-destination mb-10">
+  1016→
+  1017→                              <span>
+  1018→                                  <i class="flaticon-time"></i>
+  1019→                                  10:40  – 11:15
+  1020→                              </span>
+  1021→                          </div>
+  1022→                          <p class="mb-25 para">
+  1023→                              <span data-lang="e32I">♦ Intégrer la RSE dans la gouvernance projet : Comment le PMO peut-il devenir un acteur clé ?</span><br>
+  1024→                              <span data-lang="e33I">♦ PMO et projets de transformation durables : étude de cas (hôtels éco-certifiés ou énergie renouvelable)</span><br>
+  1025→                              <span data-lang="e34I">♦ Collaboration PMO – Institutions publiques et ONG en Tunisie pour des projets à impact</span><br>
+  1026→                          </p>
+  1027→                          <div class="td-schedule-3-btn d-flex align-items-center flex-wrap">
+  1028→                              <div class="td-schedule-3-user-wrap d-flex align-items-center">
+  1029→
+  1030→                                  <span class="dvdr"></span>
+  1031→                                  <a class="td-btn td-btn-3-squre td-left-right text3 mr-25" href="https://international-event-for-pmo-leaders.businessroom.io/">
+  1032→                                      <span class="mr10 td-text d-inline-block mr-5" data-lang="i1">Acheter un PASS</span>
+  1033→                                      <span class="td-arrow-angle">
+  1034→                                      <svg class="td-arrow-svg-top-right" width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+  1035→                                          <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+  1036→                                          <path d="M0.943836 13.5C0.685616 13.5 0.45411 13.4021 0.276027 13.224C0.0979452 13.0459 0 12.8055 0 12.5562C0 12.3068 0.0979452 12.0664 0.276027 11.8884L9.76781 2.38767H2.02123C1.49589 2.38767 1.0774 1.96027 1.0774 1.44384C1.0774 0.927397 1.50479 0.5 2.03014 0.5H12.0562C12.1274 0.5 12.1986 0.508904 12.2788 0.526712L12.4034 0.562329L12.537 0.633562C12.5637 0.65137 12.5993 0.678082 12.626 0.69589C12.6973 0.749315 12.7507 0.80274 12.7952 0.856164C12.8219 0.891781 12.8575 0.927397 12.8842 0.989726L12.9555 1.1411L12.9822 1.22123C13 1.29247 13.0089 1.3726 13.0089 1.44384V11.4699C13.0089 11.9952 12.5815 12.4137 12.0651 12.4137C11.5486 12.4137 11.1212 11.9863 11.1212 11.4699V3.72329L1.62055 13.224C1.44247 13.4021 1.20205 13.5 0.943836 13.5Z" fill="white" />
+  1037→                                      </svg>
+  1038→                                  </span>
+  1039→                                  </a>
+  1040→                              </div>
+  1041→
+  1042→
+  1043→
+  1044→                  </div>
+  1045→              </div>
+  1046→          </div>
+  1047→          </div>
+  1048→          </div>
+  1049→
+
+[showing lines 650-1049 of 1936; use offset=1050 with limit to continue reading]

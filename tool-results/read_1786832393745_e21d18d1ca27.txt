@@ -1,0 +1,1008 @@
+     1→/**
+     2→ * PMO Mastery — Database seed script
+     3→ *
+     4→ * Populates the database with:
+     5→ *   - Default admin user (admin@pmomastery.tn / PMOmaster2025!)
+     6→ *   - PMO Mastery 2025 event (11–12 October 2025, Tunis)
+     7→ *   - 21 speakers with bios (from the audit)
+     8→ *   - 2 programme days + 19 sessions
+     9→ *   - 9 passes with their businessroom.io payment URLs
+    10→ *   - 7 partners (Strategic / Diamond / Media / General)
+    11→ *   - 1 organizer (Empowerment Paths + Yosra Torjmen)
+    12→ *   - Contact info + CMS sections (Hero, Why Participate, About, Footer)
+    13→ *
+    14→ * Run with:  bun run db:seed
+    15→ *
+    16→ * Safe to re-run — uses upsert pattern (deletes existing active event first).
+    17→ */
+    18→import { PrismaClient } from "@prisma/client"
+    19→import bcrypt from "bcryptjs"
+    20→
+    21→const db = new PrismaClient()
+    22→
+    23→const REMOTE = "https://www.pmomastery.tn"
+    24→
+    25→async function main() {
+    26→  console.log("🌱 Seeding PMO Mastery database…")
+    27→
+    28→  // 1. Admin user ----------------------------------------------------------
+    29→  const adminEmail = (process.env.ADMIN_SEED_EMAIL ?? "admin@pmomastery.tn").toLowerCase().trim()
+    30→  const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? "PMOmaster2025!"
+    31→  const passwordHash = await bcrypt.hash(adminPassword, 10)
+    32→  await db.adminUser.upsert({
+    33→    where: { email: adminEmail },
+    34→    update: {},
+    35→    create: {
+    36→      email: adminEmail,
+    37→      name: "PMO Mastery Admin",
+    38→      passwordHash,
+    39→      role: "SUPER_ADMIN",
+    40→      isActive: true,
+    41→    },
+    42→  })
+    43→  console.log(`  ✓ Admin user: ${adminEmail}`)
+    44→
+    45→  // Clean previous active event (idempotent re-seed)
+    46→  await db.event.deleteMany({})
+    47→  console.log("  ✓ Cleared previous events")
+    48→
+    49→  // 2. Event ---------------------------------------------------------------
+    50→  const event = await db.event.create({
+    51→    data: {
+    52→      slug: "pmo-mastery-2025",
+    53→      editionName: "PMO Mastery 2025",
+    54→      titleFr: "Événement international pour les leaders des PMOs",
+    55→      titleEn: "International Event for PMO Leaders",
+    56→      subtitleFr: "11 – 12 octobre 2025 · Tunis, Tunisie",
+    57→      subtitleEn: "October 11–12, 2025 · Tunis, Tunisia",
+    58→      themeTaglineFr: "Le PMO du Futur : Stratégie, IA et Performance",
+    59→      themeTaglineEn: "The PMO of the Future: Strategy, AI and Performance",
+    60→      descriptionFr:
+    61→        "Pendant 2 jours intensifs, vivez une expérience immersive au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership. Un véritable parcours d'inspiration, d'apprentissage et d'échanges pour accélérer votre impact professionnel et personnel.",
+    62→      descriptionEn:
+    63→        "Two intensive days of immersive experiences at the heart of best practices in project management, PMO, change management, AI and leadership. A true journey of inspiration, learning and exchange to accelerate your professional and personal impact.",
+    64→      startDate: new Date("2025-10-11T09:00:00+01:00"),
+    65→      endDate: new Date("2025-10-12T18:00:00+01:00"),
+    66→      startTime: "09:00",
+    67→      endTime: "18:00",
+    68→      timezone: "Africa/Tunis",
+    69→      countdownTarget: new Date("2025-10-11T09:56:00+01:00"),
+    70→      venue: "Royal Tulip Taj Sultan",
+    71→      address: "Les Berges du Lac, Tunis",
+    72→      city: "Tunis",
+    73→      country: "Tunisie",
+    74→      latitude: 36.8381,
+    75→      longitude: 10.2497,
+    76→      mapUrl:
+    77→        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3191.2776632747516!2d10.2475!3d36.8381!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzbCsDUwJzE3LjIiTiAxMMKwMTQnNTEuMCJF!5e0!3m2!1sfr!2stn!4v1234567890",
+    78→      heroImageDesktop: `${REMOTE}/assets/img/hero/test1.gif`,
+    79→      heroImageMobile: `${REMOTE}/assets/img/hero/test2.gif`,
+    80→      heroLogo: `${REMOTE}/assets/img/logo/logo.png`,
+    81→      ogImage: `${REMOTE}/img/og-image.jpg`,
+    82→      registrationEnabled: true,
+    83→      status: "UPCOMING",
+    84→      isActive: true,
+    85→    },
+    86→  })
+    87→  console.log(`  ✓ Event: ${event.editionName}`)
+    88→
+    89→  // 3. Contact info --------------------------------------------------------
+    90→  await db.contactInfo.create({
+    91→    data: {
+    92→      eventId: event.id,
+    93→      email: "contact@pmomastery.tn",
+    94→      phone: "+216 94 108 023",
+    95→      address: "Tunis",
+    96→      city: "Tunis",
+    97→      country: "Tunisie",
+    98→      linkedinUrl: "https://www.linkedin.com/company/pmo-mastery-tun/about/",
+    99→      facebookUrl: "https://www.facebook.com/pmomastery",
+   100→      instagramUrl: "https://www.instagram.com/pmomastery/",
+   101→      websiteUrl: "https://www.pmomastery.tn",
+   102→    },
+   103→  })
+   104→  console.log("  ✓ Contact info")
+   105→
+   106→  // 4. Speakers ------------------------------------------------------------
+   107→  const speakers = [
+   108→    {
+   109→      slug: "lee-lambert",
+   110→      firstName: "Lee R.",
+   111→      lastName: "Lambert",
+   112→      photo: `${REMOTE}/assets/img/team/lambertt.png`,
+   113→      positionFr: "CEO, Lambert Consulting Group",
+   114→      positionEn: "CEO, Lambert Consulting Group",
+   115→      biographyFr:
+   116→        "Lee R. Lambert est l'un des pionniers mondiaux de la profession PMO. Avec plus de 40 ans d'expérience, il a accompagné des centaines d'organisations dans leur transformation projective.\n\nReconnu comme l'un des 5 pionniers du Project Management Institute (PMI), il a contribué à la création du standard PMP.\n\nAuteur de plusieurs ouvrages de référence, il partage sa vision stratégique du PMO comme moteur de création de valeur.",
+   117→      biographyEn:
+   118→        "Lee R. Lambert is one of the world's pioneers of the PMO profession. With over 40 years of experience, he has guided hundreds of organizations in their project transformation.\n\nRecognized as one of the 5 founders of the Project Management Institute (PMI), he contributed to creating the PMP standard.\n\nAuthor of several reference books, he shares his strategic vision of PMO as a value creation engine.",
+   119→      country: "USA",
+   120→      linkedinUrl: "https://www.linkedin.com/in/lelambert/",
+   121→      isFeatured: true,
+   122→      displayOrder: 1,
+   123→    },
+   124→    {
+   125→      slug: "mohamed-khalifa",
+   126→      firstName: "Mohamed",
+   127→      lastName: "Khalifa",
+   128→      photo: `${REMOTE}/assets/img/team/medd.png`,
+   129→      positionFr: "Consultant & Formateur — Top 8 PMO Influencers",
+   130→      positionEn: "Consultant & Trainer — Top 8 PMO Influencers",
+   131→      biographyFr:
+   132→        "Mohamed Khalifa figure parmi les Top 8 influenceurs PMO au niveau mondial. Consultant international et formateur certifié, il accompagne les organisations dans leur maturation PMO.\n\nExpert reconnu en création de bureaux de projets performants, il a formé des milliers de professionnels à travers le monde arabe et francophone.",
+   133→      biographyEn:
+   134→        "Mohamed Khalifa is among the Top 8 PMO influencers worldwide. International consultant and certified trainer, he supports organizations in their PMO maturation.\n\nRecognized expert in creating high-performing project offices, he has trained thousands of professionals across the Arab and Francophone world.",
+   135→      country: "Égypte",
+   136→      linkedinUrl: "https://www.linkedin.com/in/mkhalifa/",
+   137→      isFeatured: true,
+   138→      displayOrder: 2,
+   139→    },
+   140→    {
+   141→      slug: "heba-bilal",
+   142→      firstName: "Heba Bilal",
+   143→      lastName: "AlShehhi",
+   144→      photo: `${REMOTE}/assets/img/team/heba.png`,
+   145→      positionFr: "PMO Influencer & Auteure de Elements of Leadership",
+   146→      positionEn: "PMO Influencer & Author of Elements of Leadership",
+   147→      biographyFr:
+   148→        "Heba Bilal AlShehhi est une leader reconnue dans le domaine du PMO et du leadership. Auteure de l'ouvrage « Elements of Leadership », elle accompagne les organisations dans leur transformation digitale.\n\nSon expertise couvre la stratégie PMO, le leadership transformationnel et l'innovation managériale.",
+   149→      biographyEn:
+   150→        "Heba Bilal AlShehhi is a recognized leader in the PMO and leadership field. Author of \"Elements of Leadership\", she supports organizations in their digital transformation.\n\nHer expertise covers PMO strategy, transformational leadership and managerial innovation.",
+   151→      country: "Émirats Arabes Unis",
+   152→      isFeatured: true,
+   153→      displayOrder: 3,
+   154→    },
+   155→    {
+   156→      slug: "khemaies-bahri",
+   157→      firstName: "Khemaies",
+   158→      lastName: "Bahri",
+   159→      photo: `${REMOTE}/assets/img/team/km.png`,
+   160→      positionFr: "CEO, Bahri Group",
+   161→      positionEn: "CEO, Bahri Group",
+   162→      biographyFr:
+   163→        "Khemaies Bahri est un leader d'affaires reconnu en Tunisie. CEO de Bahri Group, il apporte une vision entrepreneuriale unique au monde du management de projets.\n\nSon expérience couvre de multiples secteurs, du transport à la logistique en passant par l'immobilier.",
+   164→      biographyEn:
+   165→        "Khemaies Bahri is a recognized business leader in Tunisia. CEO of Bahri Group, he brings a unique entrepreneurial vision to the project management world.\n\nHis experience covers multiple sectors, from transport to logistics to real estate.",
+   166→      country: "Tunisie",
+   167→      displayOrder: 4,
+   168→    },
+   169→    {
+   170→      slug: "imen-fakhfekh",
+   171→      firstName: "Imen",
+   172→      lastName: "Fakhfekh",
+   173→      photo: `${REMOTE}/assets/img/team/im.png`,
+   174→      positionFr: "Présidente PMITC",
+   175→      positionEn: "President of PMITC",
+   176→      biographyFr:
+   177→        "Imen Fakhfekh est présidente de PMITC (PMI Tunisia Chapter). Experte en gestion de projets et en transformation stratégique, elle accompagne les organisations tunisiennes dans leur montée en maturité PMO.\n\nElle est également formatatrice et mentor pour la nouvelle génération de chefs de projet.",
+   178→      biographyEn:
+   179→        "Imen Fakhfekh is President of PMITC (PMI Tunisia Chapter). Expert in project management and strategic transformation, she supports Tunisian organizations in their PMO maturity journey.\n\nShe is also a trainer and mentor for the new generation of project managers.",
+   180→      country: "Tunisie",
+   181→      linkedinUrl: "https://www.linkedin.com/in/imen-fakhfekh/",
+   182→      isFeatured: true,
+   183→      displayOrder: 5,
+   184→    },
+   185→    {
+   186→      slug: "eman-deabil",
+   187→      firstName: "Eman",
+   188→      lastName: "Deabil",
+   189→      photo: `${REMOTE}/assets/img/team/eman.png`,
+   190→      positionFr: "Experte en transformation, auteure et conférencière",
+   191→      positionEn: "Transformation expert, author and speaker",
+   192→      biographyFr:
+   193→        "Eman Deabil est une experte reconnue en transformation organisationnelle. Auteure et conférencière internationale, elle aide les organisations à intégrer l'IA dans leurs pratiques de management de projet.\n\nSon approche combine stratégie, technologie et conduite du changement.",
+   194→      biographyEn:
+   195→        "Eman Deabil is a recognized expert in organizational transformation. Author and international speaker, she helps organizations integrate AI into their project management practices.\n\nHer approach combines strategy, technology and change management.",
+   196→      country: "Émirats Arabes Unis",
+   197→      displayOrder: 6,
+   198→    },
+   199→    {
+   200→      slug: "slim-masmoudi",
+   201→      firstName: "Slim",
+   202→      lastName: "Masmoudi",
+   203→      photo: `${REMOTE}/assets/img/team/Slim.jpg`,
+   204→      positionFr: "Professeur en psychologie cognitive et conseiller stratégique",
+   205→      positionEn: "Professor of cognitive psychology and strategic advisor",
+   206→      biographyFr:
+   207→        "Slim Masmoudi est professeur en psychologie cognitive et conseiller stratégique. Son expertise unique combine neuroscience, psychologie et leadership.\n\nIl accompagne les dirigeants dans le développement de leur intelligence émotionnelle et stratégique.",
+   208→      biographyEn:
+   209→        "Slim Masmoudi is a professor of cognitive psychology and strategic advisor. His unique expertise combines neuroscience, psychology and leadership.\n\nHe supports leaders in developing their emotional and strategic intelligence.",
+   210→      country: "Tunisie",
+   211→      displayOrder: 7,
+   212→    },
+   213→    {
+   214→      slug: "nazir-lajdel",
+   215→      firstName: "Nazir",
+   216→      lastName: "Lajdel",
+   217→      photo: `${REMOTE}/assets/img/team/Nizar.jpg`,
+   218→      positionFr: "Director of PMO and Transformation, Zitouna Bank",
+   219→      positionEn: "Director of PMO and Transformation, Zitouna Bank",
+   220→      biographyFr:
+   221→        "Nazir Lajdel est Director of PMO and Transformation chez Zitouna Bank. Il pilote les transformations stratégiques de l'institution bancaire avec une approche PMO orientée valeur.\n\nModérateur de panels reconnu, il anime les discussions sur l'avenir du PMO dans le secteur financier.",
+   222→      biographyEn:
+   223→        "Nazir Lajdel is Director of PMO and Transformation at Zitouna Bank. He leads the strategic transformations of the banking institution with a value-oriented PMO approach.\n\nRecognized panel moderator, he leads discussions on the future of PMO in the financial sector.",
+   224→      country: "Tunisie",
+   225→      displayOrder: 8,
+   226→    },
+   227→    {
+   228→      slug: "henda-essafi-rekik",
+   229→      firstName: "Henda",
+   230→      lastName: "Essafi Rekik",
+   231→      photo: `${REMOTE}/assets/img/team/hebarekik.png`,
+   232→      positionFr: "CEO Excellia Leadership — Coach ICF — Manager de Transition",
+   233→      positionEn: "CEO Excellia Leadership — ICF Coach — Transition Manager",
+   234→      biographyFr:
+   235→        "Henda Essafi Rekik est CEO d'Excellia Leadership, coach ICF certifiée et manager de transition. Elle accompagne les dirigeants dans leur développement personnel et professionnel.\n\nSon expertise couvre le leadership féminin, la transformation culturelle et le coaching exécutif.",
+   236→      biographyEn:
+   237→        "Henda Essafi Rekik is CEO of Excellia Leadership, ICF certified coach and transition manager. She supports leaders in their personal and professional development.\n\nHer expertise covers female leadership, cultural transformation and executive coaching.",
+   238→      country: "Tunisie",
+   239→      displayOrder: 9,
+   240→    },
+   241→    {
+   242→      slug: "mouna-chaeib",
+   243→      firstName: "Mouna",
+   244→      lastName: "Chaeib",
+   245→      photo: `${REMOTE}/assets/img/team/mouna1.png`,
+   246→      positionFr: "CEO · Facilitator in Corporate Governance · Social Innovation",
+   247→      positionEn: "CEO · Facilitator in Corporate Governance · Social Innovation",
+   248→      biographyFr:
+   249→        "Mouna Chaeib est CEO et facilitatrice en gouvernance corporative et innovation sociale. Elle accompagne les organisations dans leur démarche RSE et leur impact positif.\n\nSon approche combine gouvernance, innovation et responsabilité sociétale.",
+   250→      biographyEn:
+   251→        "Mouna Chaeib is CEO and facilitator in corporate governance and social innovation. She supports organizations in their CSR approach and positive impact.\n\nHer approach combines governance, innovation and societal responsibility.",
+   252→      country: "Tunisie",
+   253→      displayOrder: 10,
+   254→    },
+   255→    {
+   256→      slug: "aicha-tamboura",
+   257→      firstName: "Aïcha",
+   258→      lastName: "Tamboura Diawara",
+   259→      photo: `${REMOTE}/assets/img/team/aicha.png`,
+   260→      positionFr: "Chercheure & Experte en Communication, Développement, Genre",
+   261→      positionEn: "Researcher & Expert in Communication, Development, Gender",
+   262→      biographyFr:
+   263→        "Aïcha Tamboura Diawara est chercheure et experte en communication, développement et questions de genre. Elle apporte une dimension académique et humaine aux débats sur le leadership inclusif.\n\nSon travail de recherche porte sur la place des femmes dans le leadership et la transformation organisationnelle.",
+   264→      biographyEn:
+   265→        "Aïcha Tamboura Diawara is a researcher and expert in communication, development and gender issues. She brings an academic and human dimension to debates on inclusive leadership.\n\nHer research focuses on the place of women in leadership and organizational transformation.",
+   266→      country: "Mali",
+   267→      displayOrder: 11,
+   268→    },
+   269→    {
+   270→      slug: "afef-belhadj",
+   271→      firstName: "Afef",
+   272→      lastName: "Belhadj",
+   273→      photo: `${REMOTE}/assets/img/team/afef.png`,
+   274→      positionFr: "Senior executive in the telecom industry",
+   275→      positionEn: "Senior executive in the telecom industry",
+   276→      biographyFr:
+   277→        "Afef Belhadj est senior executive dans l'industrie des télécommunications. Elle pilote des transformations à grande échelle dans un secteur en constante évolution.\n\nSon expertise couvre la stratégie, la transformation digitale et le leadership d'équipes multidisciplinaires.",
+   278→      biographyEn:
+   279→        "Afef Belhadj is a senior executive in the telecommunications industry. She leads large-scale transformations in a constantly evolving sector.\n\nHer expertise covers strategy, digital transformation and leadership of multidisciplinary teams.",
+   280→      country: "Tunisie",
+   281→      displayOrder: 12,
+   282→    },
+   283→    {
+   284→      slug: "imen-messadi",
+   285→      firstName: "Imen",
+   286→      lastName: "Messadi",
+   287→      photo: `${REMOTE}/assets/img/team/x.png`,
+   288→      positionFr: "Experte en Transformation Digitale & Stratégie",
+   289→      positionEn: "Expert in Digital Transformation & Strategy",
+   290→      biographyFr:
+   291→        "Imen Messadi est experte en transformation digitale et stratégie. Elle accompagne les organisations dans leur mutation vers des modèles digitaux performants.\n\nSon approche combine vision stratégique, conduite du changement et innovation technologique.",
+   292→      biographyEn:
+   293→        "Imen Messadi is an expert in digital transformation and strategy. She supports organizations in their mutation towards high-performing digital models.\n\nHer approach combines strategic vision, change management and technological innovation.",
+   294→      country: "Tunisie",
+   295→      displayOrder: 13,
+   296→    },
+   297→    {
+   298→      slug: "naouel-ben-zina",
+   299→      firstName: "Naouel",
+   300→      lastName: "Ben Zina",
+   301→      photo: `${REMOTE}/assets/img/team/naouel.png`,
+   302→      positionFr: "PMI Regional Mentor MENA",
+   303→      positionEn: "PMI Regional Mentor MENA",
+   304→      biographyFr:
+   305→        "Naouel Ben Zina est PMI Regional Mentor pour la région MENA. Elle accompagne le développement de la communauté PMI au Moyen-Orient et Afrique du Nord.\n\nSon expertise couvre la certification, le mentorat et le développement de la profession PMO dans la région.",
+   306→      biographyEn:
+   307→        "Naouel Ben Zina is PMI Regional Mentor for the MENA region. She supports the development of the PMI community in the Middle East and North Africa.\n\nHer expertise covers certification, mentoring and the development of the PMO profession in the region.",
+   308→      country: "Tunisie",
+   309→      displayOrder: 14,
+   310→    },
+   311→    {
+   312→      slug: "omrane-kammoun",
+   313→      firstName: "Omrane",
+   314→      lastName: "Kammoun",
+   315→      photo: `${REMOTE}/assets/img/team/omrane.png`,
+   316→      positionFr: "Telecom Engineer, E-MBA",
+   317→      positionEn: "Telecom Engineer, E-MBA",
+   318→      biographyFr:
+   319→        "Omrane Kammoun est Telecom Engineer et E-MBA. Il combine expertise technique et vision managériale pour piloter des projets complexes dans le secteur des télécommunications.\n\nSon parcours illustre la convergence entre ingénierie et leadership stratégique.",
+   320→      biographyEn:
+   321→        "Omrane Kammoun is a Telecom Engineer and E-MBA. He combines technical expertise and managerial vision to lead complex projects in the telecommunications sector.\n\nHis career illustrates the convergence between engineering and strategic leadership.",
+   322→      country: "Tunisie",
+   323→      displayOrder: 15,
+   324→    },
+   325→    {
+   326→      slug: "maha-chehata",
+   327→      firstName: "Maha",
+   328→      lastName: "Chehata",
+   329→      photo: `${REMOTE}/assets/img/team/mahaC.png`,
+   330→      positionFr: "Présidente MEDRH",
+   331→      positionEn: "President of MEDRH",
+   332→      biographyFr:
+   333→        "Maha Chehata est présidente de MEDRH. Elle apporte une vision RH stratégique au monde du PMO et de la transformation organisationnelle.\n\nSon expertise couvre le capital humain, le leadership et le développement des talents.",
+   334→      biographyEn:
+   335→        "Maha Chehata is President of MEDRH. She brings a strategic HR vision to the world of PMO and organizational transformation.\n\nHer expertise covers human capital, leadership and talent development.",
+   336→      country: "Tunisie",
+   337→      displayOrder: 16,
+   338→    },
+   339→    {
+   340→      slug: "moez-kamoun",
+   341→      firstName: "Moez",
+   342→      lastName: "Kamoun",
+   343→      photo: `${REMOTE}/assets/img/team/moezK.png`,
+   344→      positionFr: "Consulting Partner",
+   345→      positionEn: "Consulting Partner",
+   346→      biographyFr:
+   347→        "Moez Kamoun est Consulting Partner. Il accompagne les organisations dans leurs transformations stratégiques avec une approche orientée valeur et impact.\n\nSon expertise couvre le conseil en stratégie, la transformation et le management de projets complexes.",
+   348→      biographyEn:
+   349→        "Moez Kamoun is a Consulting Partner. He supports organizations in their strategic transformations with a value and impact-oriented approach.\n\nHis expertise covers strategy consulting, transformation and complex project management.",
+   350→      country: "Tunisie",
+   351→      displayOrder: 17,
+   352→    },
+   353→    {
+   354→      slug: "ahmed-chabchoub",
+   355→      firstName: "Ahmed",
+   356→      lastName: "Chabchoub",
+   357→      photo: `${REMOTE}/assets/img/team/ahmedC.png`,
+   358→      positionFr: "Founder & CEO, DefensyLab",
+   359→      positionEn: "Founder & CEO, DefensyLab",
+   360→      biographyFr:
+   361→        "Ahmed Chabchoub est fondateur et CEO de DefensyLab. Expert en cybersécurité et transformation digitale, il accompagne les organisations dans leur sécurisation face aux enjeux technologiques.\n\nSon approche combine innovation, sécurité et performance opérationnelle.",
+   362→      biographyEn:
+   363→        "Ahmed Chabchoub is founder and CEO of DefensyLab. Expert in cybersecurity and digital transformation, he supports organizations in securing against technological challenges.\n\nHis approach combines innovation, security and operational performance.",
+   364→      country: "Tunisie",
+   365→      displayOrder: 18,
+   366→    },
+   367→    {
+   368→      slug: "rym-akremi",
+   369→      firstName: "Rym",
+   370→      lastName: "Ben Dhief Akremi",
+   371→      photo: `${REMOTE}/assets/img/team/rymA.png`,
+   372→      positionFr: "Entrepreneure · Consultante en Stratégie RSE & ESG",
+   373→      positionEn: "Entrepreneur · CSR & ESG Strategy Consultant",
+   374→      biographyFr:
+   375→        "Rym Ben Dhief Akremi est entrepreneure et consultante en stratégie RSE et ESG. Elle accompagne les organisations dans leur démarche de responsabilité sociétale et environnementale.\n\nSon expertise combine vision durable, innovation et performance business.",
+   376→      biographyEn:
+   377→        "Rym Ben Dhief Akremi is an entrepreneur and CSR & ESG strategy consultant. She supports organizations in their corporate social and environmental responsibility approach.\n\nHer expertise combines sustainable vision, innovation and business performance.",
+   378→      country: "Tunisie",
+   379→      displayOrder: 19,
+   380→    },
+   381→    {
+   382→      slug: "sarah-lamine",
+   383→      firstName: "Sarah",
+   384→      lastName: "Lamine",
+   385→      photo: `${REMOTE}/assets/img/team/sarraL.png`,
+   386→      positionFr: "CEO at Convergen Agency",
+   387→      positionEn: "CEO at Convergen Agency",
+   388→      biographyFr:
+   389→        "Sarah Lamine est CEO de Convergen Agency. Elle apporte une vision marketing et communicationnelle au monde du PMO.\n\nSon expertise couvre la stratégie de marque, la communication digitale et l'innovation marketing.",
+   390→      biographyEn:
+   391→        "Sarah Lamine is CEO of Convergen Agency. She brings a marketing and communication vision to the PMO world.\n\nHer expertise covers brand strategy, digital communication and marketing innovation.",
+   392→      country: "Tunisie",
+   393→      displayOrder: 20,
+   394→    },
+   395→    {
+   396→      slug: "aimen-ktari",
+   397→      firstName: "Aimen",
+   398→      lastName: "Ktari",
+   399→      photo: `${REMOTE}/assets/img/team/team-2/aimen.png`,
+   400→      positionFr: "Directeur, Plateforme ESG & Développement Durable, PwC France & Maghreb",
+   401→      positionEn: "Director, ESG & Sustainable Development Platform, PwC France & Maghreb",
+   402→      biographyFr:
+   403→        "Aimen Ktari est directeur de la plateforme ESG & Développement Durable chez PwC France & Maghreb. Il accompagne les organisations dans leur transition durable et leur reporting ESG.\n\nSon expertise couvre les standards ESG, la finance durable et la transformation responsable.",
+   404→      biographyEn:
+   405→        "Aimen Ktari is Director of the ESG & Sustainable Development platform at PwC France & Maghreb. He supports organizations in their sustainable transition and ESG reporting.\n\nHis expertise covers ESG standards, sustainable finance and responsible transformation.",
+   406→      country: "France",
+   407→      displayOrder: 21,
+   408→    },
+   409→  ]
+   410→
+   411→  for (const sp of speakers) {
+   412→    await db.speaker.create({
+   413→      data: {
+   414→        eventId: event.id,
+   415→        ...sp,
+   416→        isActive: true,
+   417→      },
+   418→    })
+   419→  }
+   420→  console.log(`  ✓ ${speakers.length} speakers`)
+   421→
+   422→  // 5. Programme -----------------------------------------------------------
+   423→  const day1 = await db.programmeDay.create({
+   424→    data: {
+   425→      eventId: event.id,
+   426→      nameFr: "Jour 1 — Formation",
+   427→      nameEn: "Day 1 — Training",
+   428→      date: new Date("2025-10-11"),
+   429→      displayOrder: 0,
+   430→      isActive: true,
+   431→    },
+   432→  })
+   433→  const day2 = await db.programmeDay.create({
+   434→    data: {
+   435→      eventId: event.id,
+   436→      nameFr: "Jour 2 — Événement",
+   437→      nameEn: "Day 2 — Main Event",
+   438→      date: new Date("2025-10-12"),
+   439→      displayOrder: 1,
+   440→      isActive: true,
+   441→    },
+   442→  })
+   443→
+   444→  const sessions = [
+   445→    // Day 1
+   446→    {
+   447→      dayId: day1.id,
+   448→      startTime: "08:30",
+   449→      endTime: "10:00",
+   450→      titleFr: "Comment créer un bureau de gestion de projets réussi : outils et techniques essentiels",
+   451→      titleEn: "How to create a successful project management office: essential tools and techniques",
+   452→      sessionType: "WORKSHOP",
+   453→      language: "AR",
+   454→      displayOrder: 0,
+   455→      speakerSlugs: ["mohamed-khalifa"],
+   456→    },
+   457→    {
+   458→      dayId: day1.id,
+   459→      startTime: "10:00",
+   460→      endTime: "10:30",
+   461→      titleFr: "Pause Café",
+   462→      titleEn: "Coffee Break",
+   463→      sessionType: "BREAK",
+   464→      displayOrder: 1,
+   465→      speakerSlugs: [],
+   466→    },
+   467→    {
+   468→      dayId: day1.id,
+   469→      startTime: "10:30",
+   470→      endTime: "12:30",
+   471→      titleFr: "PMO Hybride et Pilotage de performance : Intégrer Méthode agile, Traditionnel et KPI",
+   472→      titleEn: "Hybrid PMO and Performance Management: Integrating Agile, Traditional Methods and KPIs",
+   473→      sessionType: "WORKSHOP",
+   474→      language: "FR",
+   475→      displayOrder: 2,
+   476→      speakerSlugs: [],
+   477→    },
+   478→    {
+   479→      dayId: day1.id,
+   480→      startTime: "12:30",
+   481→      endTime: "13:30",
+   482→      titleFr: "Déjeuner & Networking",
+   483→      titleEn: "Lunch & Networking",
+   484→      sessionType: "NETWORKING",
+   485→      displayOrder: 3,
+   486→      speakerSlugs: [],
+   487→    },
+   488→    {
+   489→      dayId: day1.id,
+   490→      startTime: "13:30",
+   491→      endTime: "15:30",
+   492→      titleFr: "De la Stratégie aux KPI jusqu'à l'Exécution Agile",
+   493→      titleEn: "From Strategy to KPIs to Agile Execution",
+   494→      sessionType: "WORKSHOP",
+   495→      language: "FR",
+   496→      displayOrder: 4,
+   497→      speakerSlugs: ["imen-fakhfekh"],
+   498→    },
+   499→    {
+   500→      dayId: day1.id,
+   501→      startTime: "15:30",
+   502→      endTime: "16:00",
+   503→      titleFr: "Pause Café",
+   504→      titleEn: "Coffee Break",
+   505→      sessionType: "BREAK",
+   506→      displayOrder: 5,
+   507→      speakerSlugs: [],
+   508→    },
+   509→    {
+   510→      dayId: day1.id,
+   511→      startTime: "16:00",
+   512→      endTime: "17:30",
+   513→      titleFr: "Artificial Intelligence (AI) for Project Management",
+   514→      titleEn: "Artificial Intelligence (AI) for Project Management",
+   515→      sessionType: "WORKSHOP",
+   516→      language: "EN",
+   517→      displayOrder: 6,
+   518→      speakerSlugs: [],
+   519→    },
+   520→    // Day 2
+   521→    {
+   522→      dayId: day2.id,
+   523→      startTime: "08:30",
+   524→      endTime: "09:00",
+   525→      titleFr: "Accueil et petit-déjeuner de réseautage",
+   526→      titleEn: "Welcome and networking breakfast",
+   527→      sessionType: "NETWORKING",
+   528→      displayOrder: 0,
+   529→      speakerSlugs: ["lee-lambert"],
+   530→    },
+   531→    {
+   532→      dayId: day2.id,
+   533→      startTime: "09:00",
+   534→      endTime: "09:30",
+   535→      titleFr: "Mot de bienvenue et ouverture",
+   536→      titleEn: "Welcome remarks and opening",
+   537→      sessionType: "SESSION",
+   538→      displayOrder: 1,
+   539→      speakerSlugs: ["mohamed-khalifa"],
+   540→    },
+   541→    {
+   542→      dayId: day2.id,
+   543→      startTime: "09:30",
+   544→      endTime: "10:15",
+   545→      titleFr: "Keynote 1 : Excellence des bureaux des projets (PMOs)",
+   546→      titleEn: "Keynote 1: Excellence of Project Management Offices (PMOs)",
+   547→      sessionType: "KEYNOTE",
+   548→      language: "FR",
+   549→      displayOrder: 2,
+   550→      speakerSlugs: ["aicha-tamboura"],
+   551→    },
+   552→    {
+   553→      dayId: day2.id,
+   554→      startTime: "10:15",
+   555→      endTime: "11:15",
+   556→      titleFr: "Panel 1 : PMO stratégiques — Passer de la gestion à la création de Valeur",
+   557→      titleEn: "Panel 1: Strategic PMOs — From Management to Value Creation",
+   558→      sessionType: "PANEL",
+   559→      language: "FR",
+   560→      displayOrder: 3,
+   561→      speakerSlugs: ["eman-deabil"],
+   562→    },
+   563→    {
+   564→      dayId: day2.id,
+   565→      startTime: "11:15",
+   566→      endTime: "11:45",
+   567→      titleFr: "Pause Café & Networking",
+   568→      titleEn: "Coffee Break & Networking",
+   569→      sessionType: "BREAK",
+   570→      displayOrder: 4,
+   571→      speakerSlugs: [],
+   572→    },
+   573→    {
+   574→      dayId: day2.id,
+   575→      startTime: "11:45",
+   576→      endTime: "12:30",
+   577→      titleFr: "Keynote 2 : Succès de l'IA — Cas concrets et enseignements",
+   578→      titleEn: "Keynote 2: AI Success — Concrete cases and lessons",
+   579→      sessionType: "KEYNOTE",
+   580→      language: "EN",
+   581→      displayOrder: 5,
+   582→      speakerSlugs: ["eman-deabil"],
+   583→    },
+   584→    {
+   585→      dayId: day2.id,
+   586→      startTime: "12:30",
+   587→      endTime: "13:30",
+   588→      titleFr: "Panel : IA & Automatisation",
+   589→      titleEn: "Panel: AI & Automation",
+   590→      sessionType: "PANEL",
+   591→      language: "FR",
+   592→      displayOrder: 6,
+   593→      speakerSlugs: ["heba-bilal", "maha-chehata"],
+   594→    },
+   595→    {
+   596→      dayId: day2.id,
+   597→      startTime: "13:30",
+   598→      endTime: "14:30",
+   599→      titleFr: "Déjeuner & Networking",
+   600→      titleEn: "Lunch & Networking",
+   601→      sessionType: "NETWORKING",
+   602→      displayOrder: 7,
+   603→      speakerSlugs: [],
+   604→    },
+   605→    {
+   606→      dayId: day2.id,
+   607→      startTime: "14:30",
+   608→      endTime: "15:15",
+   609→      titleFr: "Keynote : Comment les leaders exceptionnels transforment la résistance en adhésion",
+   610→      titleEn: "Keynote: How exceptional leaders turn resistance into engagement",
+   611→      sessionType: "KEYNOTE",
+   612→      language: "EN",
+   613→      displayOrder: 8,
+   614→      speakerSlugs: ["lee-lambert"],
+   615→    },
+   616→    {
+   617→      dayId: day2.id,
+   618→      startTime: "15:15",
+   619→      endTime: "16:15",
+   620→      titleFr: "Panel : Synergie Gagnante — Conduite du changement et IA au service des PMO",
+   621→      titleEn: "Panel: Winning Synergy — Change management and AI serving PMOs",
+   622→      sessionType: "PANEL",
+   623→      language: "FR",
+   624→      displayOrder: 9,
+   625→      speakerSlugs: [],
+   626→    },
+   627→    {
+   628→      dayId: day2.id,
+   629→      startTime: "16:15",
+   630→      endTime: "16:45",
+   631→      titleFr: "Pause Café & Networking",
+   632→      titleEn: "Coffee Break & Networking",
+   633→      sessionType: "BREAK",
+   634→      displayOrder: 10,
+   635→      speakerSlugs: [],
+   636→    },
+   637→    {
+   638→      dayId: day2.id,
+   639→      startTime: "16:45",
+   640→      endTime: "17:30",
+   641→      titleFr: "Keynote de Clôture : Le PMO en 2030 — Quel avenir pour les bureaux de gestion de projets ?",
+   642→      titleEn: "Closing Keynote: The PMO in 2030 — What future for project management offices?",
+   643→      sessionType: "CLOSING",
+   644→      language: "FR",
+   645→      displayOrder: 11,
+   646→      speakerSlugs: ["moez-kamoun"],
+   647→    },
+   648→    {
+   649→      dayId: day2.id,
+   650→      startTime: "17:30",
+   651→      endTime: "18:00",
+   652→      titleFr: "Clôture de l'évènement",
+   653→      titleEn: "Event closing",
+   654→      sessionType: "CLOSING",
+   655→      displayOrder: 12,
+   656→      speakerSlugs: [],
+   657→    },
+   658→  ]
+   659→
+   660→  // Build a slug -> speakerId map
+   661→  const speakerMap = new Map<string, string>()
+   662→  for (const sp of speakers) {
+   663→    const created = await db.speaker.findFirst({ where: { eventId: event.id, slug: sp.slug } })
+   664→    if (created) speakerMap.set(sp.slug, created.id)
+   665→  }
+   666→
+   667→  for (const s of sessions) {
+   668→    const session = await db.programmeSession.create({
+   669→      data: {
+   670→        programmeDayId: s.dayId,
+   671→        startTime: s.startTime,
+   672→        endTime: s.endTime,
+   673→        titleFr: s.titleFr,
+   674→        titleEn: s.titleEn,
+   675→        sessionType: s.sessionType,
+   676→        language: s.language ?? null,
+   677→        displayOrder: s.displayOrder,
+   678→        isActive: true,
+   679→      },
+   680→    })
+   681→    if (s.speakerSlugs.length > 0) {
+   682→      const ids = s.speakerSlugs.map((slug) => speakerMap.get(slug)).filter(Boolean) as string[]
+   683→      if (ids.length > 0) {
+   684→        await db.sessionSpeaker.createMany({
+   685→          data: ids.map((speakerId) => ({ sessionId: session.id, speakerId })),
+   686→        })
+   687→      }
+   688→    }
+   689→  }
+   690→  console.log(`  ✓ ${sessions.length} programme sessions`)
+   691→
+   692→  // 6. Passes --------------------------------------------------------------
+   693→  const PAYMENT_BASE = "https://international-event-for-pmo-leaders.businessroom.io"
+   694→  const passes = [
+   695→    {
+   696→      slug: "pass-evenement",
+   697→      nameFr: "Pass Événement",
+   698→      nameEn: "Event Pass",
+   699→      descriptionFr: "Accès complet aux 2 jours de conférence et panels.",
+   700→      descriptionEn: "Full access to the 2-day conference and panels.",
+   701→      price: 500,
+   702→      currency: "TND",
+   703→      vatRate: 0.19,
+   704→      paymentUrl: `${PAYMENT_BASE}/?ticket_id=154`,
+   705→      featuresFr: "Accès aux 2 jours de conférence\nToutes les keynotes et panels\nPause café & déjeuners\nCoffret goodies PMO Mastery\nNetworking avec les intervenants",
+   706→      featuresEn: "Access to 2 conference days\nAll keynotes and panels\nCoffee breaks & lunches\nPMO Mastery goodies kit\nNetworking with speakers",
+   707→      isFeatured: false,
+   708→      displayOrder: 1,
+   709→    },
+   710→    {
+   711→      slug: "pass-formation",
+   712→      nameFr: "Pass Formation",
+   713→      nameEn: "Training Pass",
+   714→      descriptionFr: "Accès au jour de formation (atelier pratique).",
+   715→      descriptionEn: "Access to the training day (practical workshop).",
+   716→      price: 400,
+   717→      currency: "TND",
+   718→      vatRate: 0.19,
+   719→      paymentUrl: `${PAYMENT_BASE}/?ticket_id=153`,
+   720→      featuresFr: "Accès au jour de formation\nAtelier pratique interactif\nSupports de formation\nPause café & déjeuner\nCertificat de participation",
+   721→      featuresEn: "Access to training day\nInteractive practical workshop\nTraining materials\nCoffee break & lunch\nCertificate of participation",
+   722→      isFeatured: false,
+   723→      displayOrder: 2,
+   724→    },
+   725→    {
+   726→      slug: "pass-duo",
+   727→      nameFr: "Pass Duo",
+   728→      nameEn: "Duo Pass",
+   729→      descriptionFr: "Événement + 1 Formation — la formule complète.",
+   730→      descriptionEn: "Event + 1 Training — the complete package.",
+   731→      price: 900,
+   732→      currency: "TND",
+   733→      vatRate: 0.19,
+   734→      paymentUrl: `${PAYMENT_BASE}/?ticket_id=155`,
+   735→      featuresFr: "Tous les avantages Pass Événement\n+ 1 jour de formation au choix\nAtelier pratique interactif\nSupports de formation\nCertificat de participation",
+   736→      featuresEn: "All Event Pass benefits\n+ 1 training day of your choice\nInteractive practical workshop\nTraining materials\nCertificate of participation",
+   737→      isFeatured: true,
+   738→      displayOrder: 3,
+   739→    },
+   740→    {
+   741→      slug: "pass-etudiant",
+   742→      nameFr: "Pass Étudiant",
+   743→      nameEn: "Student Pass",
+   744→      descriptionFr: "Tarif réduit pour les étudiants.",
+   745→      descriptionEn: "Discounted rate for students.",
+   746→      price: 200,
+   747→      currency: "TND",
+   748→      vatRate: 0.19,
+   749→      paymentUrl: null,
+   750→      featuresFr: "Accès aux 2 jours\nSur présentation carte étudiante\nPause café inclus",
+   751→      featuresEn: "Access to both days\nStudent ID required\nCoffee break included",
+   752→      isFeatured: false,
+   753→      displayOrder: 4,
+   754→    },
+   755→    {
+   756→      slug: "pass-equipe",
+   757→      nameFr: "Pass Équipe",
+   758→      nameEn: "Team Pass",
+   759→      descriptionFr: "Tarif préférentiel pour inscription de 2 personnes ou plus.",
+   760→      descriptionEn: "Discounted rate for 2+ registrations.",
+   761→      price: 450,
+   762→      currency: "TND",
+   763→      vatRate: 0.19,
+   764→      paymentUrl: null,
+   765→      featuresFr: "Tarif par personne\nMinimum 2 inscrits\nTous les avantages Pass Événement",
+   766→      featuresEn: "Per-person rate\nMinimum 2 registrations\nAll Event Pass benefits",
+   767→      minQuantity: 2,
+   768→      isFeatured: false,
+   769→      displayOrder: 5,
+   770→    },
+   771→  ]
+   772→
+   773→  for (const p of passes) {
+   774→    await db.pass.create({
+   775→      data: {
+   776→        eventId: event.id,
+   777→        ...p,
+   778→        minQuantity: p.minQuantity ?? 1,
+   779→        currency: p.currency ?? "TND",
+   780→        vatRate: p.vatRate ?? 0.19,
+   781→        isActive: true,
+   782→      },
+   783→    })
+   784→  }
+   785→  console.log(`  ✓ ${passes.length} passes`)
+   786→
+   787→  // 7. Organizer -----------------------------------------------------------
+   788→  await db.organizer.create({
+   789→    data: {
+   790→      eventId: event.id,
+   791→      name: "Empowerment Paths",
+   792→      logo: `${REMOTE}/assets/img/logo/logo.png`,
+   793→      descriptionFr:
+   794→        "Cabinet de conseil et de développement professionnel. Trois pôles : (1) Conseil — PMO, évaluation de maturité, modèles opérationnels, conduite du changement ; (2) Formation — gestion de projet (PMP®, PgMP®), excellence PMO, agilité, soft skills, leadership ; (3) Coaching exécutif & d'équipe.\n\nAmbition : positionner la Tunisie comme un hub régional d'excellence PMO.",
+   795→      descriptionEn:
+   796→        "Consulting and professional development firm. Three poles: (1) Consulting — PMO, maturity assessment, operational models, change management; (2) Training — project management (PMP®, PgMP®), PMO excellence, agility, soft skills, leadership; (3) Executive & team coaching.\n\nAmbition: position Tunisia as a regional hub of PMO excellence.",
+   797→      websiteUrl: "https://www.pmomastery.tn",
+   798→      linkedinUrl: "https://www.linkedin.com/company/pmo-mastery-tun/about/",
+   799→      facebookUrl: "https://www.facebook.com/pmomastery",
+   800→      instagramUrl: "https://www.instagram.com/pmomastery/",
+   801→      founderName: "Yosra Torjmen",
+   802→      founderTitle: "Managing Director, Fondatrice de PMO Mastery",
+   803→      founderPhoto: `${REMOTE}/assets/img/team/yosra.png`,
+   804→      founderCredentials: "PgMP®, PMP®, PMO-CP, Coach Professionnelle",
+   805→      isActive: true,
+   806→      displayOrder: 0,
+   807→    },
+   808→  })
+   809→  console.log("  ✓ 1 organizer")
+   810→
+   811→  // 8. Partners ------------------------------------------------------------
+   812→  const partners = [
+   813→    {
+   814→      name: "Excellia Leadership",
+   815→      logo: `${REMOTE}/assets/img/ex.jpg`,
+   816→      category: "STRATEGIC",
+   817→      websiteUrl: "https://excellialeadership.com/",
+   818→      displayOrder: 0,
+   819→    },
+   820→    {
+   821→      name: "Royal Tulip Taj Sultan",
+   822→      logo: `${REMOTE}/assets/img/tt.png`,
+   823→      category: "STRATEGIC",
+   824→      websiteUrl: "https://royal-tulip-taj-sultan.goldentulip.com/fr-fr/",
+   825→      displayOrder: 1,
+   826→    },
+   827→    {
+   828→      name: "Tunisie Telecom",
+   829→      logo: `${REMOTE}/assets/img/LogoTT.png`,
+   830→      category: "DIAMOND",
+   831→      websiteUrl: "https://www.tunisietelecom.tn/particulier/",
+   832→      displayOrder: 2,
+   833→    },
+   834→    {
+   835→      name: "Managers.tn",
+   836→      logo: `${REMOTE}/assets/img/manager.png`,
+   837→      category: "MEDIA",
+   838→      websiteUrl: "https://managers.tn/",
+   839→      displayOrder: 3,
+   840→    },
+   841→    {
+   842→      name: "PMI — Project Management Institute",
+   843→      logo: `${REMOTE}/assets/img/part.jpg`,
+   844→      category: "STRATEGIC",
+   845→      websiteUrl: "https://www.pmi.org/",
+   846→      descriptionFr:
+   847→        "Project Management Institute (PMI) est la principale association professionnelle mondiale dédiée au management de projet. PMI publie le PMBOK® Guide et administre les certifications PMP®, PgMP®, PMI-ACP® et autres.",
+   848→      descriptionEn:
+   849→        "Project Management Institute (PMI) is the world's leading professional association dedicated to project management. PMI publishes the PMBOK® Guide and administers the PMP®, PgMP®, PMI-ACP® and other certifications.",
+   850→      displayOrder: 4,
+   851→    },
+   852→    {
+   853→      name: "FlowUp",
+   854→      logo: `${REMOTE}/assets/img/flow.jpg`,
+   855→      category: "PARTNER",
+   856→      websiteUrl: "http://flowup.tn/",
+   857→      displayOrder: 5,
+   858→    },
+   859→    {
+   860→      name: "Talys Digital",
+   861→      logo: `${REMOTE}/assets/img/lt.jpg`,
+   862→      category: "PARTNER",
+   863→      websiteUrl: "https://www.talys.digital/",
+   864→      displayOrder: 6,
+   865→    },
+   866→  ]
+   867→  for (const p of partners) {
+   868→    await db.partner.create({
+   869→      data: {
+   870→        eventId: event.id,
+   871→        ...p,
+   872→        descriptionFr: p.descriptionFr ?? null,
+   873→        descriptionEn: p.descriptionEn ?? null,
+   874→        isActive: true,
+   875→      },
+   876→    })
+   877→  }
+   878→  console.log(`  ✓ ${partners.length} partners`)
+   879→
+   880→  // 9. CMS sections --------------------------------------------------------
+   881→  await db.websiteSection.create({
+   882→    data: {
+   883→      eventId: event.id,
+   884→      sectionKey: "HERO",
+   885→      titleFr: "Événement international pour les leaders des PMOs",
+   886→      titleEn: "International Event for PMO Leaders",
+   887→      subtitleFr: "11 – 12 octobre 2025 · Tunis, Tunisie",
+   888→      subtitleEn: "October 11–12, 2025 · Tunis, Tunisia",
+   889→      descriptionFr:
+   890→        "Pendant 2 jours intensifs, vivez une expérience immersive au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership.",
+   891→      descriptionEn:
+   892→        "For 2 intensive days, experience an immersive journey at the heart of best practices in project management, PMO, change management, AI and leadership.",
+   893→      ctaTextFr: "Je m'inscris",
+   894→      ctaTextEn: "Register now",
+   895→      ctaUrl: "#passes",
+   896→      backgroundImage: `${REMOTE}/assets/img/hero/test1.gif`,
+   897→      isActive: true,
+   898→    },
+   899→  })
+   900→
+   901→  await db.websiteSection.create({
+   902→    data: {
+   903→      eventId: event.id,
+   904→      sectionKey: "WHY_PARTICIPATE",
+   905→      titleFr: "Pourquoi y participer ?",
+   906→      titleEn: "Why participate?",
+   907→      descriptionFr:
+   908→        "Pendant 2 jours intensifs, vous allez vivre une expérience immersive au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership. Un véritable parcours d'inspiration, d'apprentissage et d'échanges pour accélérer votre impact professionnel et personnel.",
+   909→      descriptionEn:
+   910→        "For 2 intensive days, you will live an immersive experience at the heart of best practices in project management, PMO, change management, AI and leadership. A true journey of inspiration, learning and exchange to accelerate your professional and personal impact.",
+   911→      isActive: true,
+   912→      benefits: {
+   913→        create: [
+   914→          {
+   915→            icon: "TrendingUp",
+   916→            titleFr: "Explorer les dernières tendances",
+   917→            titleEn: "Explore the latest trends",
+   918→            descriptionFr: "Outils et méthodes qui façonnent le futur des PMO.",
+   919→            descriptionEn: "Tools and methods shaping the future of PMOs.",
+   920→            displayOrder: 0,
+   921→            isActive: true,
+   922→          },
+   923→          {
+   924→            icon: "Users",
+   925→            titleFr: "Capitaliser sur les retours d'expérience",
+   926→            titleEn: "Leverage expert feedback",
+   927→            descriptionFr: "Auprès d'experts et de dirigeants reconnus.",
+   928→            descriptionEn: "From recognized experts and leaders.",
+   929→            displayOrder: 1,
+   930→            isActive: true,
+   931→          },
+   932→          {
+   933→            icon: "Target",
+   934→            titleFr: "Anticiper les évolutions du marché",
+   935→            titleEn: "Anticipate market trends",
+   936→            descriptionFr: "Et positionner votre organisation comme acteur agile et innovant.",
+   937→            descriptionEn: "And position your organization as an agile and innovative player.",
+   938→            displayOrder: 2,
+   939→            isActive: true,
+   940→          },
+   941→          {
+   942→            icon: "Network",
+   943→            titleFr: "Échanger et réseauter",
+   944→            titleEn: "Exchange and network",
+   945→            descriptionFr: "Avec des professionnels, décideurs et leaders engagés.",
+   946→            descriptionEn: "With professionals, decision-makers and engaged leaders.",
+   947→            displayOrder: 3,
+   948→            isActive: true,
+   949→          },
+   950→          {
+   951→            icon: "Lightbulb",
+   952→            titleFr: "Repartir avec des solutions concrètes",
+   953→            titleEn: "Leave with concrete solutions",
+   954→            descriptionFr: "Des idées, des solutions et une nouvelle énergie pour vos projets.",
+   955→            descriptionEn: "Ideas, solutions and new energy for your projects.",
+   956→            displayOrder: 4,
+   957→            isActive: true,
+   958→          },
+   959→        ],
+   960→      },
+   961→    },
+   962→  })
+   963→
+   964→  await db.websiteSection.create({
+   965→    data: {
+   966→      eventId: event.id,
+   967→      sectionKey: "ABOUT",
+   968→      titleFr: "À propos de PMO Mastery",
+   969→      titleEn: "About PMO Mastery",
+   970→      descriptionFr:
+   971→        "PMO Mastery 2025 se positionne comme un événement de référence qui accompagne la montée en compétences des professionnels, valorise les organisations partenaires et impulse une dynamique d'excellence dans la pratique du PMO en Tunisie et dans la région MENA.",
+   972→      descriptionEn:
+   973→        "PMO Mastery 2025 positions itself as a benchmark event that supports professionals' skills development, values partner organizations and drives a dynamic of excellence in PMO practice in Tunisia and the MENA region.",
+   974→      isActive: true,
+   975→    },
+   976→  })
+   977→
+   978→  await db.websiteSection.create({
+   979→    data: {
+   980→      eventId: event.id,
+   981→      sectionKey: "FOOTER",
+   982→      titleFr: `© ${new Date().getFullYear()} PMO Mastery — Empowerment Paths. Tous droits réservés.`,
+   983→      titleEn: `© ${new Date().getFullYear()} PMO Mastery — Empowerment Paths. All rights reserved.`,
+   984→      descriptionFr:
+   985→        "Mastering PMO 2025 se positionne comme un événement de référence qui accompagne la montée en compétences des professionnels, valorise les organisations partenaires et impulse une dynamique d'excellence dans la pratique du PMO en Tunisie et dans la région MENA.",
+   986→      descriptionEn:
+   987→        "Mastering PMO 2025 positions itself as a benchmark event that supports professionals' skills development, values partner organizations and drives a dynamic of excellence in PMO practice in Tunisia and the MENA region.",
+   988→      isActive: true,
+   989→    },
+   990→  })
+   991→  console.log("  ✓ 4 CMS sections (Hero, Why, About, Footer)")
+   992→
+   993→  console.log("\n✅ Seed complete!")
+   994→  console.log(`   Admin login: ${adminEmail} / ${adminPassword}`)
+   995→  console.log(`   Event: ${event.editionName} (${event.titleFr})`)
+   996→  console.log(`   Public site: http://localhost:3000`)
+   997→  console.log(`   Admin dashboard: http://localhost:3000/admin`)
+   998→}
+   999→
+  1000→main()
+  1001→  .catch((e) => {
+  1002→    console.error("❌ Seed failed:", e)
+  1003→    process.exit(1)
+  1004→  })
+  1005→  .finally(async () => {
+  1006→    await db.$disconnect()
+  1007→  })
+  1008→
