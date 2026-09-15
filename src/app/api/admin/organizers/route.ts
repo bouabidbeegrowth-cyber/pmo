@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const data: Prisma.OrganizerCreateInput = {
       event: { connect: { id: eventId } },
       name: body.name,
-      logo: safeUrl(body.logo) ?? body.logo ?? null,
+      logo: safeUrl(body.logo),
       descriptionFr: body.descriptionFr ?? null,
       descriptionEn: body.descriptionEn ?? null,
       websiteUrl: safeUrl(body.websiteUrl),
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       instagramUrl: safeUrl(body.instagramUrl),
       founderName: body.founderName ?? null,
       founderTitle: body.founderTitle ?? null,
-      founderPhoto: safeUrl(body.founderPhoto) ?? body.founderPhoto ?? null,
+      founderPhoto: safeUrl(body.founderPhoto),
       founderCredentials: body.founderCredentials ?? null,
       isActive: body.isActive ?? true,
       displayOrder: body.displayOrder ?? 0,

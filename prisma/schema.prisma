@@ -1,13 +1,11 @@
 // PMO Mastery — Prisma schema
-// Portable: switch datasource provider to "postgresql" and set DATABASE_URL
-// to a Postgres connection string for production deployment.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -76,16 +74,135 @@ model Event {
   passes              Pass[]
   organizers          Organizer[]
   partners            Partner[]
+  popups              Popup[]
+  galleryItems        GalleryItem[]
   contactInfo         ContactInfo?
   websiteSections     WebsiteSection[]
 
   @@index([isActive])
 }
 
+// ---------------------------------------------------------------------------
+// Gallery — photos + videos per event edition. Videos are external links
+// (YouTube/Vimeo), never uploaded files, so there's no video storage/bandwidth
+// cost. Public /galerie page lets visitors switch between editions.
+// ---------------------------------------------------------------------------
+
+model GalleryItem {
+  id           String   @id @default(cuid())
+  eventId      String
+  type         String   // IMAGE | VIDEO
+  imageUrl     String?  // IMAGE: uploaded photo
+  videoUrl     String?  // VIDEO: external YouTube/Vimeo URL
+  thumbnail    String?  // VIDEO: optional custom thumbnail (uploaded); falls back to provider thumbnail
+  captionFr    String?
+  captionEn    String?
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
 model Setting {
   id    String @id @default(cuid())
   key   String @unique
   value String
+}
+
+// ---------------------------------------------------------------------------
+// UI text — admin-editable translation catalog for hardcoded page chrome
+// (nav labels, headings, buttons, empty states) that isn't part of the
+// richer WebsiteSection content model. Global, not Event-scoped.
+// ---------------------------------------------------------------------------
+
+model UiText {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  category  String
+  valueFr   String
+  valueEn   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+}
+
+// ---------------------------------------------------------------------------
+// SEO — per-page meta title/description/OG image, admin-editable. Global
+// (not Event-scoped), fixed page-key catalog like UiText: admins edit
+// values for a known, seeded set of pages, never create/delete keys.
+// ---------------------------------------------------------------------------
+
+model SeoMeta {
+  id            String   @id @default(cuid())
+  page          String   @unique // "home" | "evenement" | "programme" | ...
+  titleFr       String?
+  titleEn       String?
+  descriptionFr String?
+  descriptionEn String?
+  ogImage       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// URL redirects — admin-managed, exact-path only (no wildcards). Enforced in
+// src/proxy.ts on every public request.
+// ---------------------------------------------------------------------------
+
+model Redirect {
+  id        String   @id @default(cuid())
+  fromPath  String   @unique // must start with "/", e.g. "/old-page"
+  toPath    String   // relative path or absolute URL
+  permanent Boolean  @default(true) // true -> 308, false -> 307
+  isActive  Boolean  @default(true)
+  hits      Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+// ---------------------------------------------------------------------------
+// robots.txt settings — structured, not raw text: the baseline safety rules
+// (disallow /admin, /api) are always hardcoded in src/app/robots.ts and
+// can't be edited away by mistake. Admins can only add to that baseline.
+// Singleton row (id is always "singleton").
+// ---------------------------------------------------------------------------
+
+model SeoSettings {
+  id             String   @id @default("singleton")
+  extraDisallow  String?  // newline-separated additional paths to disallow
+  extraAllow     String?  // newline-separated additional paths to explicitly allow
+  crawlDelay     Int?     // seconds, applied to User-agent: *
+  updatedAt      DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Sitemap — per-page include/priority override for the fixed set of known
+// public pages, plus admin-added custom URLs (e.g. an external landing page).
+// ---------------------------------------------------------------------------
+
+model SitemapEntry {
+  id               String   @id @default(cuid())
+  page             String   @unique // matches a sitemap.ts page key
+  included         Boolean  @default(true)
+  priorityOverride Float?
+  updatedAt        DateTime @updatedAt
+}
+
+model SitemapExtraUrl {
+  id         String   @id @default(cuid())
+  path       String   @unique // relative path or absolute URL
+  priority   Float    @default(0.5)
+  changeFreq String   @default("monthly")
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 // ---------------------------------------------------------------------------
@@ -255,6 +372,29 @@ model Partner {
   updatedAt     DateTime @updatedAt
 
   event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, isActive, displayOrder])
+}
+
+// ---------------------------------------------------------------------------
+// Popups — admin-managed social-proof / announcement bubbles that cycle on
+// the public site (photo, name, short message, optional link).
+// ---------------------------------------------------------------------------
+
+model Popup {
+  id           String   @id @default(cuid())
+  eventId      String
+  name         String
+  photo        String?
+  messageFr    String
+  messageEn    String?
+  ctaUrl       String?
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId, isActive, displayOrder])
 }

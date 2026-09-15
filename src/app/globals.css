@@ -6,8 +6,21 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-pmo-violet: var(--pmo-violet);
+  --color-pmo-violet-deep: var(--pmo-violet-deep);
+  --color-pmo-navy: var(--pmo-navy);
+  --color-pmo-navy-2: var(--pmo-navy-2);
+  --color-pmo-gold: var(--pmo-gold);
+  --color-pmo-orange: var(--pmo-orange);
+  --color-pmo-blue: var(--pmo-blue);
+  --color-pmo-sky-blue: var(--pmo-sky-blue);
+  --color-pmo-pink: var(--pmo-pink);
+  --color-pmo-bright-orange: var(--pmo-bright-orange);
+  --color-pmo-navy-deep: var(--pmo-navy-deep);
+  --color-pmo-text-navy: var(--pmo-text-navy);
+  --color-pmo-light-bg: var(--pmo-light-bg);
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-unbounded), var(--font-poppins), sans-serif;
+  --font-display: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -47,36 +60,48 @@
 :root {
   --radius: 0.75rem;
 
-  /* Brand */
-  --pmo-violet: #5033ff;
-  --pmo-violet-deep: #3a1fd6;
-  --pmo-navy: #0b1437;
-  --pmo-navy-2: #131d4a;
-  --pmo-gold: #fccb0a;
-  --pmo-orange: #e97732;
+  /* Brand — repointed to the official "PMO Mastery 2027" charte graphique.
+     These legacy token names are kept (hundreds of call sites reference them)
+     but now resolve to the authoritative charte hex values below instead of
+     the old placeholder violet/gold palette. */
+  --pmo-violet: #0066ff;
+  --pmo-violet-deep: #0052cc;
+  --pmo-navy: #0a1730;
+  --pmo-navy-2: #122040;
+  --pmo-gold: #e5005a;
+  --pmo-orange: #ff7a00;
+
+  /* Official "PMO Mastery 2027" charte graphique — authoritative brand hex values */
+  --pmo-blue: #0066ff;
+  --pmo-sky-blue: #5b86e8;
+  --pmo-pink: #e5005a;
+  --pmo-bright-orange: #ff7a00;
+  --pmo-navy-deep: #0a1730;
+  --pmo-text-navy: #0b1f4b;
+  --pmo-light-bg: #f2f4f8;
 
   /* Surfaces (light mode) */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --foreground: #0b1f4b;
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: #0b1f4b;
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #5033ff;
+  --popover-foreground: #0b1f4b;
+  --primary: #0066ff;
   --primary-foreground: #ffffff;
-  --secondary: #f4f5fb;
-  --secondary-foreground: #131d4a;
-  --muted: #f4f5fb;
+  --secondary: #f2f4f8;
+  --secondary-foreground: #0b1f4b;
+  --muted: #f2f4f8;
   --muted-foreground: #5a6485;
-  --accent: #f4f5fb;
-  --accent-foreground: #131d4a;
+  --accent: #f2f4f8;
+  --accent-foreground: #0b1f4b;
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: #5033ff;
-  --chart-1: #5033ff;
-  --chart-2: #fccb0a;
-  --chart-3: #e97732;
+  --ring: #0066ff;
+  --chart-1: #0066ff;
+  --chart-2: #e5005a;
+  --chart-3: #ff7a00;
   --chart-4: #0b1437;
   --chart-5: #00c6ff;
   --sidebar: #0b1437;
@@ -139,25 +164,26 @@
     text-wrap: pretty;
   }
 
-  /* Premium gradient helpers */
+  /* Premium gradient helpers — repointed to the charte graphique's signature
+     (blue -> pink -> orange) and accent (pink -> orange) gradients. */
   .bg-pmo-violet-gradient {
-    background-image: linear-gradient(135deg, #5033ff 0%, #3a1fd6 100%);
+    background-image: linear-gradient(135deg, #0066ff 0%, #e5005a 100%);
   }
   .bg-pmo-navy-gradient {
-    background-image: linear-gradient(145deg, #0b1437 0%, #131d4a 50%, #0b1437 100%);
+    background-image: linear-gradient(145deg, #0a1730 0%, #122040 50%, #0a1730 100%);
   }
   .bg-pmo-gold-gradient {
-    background-image: linear-gradient(135deg, #fccb0a 0%, #f59e0b 100%);
+    background-image: linear-gradient(135deg, #e5005a 0%, #ff7a00 100%);
   }
   .text-gradient-violet {
-    background-image: linear-gradient(135deg, #6b54ff 0%, #5033ff 50%, #fccb0a 100%);
+    background-image: linear-gradient(90deg, #0066ff 0%, #e5005a 55%, #ff7a00 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
   }
   .text-gradient-gold {
-    background-image: linear-gradient(135deg, #fccb0a 0%, #f59e0b 100%);
+    background-image: linear-gradient(90deg, #e5005a 0%, #ff7a00 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -203,6 +229,55 @@
     background:
       linear-gradient(#fff, #fff) padding-box,
       linear-gradient(135deg, #5033ff, #fccb0a) border-box;
+  }
+
+  /* Hero (2027 redesign) — dark overlay for the group-photo background,
+     kept darker on the right so the animated logo lockup stays legible. */
+  .hero-overlay {
+    background: linear-gradient(
+      to right,
+      rgba(11, 20, 55, 0.88) 0%,
+      rgba(11, 20, 55, 0.75) 45%,
+      rgba(11, 20, 55, 0.8) 70%,
+      rgba(11, 20, 55, 0.85) 100%
+    );
+  }
+
+  /* Hero brand-spectrum gradient text (charte graphique "dégradé signature":
+     blue -> pink -> orange — the purple band emerges naturally from the blend) */
+  .hero-gradient-text {
+    background-image: linear-gradient(90deg, #0066ff, #e5005a, #ff7a00);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Charte "gradient accent — texte/titres" (pink -> orange only) */
+  .hero-gradient-accent {
+    background-image: linear-gradient(90deg, #e5005a, #ff7a00);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Hero decorative divider line — charte "gradient rule — filet de séparation" */
+  .hero-divider {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #0066ff, #e5005a, #ff7a00);
+    border-radius: 2px;
+  }
+
+  /* Hero primary CTA gradient button */
+  .hero-btn-gradient {
+    background: linear-gradient(135deg, #0066ff 0%, #e5005a 65%, #ff7a00 100%);
+    transition: all 0.3s ease;
+  }
+  .hero-btn-gradient:hover {
+    background: linear-gradient(135deg, #0052cc 0%, #c9004c 65%, #cc6200 100%);
+    box-shadow: 0 8px 25px -5px rgba(0, 102, 255, 0.35), 0 4px 10px -5px rgba(229, 0, 90, 0.25);
   }
 }
 

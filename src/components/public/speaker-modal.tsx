@@ -30,11 +30,13 @@ export function SpeakerModal({
   locale,
   open,
   onOpenChange,
+  labels,
 }: {
   speaker: Speaker | null
   locale: "fr" | "en"
   open: boolean
   onOpenChange: (open: boolean) => void
+  labels: { biography: string; featuredBadge: string }
 }) {
   if (!speaker) return null
   const position = locale === "en" ? speaker.positionEn ?? speaker.positionFr : speaker.positionFr
@@ -42,7 +44,7 @@ export function SpeakerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>
             {speaker.firstName} {speaker.lastName}
@@ -112,7 +114,7 @@ export function SpeakerModal({
           {/* Bio side */}
           <div className="p-6 sm:p-8">
             <h4 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-              {locale === "fr" ? "Biographie" : "Biography"}
+              {labels.biography}
             </h4>
             <div className="prose prose-sm max-w-none">
               {(bio ?? "")
@@ -126,7 +128,7 @@ export function SpeakerModal({
             </div>
             {speaker.isFeatured && (
               <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-pmo-gold/10 border border-pmo-gold/30 px-3 py-1 text-xs text-pmo-gold font-semibold">
-                ★ {locale === "fr" ? "Speaker vedette" : "Featured speaker"}
+                ★ {labels.featuredBadge}
               </div>
             )}
           </div>

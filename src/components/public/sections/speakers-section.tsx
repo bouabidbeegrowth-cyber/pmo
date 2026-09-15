@@ -119,6 +119,7 @@ export function SpeakersSection({ speakers, locale, title, subtitle }: Props) {
           speaker={selected}
           locale={locale}
           open={!!selected}
+          labels={{ biography: "Biographie", featuredBadge: "Speaker vedette" }}
           onOpenChange={(o) => !o && setSelected(null)}
         />
       </div>

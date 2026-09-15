@@ -24,6 +24,17 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
   Loader2,
   Plus,
   Clock3,
@@ -32,6 +43,7 @@ import {
   Calendar,
   Users,
   GripVertical,
+  AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
 import { format } from "date-fns"
@@ -70,6 +82,7 @@ interface Session {
   titleEn?: string | null
   titleAr?: string | null
   descriptionFr?: string | null
+  descriptionEn?: string | null
   sessionType: string
   language?: string | null
   room?: string | null
@@ -98,6 +111,8 @@ const SESSION_TYPES: Record<string, { label: string; color: string }> = {
   CLOSING: { label: "Clôture", color: "bg-rose-100 text-rose-700" },
   WORKSHOP: { label: "Atelier", color: "bg-cyan-100 text-cyan-700" },
   SESSION: { label: "Session", color: "bg-zinc-100 text-zinc-700" },
+  PMO_TALKS: { label: "PMO Talks", color: "bg-indigo-100 text-indigo-700" },
+  MASTERCLASS: { label: "Masterclass", color: "bg-fuchsia-100 text-fuchsia-700" },
 }
 
 export default function ProgrammePage() {
@@ -163,7 +178,6 @@ export default function ProgrammePage() {
   }
 
   async function deleteDay(id: string) {
-    if (!confirm("Supprimer ce jour et toutes ses sessions ?")) return
     try {
       await fetch(`/api/admin/programme/days/${id}`, { method: "DELETE" })
       toast.success("Jour supprimé.")
@@ -202,7 +216,6 @@ export default function ProgrammePage() {
   }
 
   async function deleteSession(id: string) {
-    if (!confirm("Supprimer cette session ?")) return
     try {
       await fetch(`/api/admin/programme/sessions/${id}`, { method: "DELETE" })
       toast.success("Session supprimée.")
@@ -298,20 +311,28 @@ export default function ProgrammePage() {
         <Tabs value={activeDayId} onValueChange={setActiveDayId}>
           <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
             <TabsList className="bg-white shadow-premium h-auto p-1">
-              {days.map((day) => (
-                <TabsTrigger
-                  key={day.id}
-                  value={day.id}
-                  className="data-[state=active]:bg-pmo-violet-gradient data-[state=active]:text-white px-4 py-2"
-                >
-                  <div className="text-left">
-                    <div className="font-medium text-sm">{day.nameFr}</div>
-                    <div className="text-xs opacity-70">
-                      {format(new Date(day.date), "dd MMM yyyy")}
+              {days.map((day) => {
+                const isActive = day.id === activeDayId
+                return (
+                  <TabsTrigger
+                    key={day.id}
+                    value={day.id}
+                    className={cn(
+                      "px-4 py-2",
+                      isActive ? "bg-pmo-violet-gradient" : "bg-transparent",
+                    )}
+                  >
+                    <div className="text-left">
+                      <div className={cn("font-medium text-sm", isActive ? "text-white" : "text-foreground")}>
+                        {day.nameFr}
+                      </div>
+                      <div className={cn("text-xs", isActive ? "text-white/80" : "text-muted-foreground")}>
+                        {format(new Date(day.date), "dd MMM yyyy")}
+                      </div>
                     </div>
-                  </div>
-                </TabsTrigger>
-              ))}
+                  </TabsTrigger>
+                )
+              })}
             </TabsList>
           </div>
 
@@ -333,14 +354,50 @@ export default function ProgrammePage() {
                     <Plus className="w-4 h-4 mr-1" />
                     Session
                   </Button>
-                  <Button
-                    onClick={() => deleteDay(day.id)}
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <div className="mx-auto sm:mx-0 flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                            <Calendar className="w-6 h-6 text-primary" />
+                          </div>
+                          <div className="min-w-0">
+                            <AlertDialogTitle className="truncate">{day.nameFr}</AlertDialogTitle>
+                            <div className="text-xs text-muted-foreground">
+                              {format(new Date(day.date), "dd MMMM yyyy")}
+                            </div>
+                          </div>
+                        </div>
+                        <AlertDialogDescription className="flex items-start gap-2 pt-2">
+                          <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                          <span>
+                            Cette journée et {day.sessions.length === 0
+                              ? "toutes ses sessions"
+                              : `${day.sessions.length} session${day.sessions.length > 1 ? "s" : ""}`}{" "}
+                            seront définitivement supprimées. Cette action est irréversible.
+                          </span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteDay(day.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Supprimer définitivement
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
 
@@ -508,12 +565,42 @@ function SortableSession({
         >
           <Pencil className="w-4 h-4" />
         </button>
-        <button
-          onClick={onDelete}
-          className="p-2 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="p-2 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <div className="mx-auto sm:mx-0 flex items-center gap-3">
+                <div className={cn("w-14 h-14 rounded-lg flex items-center justify-center shrink-0", typeMeta.color)}>
+                  <Clock3 className="w-6 h-6" />
+                </div>
+                <div className="min-w-0">
+                  <AlertDialogTitle className="truncate">{session.titleFr}</AlertDialogTitle>
+                  <div className="text-xs text-muted-foreground">
+                    {session.startTime}
+                    {session.endTime ? ` – ${session.endTime}` : ""}
+                  </div>
+                </div>
+              </div>
+              <AlertDialogDescription className="flex items-start gap-2 pt-2">
+                <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                <span>Cette session sera définitivement supprimée. Cette action est irréversible.</span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={onDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Supprimer définitivement
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   )
@@ -550,7 +637,7 @@ function SessionEditor({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Modifier la session</DialogTitle>
         </DialogHeader>
@@ -593,6 +680,15 @@ function SessionEditor({
             <Textarea
               value={data.descriptionFr ?? ""}
               onChange={(e) => update("descriptionFr", e.target.value || null)}
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label className="text-sm">Description (EN)</Label>
+            <Textarea
+              value={data.descriptionEn ?? ""}
+              onChange={(e) => update("descriptionEn", e.target.value || null)}
               rows={3}
             />
           </div>

@@ -37,10 +37,27 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.role = (user as { role?: string }).role ?? "ADMIN"
+        token.revoked = false
+        return token
+      }
+      // Re-validate against the DB on every subsequent request so a role
+      // change or account deactivation takes effect without waiting for
+      // the JWT to naturally expire.
+      if (token.id) {
+        const dbUser = await db.adminUser.findUnique({ where: { id: token.id as string } })
+        if (!dbUser || !dbUser.isActive) {
+          token.revoked = true
+        } else {
+          token.role = dbUser.role
+          token.revoked = false
+        }
       }
       return token
     },
     async session({ session, token }) {
+      if (token.revoked) {
+        return { ...session, user: undefined as unknown as typeof session.user }
+      }
       if (session.user) {
         ;(session.user as { id?: string }).id = token.id as string
         ;(session.user as { role?: string }).role = (token.role as string) ?? "ADMIN"

@@ -808,6 +808,21 @@ async function main() {
   })
   console.log("  ✓ 1 organizer")
 
+  // 7b. Popups ---------------------------------------------------------------
+  await db.popup.create({
+    data: {
+      eventId: event.id,
+      name: "Yosra Torjmen",
+      photo: `${REMOTE}/assets/img/team/yosra.png`,
+      messageFr: "Ne manquez pas cet atelier PMO exclusif !",
+      messageEn: "Don't miss this exclusive PMO workshop!",
+      ctaUrl: "/pass-formation",
+      isActive: true,
+      displayOrder: 0,
+    },
+  })
+  console.log("  ✓ 1 popup")
+
   // 8. Partners ------------------------------------------------------------
   const partners = [
     {
@@ -990,6 +1005,12 @@ async function main() {
   })
   console.log("  ✓ 4 CMS sections (Hero, Why, About, Footer)")
 
+  await seedUiText()
+  console.log("  ✓ UI text catalog")
+
+  await seedSeoMeta()
+  console.log("  ✓ SEO meta catalog")
+
   console.log("\n✅ Seed complete!")
   console.log(`   Admin login: ${adminEmail} / ${adminPassword}`)
   console.log(`   Event: ${event.editionName} (${event.titleFr})`)
@@ -997,11 +1018,332 @@ async function main() {
   console.log(`   Admin dashboard: http://localhost:3000/admin`)
 }
 
-main()
-  .catch((e) => {
-    console.error("❌ Seed failed:", e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await db.$disconnect()
-  })
+// ---------------------------------------------------------------------------
+// UI text catalog — admin-editable translations for hardcoded page chrome.
+// Global (not Event-scoped), upserted by key so re-seeding never clobbers an
+// admin's edits. Every initial value is the exact string that was previously
+// hardcoded in the corresponding component, so this migration is a no-op
+// visually until an admin actually changes something. A few entries fix a
+// pre-existing bug where the English value was never localized (marked below).
+// ---------------------------------------------------------------------------
+
+const UI_TEXT: { key: string; category: string; valueFr: string; valueEn: string }[] = [
+  // --- nav ---
+  { key: "nav.home", category: "nav", valueFr: "Accueil", valueEn: "Home" },
+  { key: "nav.event", category: "nav", valueFr: "Événement", valueEn: "Event" },
+  { key: "nav.event.programme", category: "nav", valueFr: "Programme", valueEn: "Programme" },
+  { key: "nav.event.passEvenement", category: "nav", valueFr: "Pass Événement", valueEn: "Event Pass" },
+  { key: "nav.event.passFormation", category: "nav", valueFr: "Pass Formation", valueEn: "Training Pass" },
+  { key: "nav.event.passDuo", category: "nav", valueFr: "Pass Duo", valueEn: "Duo Pass" },
+  { key: "nav.speakers", category: "nav", valueFr: "Intervenants", valueEn: "Speakers" },
+  { key: "nav.orgPartners", category: "nav", valueFr: "Organisateurs & Partenaires", valueEn: "Organizers & Partners" },
+  { key: "nav.organizers", category: "nav", valueFr: "Organisateurs", valueEn: "Organizers" },
+  { key: "nav.partners", category: "nav", valueFr: "Partenaires", valueEn: "Partners" },
+  { key: "nav.contact", category: "nav", valueFr: "Contact", valueEn: "Contact" },
+  { key: "nav.cta.register", category: "nav", valueFr: "Je m'inscris", valueEn: "Register" },
+
+  // --- common (reused verbatim across several pages) ---
+  { key: "common.breadcrumb.home", category: "common", valueFr: "Accueil", valueEn: "Home" },
+  { key: "common.breadcrumb.event", category: "common", valueFr: "Événement", valueEn: "Event" },
+  { key: "common.cta.register", category: "common", valueFr: "Je m'inscris", valueEn: "Register now" },
+  { key: "common.speaker.viewProfile", category: "common", valueFr: "Voir le profil", valueEn: "View profile" },
+  { key: "common.cta.viewDetails", category: "common", valueFr: "Voir les détails", valueEn: "View details" },
+  { key: "common.why.titleFallback", category: "common", valueFr: "Pourquoi y participer ?", valueEn: "Why participate?" },
+  { key: "common.about.titleFallback", category: "common", valueFr: "À propos de l'événement", valueEn: "About the event" },
+
+  // --- home ---
+  { key: "home.hero.badge", category: "home", valueFr: "Événement international", valueEn: "International event" },
+  { key: "home.hero.ctaSecondary", category: "home", valueFr: "Découvrir le programme", valueEn: "View programme" },
+  { key: "home.aboutCta", category: "home", valueFr: "En savoir plus", valueEn: "Learn more" },
+  { key: "home.countdownLabel", category: "home", valueFr: "Plus que", valueEn: "Only" },
+  { key: "home.editionLabel", category: "home", valueFr: "Édition", valueEn: "Edition" },
+  { key: "home.venueLink", category: "home", valueFr: "Voir le lieu", valueEn: "View venue" },
+  { key: "home.stat.speakers", category: "home", valueFr: "Intervenants", valueEn: "Speakers" },
+  { key: "home.stat.days", category: "home", valueFr: "Jours", valueEn: "Days" },
+  { key: "home.stat.passes", category: "home", valueFr: "Pass disponibles", valueEn: "Passes" },
+  { key: "home.stat.partners", category: "home", valueFr: "Partenaires", valueEn: "Partners" },
+  { key: "home.speakers.title", category: "home", valueFr: "Intervenants", valueEn: "Speakers" },
+  { key: "home.speakers.subtitle", category: "home", valueFr: "Des experts reconnus partagent leur vision", valueEn: "Renowned experts share their vision" },
+  { key: "home.speakers.cta", category: "home", valueFr: "Voir tous les intervenants", valueEn: "View all speakers" },
+  { key: "home.programme.title", category: "home", valueFr: "Programme", valueEn: "Programme" },
+  { key: "home.programme.subtitle", category: "home", valueFr: "2 jours intensifs d'échanges et d'apprentissage", valueEn: "2 intensive days of exchange and learning" },
+  { key: "home.programme.cta", category: "home", valueFr: "Voir le programme complet", valueEn: "View full programme" },
+  { key: "home.passes.title", category: "home", valueFr: "Choisissez votre pass", valueEn: "Choose your pass" },
+  { key: "home.passes.subtitle", category: "home", valueFr: "Des formules adaptées à chaque besoin", valueEn: "Options for every need" },
+  { key: "home.passes.cta", category: "home", valueFr: "Comparer tous les passes", valueEn: "Compare all passes" },
+  { key: "home.partners.title", category: "home", valueFr: "Partenaires", valueEn: "Partners" },
+  { key: "home.partners.subtitle", category: "home", valueFr: "Ils soutiennent PMO Mastery", valueEn: "They support PMO Mastery" },
+  { key: "home.partners.viewAll", category: "home", valueFr: "Voir tous les partenaires", valueEn: "View all partners" },
+  { key: "home.emptyState.title", category: "home", valueFr: "Événement à venir", valueEn: "Event coming soon" },
+  { key: "home.emptyState.body", category: "home", valueFr: "Les informations sur le prochain événement PMO Mastery seront bientôt disponibles.", valueEn: "Information about the next PMO Mastery event will be available soon." },
+
+  // --- event (Événement page) ---
+  { key: "event.hero.eyebrow", category: "event", valueFr: "L'événement", valueEn: "The event" },
+  { key: "event.venueTitle", category: "event", valueFr: "Le lieu", valueEn: "The venue" },
+  { key: "event.venueAddress", category: "event", valueFr: "Adresse", valueEn: "Address" },
+  { key: "event.venueMap", category: "event", valueFr: "Voir sur la carte", valueEn: "View on map" },
+  { key: "event.countdownLabel", category: "event", valueFr: "L'événement commence dans", valueEn: "The event starts in" },
+  { key: "event.editionLabel", category: "event", valueFr: "Édition", valueEn: "Edition" },
+  { key: "event.dateLabel", category: "event", valueFr: "Dates", valueEn: "Dates" },
+  { key: "event.timeLabel", category: "event", valueFr: "Horaires", valueEn: "Hours" },
+  { key: "event.cityLabel", category: "event", valueFr: "Ville", valueEn: "City" },
+  { key: "event.ctaProgramme", category: "event", valueFr: "Voir le programme", valueEn: "View programme" },
+  { key: "event.emptyState", category: "event", valueFr: "Événement à venir.", valueEn: "Event coming soon." },
+
+  // --- programme ---
+  { key: "programme.hero.eyebrow", category: "programme", valueFr: "Agenda", valueEn: "Schedule" },
+  { key: "programme.hero.title", category: "programme", valueFr: "Programme", valueEn: "Programme" },
+  { key: "programme.hero.subtitle", category: "programme", valueFr: "2 jours intensifs d'échanges, d'apprentissage et de networking au cœur des meilleures pratiques PMO.", valueEn: "2 intensive days of exchange, learning and networking at the heart of best PMO practices." },
+  { key: "programme.dayLabel", category: "programme", valueFr: "Jour", valueEn: "Day" },
+  { key: "programme.emptyState.subtitle", category: "programme", valueFr: "Le programme sera bientôt publié.", valueEn: "The programme will be published soon." },
+  { key: "programme.stat.days", category: "programme", valueFr: "jours", valueEn: "days" },
+  { key: "programme.stat.speakers", category: "programme", valueFr: "intervenants", valueEn: "speakers" },
+  // session-type labels — EN values fixed here (previously French-only regardless of locale)
+  { key: "programme.sessionType.KEYNOTE", category: "programme", valueFr: "Keynote", valueEn: "Keynote" },
+  { key: "programme.sessionType.PANEL", category: "programme", valueFr: "Panel", valueEn: "Panel" },
+  { key: "programme.sessionType.BREAK", category: "programme", valueFr: "Pause", valueEn: "Break" },
+  { key: "programme.sessionType.NETWORKING", category: "programme", valueFr: "Networking", valueEn: "Networking" },
+  { key: "programme.sessionType.CLOSING", category: "programme", valueFr: "Clôture", valueEn: "Closing" },
+  { key: "programme.sessionType.WORKSHOP", category: "programme", valueFr: "Atelier", valueEn: "Workshop" },
+  { key: "programme.sessionType.SESSION", category: "programme", valueFr: "Session", valueEn: "Session" },
+
+  // --- speakers ---
+  { key: "speakers.hero.eyebrow", category: "speakers", valueFr: "Speakers", valueEn: "Speakers" },
+  { key: "speakers.hero.title", category: "speakers", valueFr: "Intervenants", valueEn: "Speakers" },
+  { key: "speakers.hero.subtitle", category: "speakers", valueFr: "Des experts reconnus, des leaders inspirants et des praticiens de renom partagent leur vision du PMO du futur.", valueEn: "Recognized experts, inspiring leaders and renowned practitioners share their vision of the PMO of the future." },
+  { key: "speakers.stat.speakers", category: "speakers", valueFr: "intervenants", valueEn: "speakers" },
+  { key: "speakers.stat.featured", category: "speakers", valueFr: "en vedette", valueEn: "featured" },
+  { key: "speakers.emptyState", category: "speakers", valueFr: "Les intervenants seront bientôt annoncés.", valueEn: "Speakers will be announced soon." },
+  { key: "speakers.search.placeholder", category: "speakers", valueFr: "Rechercher un intervenant…", valueEn: "Search a speaker…" },
+  { key: "speakers.filter.all", category: "speakers", valueFr: "Tous", valueEn: "All" },
+  { key: "speakers.filter.featured", category: "speakers", valueFr: "Vedettes", valueEn: "Featured" },
+  { key: "speakers.noResults", category: "speakers", valueFr: "Aucun intervenant trouvé.", valueEn: "No speakers found." },
+  { key: "speakers.badge.featured", category: "speakers", valueFr: "Vedette", valueEn: "Featured" },
+  { key: "speakers.modal.biography", category: "speakers", valueFr: "Biographie", valueEn: "Biography" },
+  { key: "speakers.modal.featuredBadge", category: "speakers", valueFr: "Speaker vedette", valueEn: "Featured speaker" },
+
+  // --- passes ---
+  { key: "passes.duo.eyebrow", category: "passes", valueFr: "Billet", valueEn: "Ticket" },
+  { key: "passes.duo.title", category: "passes", valueFr: "Pass Duo", valueEn: "Duo Pass" },
+  { key: "passes.duo.subtitle", category: "passes", valueFr: "La formule complète : Événement + 1 jour de Formation. Le meilleur rapport qualité-prix.", valueEn: "The complete package: Event + 1 Training day. Best value for money." },
+  { key: "passes.evenement.eyebrow", category: "passes", valueFr: "Billet", valueEn: "Ticket" },
+  { key: "passes.evenement.title", category: "passes", valueFr: "Pass Événement", valueEn: "Event Pass" },
+  { key: "passes.evenement.subtitle", category: "passes", valueFr: "L'accès complet aux deux jours de conférence, keynotes et panels.", valueEn: "Full access to both conference days, keynotes and panels." },
+  { key: "passes.formation.eyebrow", category: "passes", valueFr: "Billet", valueEn: "Ticket" },
+  { key: "passes.formation.title", category: "passes", valueFr: "Pass Formation", valueEn: "Training Pass" },
+  { key: "passes.formation.subtitle", category: "passes", valueFr: "Un jour de formation pratique pour monter en compétences sur des thématiques ciblées.", valueEn: "A practical training day to build skills on targeted topics." },
+  { key: "passes.detail.includes", category: "passes", valueFr: "Ce pass inclut", valueEn: "This pass includes" },
+  { key: "passes.detail.priceHt", category: "passes", valueFr: "HT", valueEn: "ex. VAT" },
+  { key: "passes.detail.vat", category: "passes", valueFr: "TVA", valueEn: "VAT" },
+  { key: "passes.detail.ttc", category: "passes", valueFr: "TTC", valueEn: "inc. VAT" },
+  { key: "passes.detail.registrationSoon", category: "passes", valueFr: "Inscriptions bientôt ouvertes", valueEn: "Registration opening soon" },
+  { key: "passes.detail.minQty", category: "passes", valueFr: "Quantité minimum", valueEn: "Minimum quantity" },
+  { key: "passes.detail.otherPasses", category: "passes", valueFr: "Autres passes", valueEn: "Other passes" },
+  { key: "passes.detail.guarantee", category: "passes", valueFr: "Paiement sécurisé", valueEn: "Secure payment" },
+  { key: "passes.detail.backToPasses", category: "passes", valueFr: "Voir tous les passes", valueEn: "View all passes" },
+  { key: "passes.detail.perPerson", category: "passes", valueFr: "/ personne", valueEn: "/ person" },
+  { key: "passes.detail.recommendedBadge", category: "passes", valueFr: "Formule recommandée", valueEn: "Recommended package" },
+  { key: "passes.detail.priceLabel", category: "passes", valueFr: "Tarif", valueEn: "Price" },
+  { key: "passes.detail.access2days", category: "passes", valueFr: "Accès 2 jours", valueEn: "2-day access" },
+  { key: "passes.detail.networkingIncluded", category: "passes", valueFr: "Networking inclus", valueEn: "Networking included" },
+  { key: "passes.recommended", category: "passes", valueFr: "Recommandé", valueEn: "Recommended" },
+
+  // --- partners ---
+  { key: "partners.hero.eyebrow", category: "partners", valueFr: "Sponsors", valueEn: "Sponsors" },
+  { key: "partners.hero.title", category: "partners", valueFr: "Partenaires", valueEn: "Partners" },
+  { key: "partners.hero.subtitle", category: "partners", valueFr: "Ils soutiennent PMO Mastery et accompagnent le développement de l'excellence PMO en Tunisie et dans la région.", valueEn: "They support PMO Mastery and foster the development of PMO excellence in Tunisia and the region." },
+  { key: "partners.visitSite", category: "partners", valueFr: "Visiter le site", valueEn: "Visit website" },
+  { key: "partners.becomePartner", category: "partners", valueFr: "Devenir partenaire", valueEn: "Become a partner" },
+  { key: "partners.becomePartnerDesc", category: "partners", valueFr: "Vous souhaitez associer votre marque à PMO Mastery ? Contactez notre équipe pour découvrir nos offres de partenariat.", valueEn: "Want to associate your brand with PMO Mastery? Contact our team to discover our partnership offers." },
+  { key: "partners.contactUs", category: "partners", valueFr: "Nous contacter", valueEn: "Contact us" },
+  { key: "partners.emptyState", category: "partners", valueFr: "Les partenaires seront bientôt annoncés.", valueEn: "Partners will be announced soon." },
+  { key: "partners.countSuffix", category: "partners", valueFr: "partenaire(s)", valueEn: "partner(s)" },
+  { key: "partners.tier.STRATEGIC", category: "partners", valueFr: "Partenaires stratégiques", valueEn: "Strategic partners" },
+  { key: "partners.tier.DIAMOND", category: "partners", valueFr: "Partenaires Diamond", valueEn: "Diamond partners" },
+  { key: "partners.tier.GOLD", category: "partners", valueFr: "Partenaires Gold", valueEn: "Gold partners" },
+  { key: "partners.tier.SILVER", category: "partners", valueFr: "Partenaires Silver", valueEn: "Silver partners" },
+  { key: "partners.tier.MEDIA", category: "partners", valueFr: "Partenaires média", valueEn: "Media partners" },
+  { key: "partners.tier.INSTITUTIONAL", category: "partners", valueFr: "Partenaires institutionnels", valueEn: "Institutional partners" },
+  { key: "partners.tier.PARTNER", category: "partners", valueFr: "Partenaires", valueEn: "Partners" },
+
+  // --- organizers ---
+  { key: "organizers.hero.eyebrow", category: "organizers", valueFr: "L'équipe", valueEn: "The team" },
+  { key: "organizers.hero.title", category: "organizers", valueFr: "Organisateurs", valueEn: "Organizers" },
+  { key: "organizers.hero.subtitle", category: "organizers", valueFr: "L'équipe derrière PMO Mastery, engagée pour l'excellence du PMO en Tunisie et dans la région MENA.", valueEn: "The team behind PMO Mastery, committed to PMO excellence in Tunisia and the MENA region." },
+  { key: "organizers.founderLabel", category: "organizers", valueFr: "Fondatrice", valueEn: "Founder" },
+  { key: "organizers.aboutOrg", category: "organizers", valueFr: "À propos", valueEn: "About" },
+  { key: "organizers.credentials", category: "organizers", valueFr: "Certifications", valueEn: "Credentials" },
+  { key: "organizers.website", category: "organizers", valueFr: "Site web", valueEn: "Website" },
+  { key: "organizers.emptyState", category: "organizers", valueFr: "Les organisateurs seront bientôt présentés.", valueEn: "Organizers will be showcased soon." },
+  { key: "organizers.ctaText", category: "organizers", valueFr: "Découvrez aussi nos partenaires qui soutiennent l'événement.", valueEn: "Also discover our partners who support the event." },
+  { key: "organizers.ctaButton", category: "organizers", valueFr: "Voir les partenaires", valueEn: "View partners" },
+
+  // --- contact ---
+  { key: "contact.hero.eyebrow", category: "contact", valueFr: "Échangeons", valueEn: "Let's talk" },
+  { key: "contact.hero.title", category: "contact", valueFr: "Contact", valueEn: "Contact" },
+  { key: "contact.hero.subtitle", category: "contact", valueFr: "Une question, une demande de partenariat ou besoin d'informations ? Notre équipe vous répond rapidement.", valueEn: "A question, a partnership request or need information? Our team responds quickly." },
+  { key: "contact.formTitle", category: "contact", valueFr: "Envoyez-nous un message", valueEn: "Send us a message" },
+  { key: "contact.infoTitle", category: "contact", valueFr: "Informations de contact", valueEn: "Contact information" },
+  { key: "contact.email", category: "contact", valueFr: "Email", valueEn: "Email" },
+  { key: "contact.phone", category: "contact", valueFr: "Téléphone", valueEn: "Phone" },
+  { key: "contact.address", category: "contact", valueFr: "Adresse", valueEn: "Address" },
+  { key: "contact.hours", category: "contact", valueFr: "Horaires", valueEn: "Hours" },
+  { key: "contact.followUs", category: "contact", valueFr: "Suivez-nous", valueEn: "Follow us" },
+  { key: "contact.hoursValue", category: "contact", valueFr: "Lun – Ven · 9h00 – 18h00", valueEn: "Mon – Fri · 9:00 AM – 6:00 PM" },
+  { key: "contact.form.nameLabel", category: "contact", valueFr: "Nom complet", valueEn: "Full name" },
+  { key: "contact.form.namePlaceholder", category: "contact", valueFr: "Votre nom", valueEn: "Your name" },
+  // email placeholder — EN value fixed here (was always French-style regardless of locale)
+  { key: "contact.form.emailPlaceholder", category: "contact", valueFr: "vous@exemple.com", valueEn: "you@example.com" },
+  { key: "contact.form.phonePlaceholder", category: "contact", valueFr: "+216 …", valueEn: "+216 …" },
+  { key: "contact.form.subjectLabel", category: "contact", valueFr: "Sujet", valueEn: "Subject" },
+  { key: "contact.form.messageLabel", category: "contact", valueFr: "Message", valueEn: "Message" },
+  { key: "contact.form.messagePlaceholder", category: "contact", valueFr: "Votre message…", valueEn: "Your message…" },
+  { key: "contact.form.sending", category: "contact", valueFr: "Envoi…", valueEn: "Sending…" },
+  { key: "contact.form.send", category: "contact", valueFr: "Envoyer le message", valueEn: "Send message" },
+  { key: "contact.form.successTitle", category: "contact", valueFr: "Message envoyé !", valueEn: "Message sent!" },
+  { key: "contact.form.successBody", category: "contact", valueFr: "Nous vous répondrons dans les plus brefs délais.", valueEn: "We'll get back to you as soon as possible." },
+  { key: "contact.form.sendAnother", category: "contact", valueFr: "Envoyer un autre message", valueEn: "Send another message" },
+  // error toast fallback — EN value fixed here (was always French regardless of locale)
+  { key: "contact.form.errorFallback", category: "contact", valueFr: "Échec de l'envoi.", valueEn: "Failed to send." },
+
+  // --- footer ---
+  { key: "footer.nav", category: "footer", valueFr: "Navigation", valueEn: "Navigation" },
+  { key: "footer.passesHeading", category: "footer", valueFr: "Pass", valueEn: "Pass" },
+  { key: "footer.followUs", category: "footer", valueFr: "Suivez-nous", valueEn: "Follow us" },
+  { key: "footer.rights", category: "footer", valueFr: "Tous droits réservés.", valueEn: "All rights reserved." },
+  { key: "footer.taglineDefault", category: "footer", valueFr: "Événement international pour les leaders des PMO.", valueEn: "International event for PMO leaders." },
+  { key: "footer.bottomTagline", category: "footer", valueFr: "Conçu avec passion pour les leaders PMO", valueEn: "Crafted with passion for PMO leaders" },
+
+  // --- countdown ---
+  { key: "countdown.days", category: "countdown", valueFr: "Jours", valueEn: "Days" },
+  { key: "countdown.hours", category: "countdown", valueFr: "Heures", valueEn: "Hours" },
+  { key: "countdown.minutes", category: "countdown", valueFr: "Minutes", valueEn: "Minutes" },
+  { key: "countdown.seconds", category: "countdown", valueFr: "Secondes", valueEn: "Seconds" },
+  { key: "countdown.inProgress", category: "countdown", valueFr: "Événement en cours", valueEn: "Event in progress" },
+  { key: "countdown.ended", category: "countdown", valueFr: "Événement terminé", valueEn: "Event ended" },
+]
+
+export async function seedUiText() {
+  for (const row of UI_TEXT) {
+    await db.uiText.upsert({
+      where: { key: row.key },
+      update: {},
+      create: row,
+    })
+  }
+}
+
+// ---------------------------------------------------------------------------
+// SEO meta catalog — admin-editable per-page title/description/OG image.
+// Global, upserted by page key so re-seeding never clobbers an admin's
+// edits. Initial values mirror the copy already used as the `ui()` fallback
+// on each page's hero, so the migration is visually invisible until an
+// admin actually edits something.
+// ---------------------------------------------------------------------------
+
+const SEO_META: { page: string; titleFr: string; titleEn: string; descriptionFr: string; descriptionEn: string }[] = [
+  {
+    page: "home",
+    titleFr: "PMO Mastery — Le PMO du Futur : Stratégie, IA et Performance",
+    titleEn: "PMO Mastery — International Event for PMO Leaders",
+    descriptionFr:
+      "Événement international pour les leaders des PMO. Deux jours intensifs au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership.",
+    descriptionEn:
+      "International event for PMO leaders. Two intensive days on best practices in project management, PMO, change management, AI and leadership.",
+  },
+  {
+    page: "evenement",
+    titleFr: "L'événement",
+    titleEn: "The Event",
+    descriptionFr:
+      "Dates, lieu, programme et informations pratiques sur PMO Mastery — l'événement international dédié aux leaders PMO.",
+    descriptionEn:
+      "Dates, venue, programme and practical information about PMO Mastery — the international event for PMO leaders.",
+  },
+  {
+    page: "programme",
+    titleFr: "Programme",
+    titleEn: "Programme",
+    descriptionFr:
+      "2 jours intensifs d'échanges, d'apprentissage et de networking au cœur des meilleures pratiques PMO.",
+    descriptionEn: "2 intensive days of exchange, learning and networking at the heart of best PMO practices.",
+  },
+  {
+    page: "contact",
+    titleFr: "Contact",
+    titleEn: "Contact",
+    descriptionFr:
+      "Une question, une demande de partenariat ou besoin d'informations ? Contactez l'équipe PMO Mastery.",
+    descriptionEn: "A question, a partnership request or need information? Get in touch with the PMO Mastery team.",
+  },
+  {
+    page: "intervenants",
+    titleFr: "Intervenants",
+    titleEn: "Speakers",
+    descriptionFr:
+      "Des experts reconnus, des leaders inspirants et des praticiens de renom partagent leur vision du PMO du futur.",
+    descriptionEn:
+      "Recognized experts, inspiring leaders and renowned practitioners share their vision of the PMO of the future.",
+  },
+  {
+    page: "organisateurs",
+    titleFr: "Organisateurs",
+    titleEn: "Organizers",
+    descriptionFr:
+      "L'équipe derrière PMO Mastery, engagée pour l'excellence du PMO en Tunisie et dans la région MENA.",
+    descriptionEn: "The team behind PMO Mastery, committed to PMO excellence in Tunisia and the MENA region.",
+  },
+  {
+    page: "partenaires",
+    titleFr: "Partenaires",
+    titleEn: "Partners",
+    descriptionFr:
+      "Ils soutiennent PMO Mastery et accompagnent le développement de l'excellence PMO en Tunisie et dans la région.",
+    descriptionEn: "They support PMO Mastery and foster the development of PMO excellence in Tunisia and the region.",
+  },
+  {
+    page: "pass-duo",
+    titleFr: "Pass Duo",
+    titleEn: "Duo Pass",
+    descriptionFr: "La formule complète : Événement + 1 jour de Formation. Le meilleur rapport qualité-prix.",
+    descriptionEn: "The complete package: Event + 1 Training day. Best value for money.",
+  },
+  {
+    page: "pass-evenement",
+    titleFr: "Pass Événement",
+    titleEn: "Event Pass",
+    descriptionFr: "L'accès complet aux deux jours de conférence, keynotes et panels.",
+    descriptionEn: "Full access to both conference days, keynotes and panels.",
+  },
+  {
+    page: "pass-formation",
+    titleFr: "Pass Formation",
+    titleEn: "Training Pass",
+    descriptionFr: "Un jour de formation pratique pour monter en compétences sur des thématiques ciblées.",
+    descriptionEn: "A practical training day to build skills on targeted topics.",
+  },
+]
+
+export async function seedSeoMeta() {
+  for (const row of SEO_META) {
+    await db.seoMeta.upsert({
+      where: { page: row.page },
+      update: {},
+      create: row,
+    })
+  }
+}
+
+// SEED_UI_TEXT_ONLY / SEED_SEO_ONLY guard the destructive full seed (main()
+// wipes and recreates the whole event) so the one-off runners can seed just
+// their catalog without touching real event/admin data.
+if (process.env.SEED_UI_TEXT_ONLY !== "1" && process.env.SEED_SEO_ONLY !== "1") {
+  main()
+    .catch((e) => {
+      console.error("❌ Seed failed:", e)
+      process.exit(1)
+    })
+    .finally(async () => {
+      await db.$disconnect()
+    })
+}

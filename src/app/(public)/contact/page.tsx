@@ -1,51 +1,77 @@
+import type { Metadata } from "next"
 import { Mail, Phone, MapPin, Clock, Globe, Linkedin, Facebook, Instagram, Youtube } from "lucide-react"
-import { getLocale, getActiveEvent } from "@/lib/site-data"
+import { getLocale, getActiveEvent, getUiText } from "@/lib/site-data"
+import { buildPageMetadata } from "@/lib/seo"
 import { PageHero } from "@/components/public/page-hero"
 import { ContactForm } from "@/components/public/contact-form"
+import { BreadcrumbStructuredData } from "@/components/public/structured-data"
 
 export const dynamic = "force-dynamic"
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  return buildPageMetadata({
+    page: "contact",
+    path: "/contact",
+    locale,
+    defaults: {
+      titleFr: "Contact",
+      titleEn: "Contact",
+      descriptionFr:
+        "Une question, une demande de partenariat ou besoin d'informations ? Contactez l'équipe PMO Mastery.",
+      descriptionEn: "A question, a partnership request or need information? Get in touch with the PMO Mastery team.",
+    },
+  })
+}
 
 export default async function ContactPage() {
   const locale = await getLocale()
   const event = await getActiveEvent()
+  const ui = await getUiText(locale)
 
-  const t = locale === "fr"
-    ? {
-        eyebrow: "Échangeons",
-        title: "Contact",
-        subtitle: "Une question, une demande de partenariat ou besoin d'informations ? Notre équipe vous répond rapidement.",
-        formTitle: "Envoyez-nous un message",
-        infoTitle: "Informations de contact",
-        email: "Email",
-        phone: "Téléphone",
-        address: "Adresse",
-        hours: "Horaires",
-        followUs: "Suivez-nous",
-        hoursValue: "Lun – Ven · 9h00 – 18h00",
-      }
-    : {
-        eyebrow: "Let's talk",
-        title: "Contact",
-        subtitle: "A question, a partnership request or need information? Our team responds quickly.",
-        formTitle: "Send us a message",
-        infoTitle: "Contact information",
-        email: "Email",
-        phone: "Phone",
-        address: "Address",
-        hours: "Hours",
-        followUs: "Follow us",
-        hoursValue: "Mon – Fri · 9:00 AM – 6:00 PM",
-      }
+  const t = {
+    eyebrow: ui("contact.hero.eyebrow", "Échangeons"),
+    title: ui("contact.hero.title", "Contact"),
+    subtitle: ui("contact.hero.subtitle", "Une question, une demande de partenariat ou besoin d'informations ? Notre équipe vous répond rapidement."),
+    formTitle: ui("contact.formTitle", "Envoyez-nous un message"),
+    infoTitle: ui("contact.infoTitle", "Informations de contact"),
+    email: ui("contact.email", "Email"),
+    phone: ui("contact.phone", "Téléphone"),
+    address: ui("contact.address", "Adresse"),
+    hours: ui("contact.hours", "Horaires"),
+    followUs: ui("contact.followUs", "Suivez-nous"),
+    hoursValue: ui("contact.hoursValue", "Lun – Ven · 9h00 – 18h00"),
+  }
+
+  const formLabels = {
+    successToast: ui("contact.form.successTitle", "Message envoyé !"),
+    successTitle: ui("contact.form.successTitle", "Message envoyé !"),
+    successBody: ui("contact.form.successBody", "Nous vous répondrons dans les plus brefs délais."),
+    sendAnother: ui("contact.form.sendAnother", "Envoyer un autre message"),
+    nameLabel: ui("contact.form.nameLabel", "Nom complet"),
+    namePlaceholder: ui("contact.form.namePlaceholder", "Votre nom"),
+    emailPlaceholder: ui("contact.form.emailPlaceholder", "vous@exemple.com"),
+    phoneLabel: ui("contact.form.phoneLabel", "Téléphone"),
+    phonePlaceholder: ui("contact.form.phonePlaceholder", "+216 …"),
+    subjectLabel: ui("contact.form.subjectLabel", "Sujet"),
+    messageLabel: ui("contact.form.messageLabel", "Message"),
+    messagePlaceholder: ui("contact.form.messagePlaceholder", "Votre message…"),
+    sending: ui("contact.form.sending", "Envoi…"),
+    send: ui("contact.form.send", "Envoyer le message"),
+    errorFallback: ui("contact.form.errorFallback", "Échec de l'envoi."),
+  }
 
   const contact = event?.contactInfo ?? null
+  const breadcrumbs = [{ href: "/", label: ui("common.breadcrumb.home", "Accueil") }, { label: t.title }]
 
   return (
     <>
+      <BreadcrumbStructuredData items={breadcrumbs} />
       <PageHero
         eyebrow={t.eyebrow}
         title={t.title}
         subtitle={t.subtitle}
-        breadcrumbs={[{ href: "/", label: locale === "fr" ? "Accueil" : "Home" }, { label: t.title }]}
+        breadcrumbs={breadcrumbs}
       />
 
       <section className="py-16 sm:py-20 bg-background">
@@ -55,7 +81,7 @@ export default async function ContactPage() {
             <div>
               <h2 className="font-display text-2xl font-bold mb-6">{t.formTitle}</h2>
               <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-premium">
-                <ContactForm locale={locale} />
+                <ContactForm labels={formLabels} />
               </div>
             </div>
 

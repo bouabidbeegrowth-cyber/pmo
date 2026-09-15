@@ -13,7 +13,6 @@ import {
   ArrowRight,
   TrendingUp,
   Plus,
-  Image as ImageIcon,
 } from "lucide-react"
 import { format, formatDistanceToNow } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -21,7 +20,7 @@ import { fr } from "date-fns/locale"
 export const dynamic = "force-dynamic"
 
 async function getDashboardData() {
-  const [activeEvent, speakerCount, sessionCount, passCount, partnerCount, organizerCount, mediaCount] =
+  const [activeEvent, speakerCount, sessionCount, passCount, partnerCount, organizerCount] =
     await Promise.all([
       db.event.findFirst({
         where: { isActive: true },
@@ -32,7 +31,6 @@ async function getDashboardData() {
       db.pass.count(),
       db.partner.count(),
       db.organizer.count(),
-      db.mediaAsset.count(),
     ])
 
   const recentSpeakers = await db.speaker.findMany({
@@ -47,7 +45,6 @@ async function getDashboardData() {
     passCount,
     partnerCount,
     organizerCount,
-    mediaCount,
     recentSpeakers,
   }
 }
@@ -100,13 +97,6 @@ export default async function DashboardPage() {
       icon: Building2,
       href: "/admin/organizers",
       color: "from-pink-500 to-rose-500",
-    },
-    {
-      label: "Médias",
-      value: data.mediaCount,
-      icon: ImageIcon,
-      href: "/admin/media",
-      color: "from-indigo-500 to-blue-500",
     },
   ]
 

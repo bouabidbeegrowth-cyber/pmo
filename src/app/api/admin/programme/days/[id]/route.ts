@@ -16,6 +16,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const existing = await db.programmeDay.findUnique({ where: { id } })
   if (!existing) return fail("Day not found", 404)
 
+  if (typeof body.nameFr === "string" && !body.nameFr.trim()) {
+    return fail("nameFr cannot be empty", 400)
+  }
+
   try {
     const data: Prisma.ProgrammeDayUpdateInput = {
       nameFr: body.nameFr,

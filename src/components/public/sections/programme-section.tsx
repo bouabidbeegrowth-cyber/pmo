@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Clock3, MapPin, Users, Calendar } from "lucide-react"
+import Link from "next/link"
+import { Clock3, MapPin, ArrowUpRight } from "lucide-react"
 import { format } from "date-fns"
 import { fr, enUS } from "date-fns/locale"
 import { cn } from "@/lib/utils"
@@ -43,19 +44,25 @@ interface Props {
   title: string
   subtitle: string
   dayLabel: string
+  sessionTypeLabels: Record<string, string>
+  showCta?: boolean
+  ctaLabel?: string
+  ctaHref?: string
 }
 
-const TYPE_STYLES: Record<string, { label: string; color: string; dot: string }> = {
-  KEYNOTE: { label: "Keynote", color: "bg-violet-100 text-violet-700 border-violet-200", dot: "bg-violet-500" },
-  PANEL: { label: "Panel", color: "bg-blue-100 text-blue-700 border-blue-200", dot: "bg-blue-500" },
-  BREAK: { label: "Pause", color: "bg-amber-100 text-amber-700 border-amber-200", dot: "bg-amber-500" },
-  NETWORKING: { label: "Networking", color: "bg-emerald-100 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" },
-  CLOSING: { label: "Clôture", color: "bg-rose-100 text-rose-700 border-rose-200", dot: "bg-rose-500" },
-  WORKSHOP: { label: "Atelier", color: "bg-cyan-100 text-cyan-700 border-cyan-200", dot: "bg-cyan-500" },
-  SESSION: { label: "Session", color: "bg-zinc-100 text-zinc-700 border-zinc-200", dot: "bg-zinc-500" },
+const TYPE_STYLES: Record<string, { color: string; dot: string }> = {
+  KEYNOTE: { color: "bg-pmo-blue/10 text-pmo-blue border-pmo-blue/20", dot: "bg-pmo-blue" },
+  PANEL: { color: "bg-pmo-sky-blue/15 text-pmo-sky-blue border-pmo-sky-blue/25", dot: "bg-pmo-sky-blue" },
+  BREAK: { color: "bg-pmo-bright-orange/10 text-pmo-bright-orange border-pmo-bright-orange/20", dot: "bg-pmo-bright-orange" },
+  NETWORKING: { color: "bg-pmo-pink/10 text-pmo-pink border-pmo-pink/20", dot: "bg-pmo-pink" },
+  CLOSING: { color: "bg-pmo-navy-deep/10 text-pmo-navy-deep border-pmo-navy-deep/20", dot: "bg-pmo-navy-deep" },
+  WORKSHOP: { color: "bg-pmo-sky-blue/15 text-pmo-sky-blue border-pmo-sky-blue/25", dot: "bg-pmo-sky-blue" },
+  SESSION: { color: "bg-pmo-text-navy/10 text-pmo-text-navy border-pmo-text-navy/20", dot: "bg-pmo-text-navy" },
+  PMO_TALKS: { color: "bg-pmo-blue/10 text-pmo-blue border-pmo-blue/20", dot: "bg-pmo-blue" },
+  MASTERCLASS: { color: "bg-pmo-pink/10 text-pmo-pink border-pmo-pink/20", dot: "bg-pmo-pink" },
 }
 
-export function ProgrammeSection({ days, locale, title, subtitle, dayLabel }: Props) {
+export function ProgrammeSection({ days, locale, title, subtitle, dayLabel, sessionTypeLabels, showCta, ctaLabel, ctaHref }: Props) {
   const [activeDay, setActiveDay] = useState(days[0]?.id ?? "")
   const dateLocale = locale === "fr" ? fr : enUS
   const day = days.find((d) => d.id === activeDay)
@@ -66,7 +73,7 @@ export function ProgrammeSection({ days, locale, title, subtitle, dayLabel }: Pr
     <section id="programme" className="py-20 sm:py-28 bg-background relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 rounded-full bg-pmo-violet/10 border border-pmo-violet/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-violet mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full bg-pmo-pink/10 border border-pmo-pink/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-pink mb-4">
             <Clock3 className="w-3.5 h-3.5" />
             {title}
           </div>
@@ -87,7 +94,7 @@ export function ProgrammeSection({ days, locale, title, subtitle, dayLabel }: Pr
                   className={cn(
                     "px-5 sm:px-8 py-3 rounded-xl font-display font-semibold transition-all whitespace-nowrap",
                     isActive
-                      ? "bg-pmo-violet-gradient text-white shadow-premium"
+                      ? "hero-btn-gradient text-white shadow-premium"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
@@ -101,92 +108,100 @@ export function ProgrammeSection({ days, locale, title, subtitle, dayLabel }: Pr
           </div>
         </div>
 
-        {/* Timeline */}
-        <div className="max-w-4xl mx-auto">
-          <div className="relative">
-            {/* Vertical line */}
-            <div className="absolute left-4 sm:left-32 top-0 bottom-0 w-px bg-border" />
+        {/* Sessions */}
+        <div className="max-w-4xl mx-auto space-y-4">
+          {day.sessions.map((session) => {
+            const typeMeta = TYPE_STYLES[session.sessionType] ?? TYPE_STYLES.SESSION
+            const typeLabel = sessionTypeLabels[session.sessionType] ?? session.sessionType
+            const title = locale === "en"
+              ? session.titleEn ?? session.titleFr
+              : session.titleFr
+            const description = locale === "en"
+              ? session.descriptionEn ?? session.descriptionFr
+              : session.descriptionFr
+            const timeRange = session.endTime ? `${session.startTime} – ${session.endTime}` : session.startTime
 
-            <div className="space-y-4">
-              {day.sessions.map((session) => {
-                const typeMeta = TYPE_STYLES[session.sessionType] ?? TYPE_STYLES.SESSION
-                const title = locale === "en"
-                  ? session.titleEn ?? session.titleFr
-                  : session.titleFr
-                const description = locale === "en"
-                  ? session.descriptionEn ?? session.descriptionFr
-                  : session.descriptionFr
-                return (
-                  <div key={session.id} className="relative pl-12 sm:pl-40">
-                    {/* Time + dot */}
-                    <div className="absolute left-0 top-3 flex items-center gap-3">
-                      <div className={cn("w-8 h-8 rounded-full ring-4 ring-background", typeMeta.dot)} />
-                    </div>
-                    <div className="absolute left-0 top-3 hidden sm:block sm:w-32 sm:pr-4 text-right">
-                      <div className="font-display text-sm font-bold tabular-nums">{session.startTime}</div>
-                      {session.endTime && (
-                        <div className="text-xs text-muted-foreground tabular-nums">{session.endTime}</div>
-                      )}
-                    </div>
+            return (
+              <div key={session.id} className="rounded-2xl border border-border bg-card p-4 sm:p-5 flex gap-4 hover:shadow-premium transition-shadow">
+                {/* Photo(s) + type badge */}
+                <div className="relative shrink-0 pt-2">
+                  <div className="flex -space-x-3">
+                    {session.speakers.length > 0 ? (
+                      session.speakers.slice(0, 2).map(({ speaker }) => (
+                        <div key={speaker.id} className="w-12 h-12 sm:w-14 sm:h-14 rounded-full ring-2 ring-background overflow-hidden bg-muted shrink-0">
+                          {speaker.photo ? (
 
-                    {/* Card */}
-                    <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 hover:shadow-premium transition-shadow">
-                      <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className={cn("text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border", typeMeta.color)}>
-                            {typeMeta.label}
-                          </span>
-                          {session.language && (
-                            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                              {session.language}
-                            </span>
-                          )}
-                          {session.room && (
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {session.room}
-                            </span>
+                            <img src={speaker.photo} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs font-semibold hero-btn-gradient text-white">
+                              {speaker.firstName.charAt(0)}
+                              {speaker.lastName.charAt(0)}
+                            </div>
                           )}
                         </div>
+                      ))
+                    ) : (
+                      <div className={cn("w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center", typeMeta.color)}>
+                        <Clock3 className="w-5 h-5" />
                       </div>
-                      <h3 className="font-display text-base sm:text-lg font-semibold leading-tight mb-1">
-                        {title}
-                      </h3>
-                      {description && (
-                        <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
-                      )}
-                      {/* Speakers */}
-                      {session.speakers.length > 0 && (
-                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
-                          <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {session.speakers.map(({ speaker }) => (
-                              <div key={speaker.id} className="flex items-center gap-1.5">
-                                <div className="w-6 h-6 rounded-full bg-muted overflow-hidden">
-                                  {speaker.photo ? (
-                                     
-                                    <img src={speaker.photo} alt="" className="w-full h-full object-cover" />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-[10px] font-semibold bg-pmo-violet-gradient text-white">
-                                      {speaker.firstName.charAt(0)}
-                                      {speaker.lastName.charAt(0)}
-                                    </div>
-                                  )}
-                                </div>
-                                <span className="text-xs text-muted-foreground">
-                                  {speaker.firstName} {speaker.lastName}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
-                )
-              })}
-            </div>
-          </div>
+                  <span className={cn("absolute -top-2 left-0 text-[9px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border whitespace-nowrap", typeMeta.color)}>
+                    {typeLabel}
+                  </span>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0 pt-1">
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+                    <h3 className="font-display text-sm sm:text-base font-bold leading-snug">
+                      {title}
+                    </h3>
+                    {session.language && (
+                      <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
+                        {session.language}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mb-2 flex-wrap">
+                    <Clock3 className="w-3.5 h-3.5 text-pmo-blue shrink-0" />
+                    <span className="font-semibold tabular-nums">{timeRange}</span>
+                    {session.room && (
+                      <>
+                        <span className="text-border">·</span>
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        <span>{session.room}</span>
+                      </>
+                    )}
+                  </div>
+                  {description && (
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-3 line-clamp-2">
+                      {description}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {showCta && ctaHref && ctaLabel && (
+                      <>
+                        <span className="w-px h-4 bg-border shrink-0" />
+                        <Link
+                          href={ctaHref}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-pmo-navy-deep text-white text-[11px] sm:text-xs font-bold uppercase tracking-wide px-3.5 py-2 hover:opacity-90 transition-opacity"
+                        >
+                          {ctaLabel}
+                          <ArrowUpRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </>
+                    )}
+                    {session.speakers.length > 0 && (
+                      <span className="text-xs text-muted-foreground truncate">
+                        {session.speakers.map(({ speaker }) => `${speaker.firstName} ${speaker.lastName}`).join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import {
   Building2,
@@ -9,53 +10,65 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react"
-import { getLocale, getActiveEvent, pick } from "@/lib/site-data"
+import { getLocale, getActiveEvent, getUiText, pick } from "@/lib/site-data"
+import { buildPageMetadata } from "@/lib/seo"
 import { PageHero } from "@/components/public/page-hero"
+import { BreadcrumbStructuredData } from "@/components/public/structured-data"
 
 export const dynamic = "force-dynamic"
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  return buildPageMetadata({
+    page: "organisateurs",
+    path: "/organisateurs",
+    locale,
+    defaults: {
+      titleFr: "Organisateurs",
+      titleEn: "Organizers",
+      descriptionFr:
+        "L'équipe derrière PMO Mastery, engagée pour l'excellence du PMO en Tunisie et dans la région MENA.",
+      descriptionEn: "The team behind PMO Mastery, committed to PMO excellence in Tunisia and the MENA region.",
+    },
+  })
+}
 
 export default async function OrganisateursPage() {
   const locale = await getLocale()
   const event = await getActiveEvent()
+  const ui = await getUiText(locale)
 
-  const t = locale === "fr"
-    ? {
-        eyebrow: "L'équipe",
-        title: "Organisateurs",
-        subtitle: "L'équipe derrière PMO Mastery, engagée pour l'excellence du PMO en Tunisie et dans la région MENA.",
-        founderTitle: "Fondatrice",
-        aboutOrg: "À propos",
-        credentials: "Certifications",
-        website: "Site web",
-      }
-    : {
-        eyebrow: "The team",
-        title: "Organizers",
-        subtitle: "The team behind PMO Mastery, committed to PMO excellence in Tunisia and the MENA region.",
-        founderTitle: "Founder",
-        aboutOrg: "About",
-        credentials: "Credentials",
-        website: "Website",
-      }
+  const t = {
+    eyebrow: ui("organizers.hero.eyebrow", "L'équipe"),
+    title: ui("organizers.hero.title", "Organisateurs"),
+    subtitle: ui("organizers.hero.subtitle", "L'équipe derrière PMO Mastery, engagée pour l'excellence du PMO en Tunisie et dans la région MENA."),
+    founderTitle: ui("organizers.founderLabel", "Fondatrice"),
+    aboutOrg: ui("organizers.aboutOrg", "À propos"),
+    credentials: ui("organizers.credentials", "Certifications"),
+    website: ui("organizers.website", "Site web"),
+    emptyState: ui("organizers.emptyState", "Les organisateurs seront bientôt présentés."),
+    ctaText: ui("organizers.ctaText", "Découvrez aussi nos partenaires qui soutiennent l'événement."),
+    ctaButton: ui("organizers.ctaButton", "Voir les partenaires"),
+  }
 
   const organizers = event?.organizers ?? []
+  const breadcrumbs = [{ href: "/", label: ui("common.breadcrumb.home", "Accueil") }, { label: t.title }]
 
   return (
     <>
+      <BreadcrumbStructuredData items={breadcrumbs} />
       <PageHero
         eyebrow={t.eyebrow}
         title={t.title}
         subtitle={t.subtitle}
-        breadcrumbs={[{ href: "/", label: locale === "fr" ? "Accueil" : "Home" }, { label: t.title }]}
+        breadcrumbs={breadcrumbs}
       />
 
       <section className="py-16 sm:py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {organizers.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-muted-foreground">
-                {locale === "fr" ? "Les organisateurs seront bientôt présentés." : "Organizers will be showcased soon."}
-              </p>
+              <p className="text-muted-foreground">{t.emptyState}</p>
             </div>
           ) : (
             <div className="space-y-12">
@@ -165,11 +178,9 @@ export default async function OrganisateursPage() {
 
           {/* CTA to partners */}
           <div className="mt-16 pt-12 border-t border-border text-center">
-            <p className="text-muted-foreground mb-4">
-              {locale === "fr" ? "Découvrez aussi nos partenaires qui soutiennent l'événement." : "Also discover our partners who support the event."}
-            </p>
+            <p className="text-muted-foreground mb-4">{t.ctaText}</p>
             <Link href="/partenaires" className="inline-flex items-center gap-2 rounded-xl bg-pmo-violet-gradient text-white px-6 py-3 font-semibold shadow-premium hover:scale-[1.02] transition-transform">
-              {locale === "fr" ? "Voir les partenaires" : "View partners"}
+              {t.ctaButton}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

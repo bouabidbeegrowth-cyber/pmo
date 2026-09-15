@@ -23,24 +23,33 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl,
-    })
-    setLoading(false)
-    if (res?.error) {
-      setError("Identifiants invalides. Vérifiez votre email et mot de passe.")
-      return
+    try {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl,
+      })
+      if (res?.error) {
+        setError("Identifiants invalides. Vérifiez votre email et mot de passe.")
+        return
+      }
+      if (!res?.ok) {
+        setError("Connexion impossible. Vérifiez que le serveur est bien démarré et réessayez.")
+        return
+      }
+      router.push(callbackUrl)
+      router.refresh()
+    } catch {
+      setError("Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.")
+    } finally {
+      setLoading(false)
     }
-    router.push(callbackUrl)
-    router.refresh()
   }
 
   return (
-    <div className="min-h-screen flex bg-pmo-navy-gradient text-white">
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-pmo-navy-gradient">
+    <div className="min-h-screen flex bg-pmo-navy-gradient">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-pmo-navy-gradient text-white">
         <div className="absolute inset-0 bg-grid opacity-30" />
         <div className="absolute -top-32 -right-32 w-[28rem] h-[28rem] rounded-full bg-pmo-violet/30 blur-3xl" />
         <div className="absolute -bottom-32 -left-32 w-[28rem] h-[28rem] rounded-full bg-pmo-gold/20 blur-3xl" />

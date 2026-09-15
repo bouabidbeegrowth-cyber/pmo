@@ -5,122 +5,162 @@ import {
   Calendar,
   MapPin,
   ArrowRight,
-  Sparkles,
-  Rocket,
   Users,
-  TrendingUp,
-  Target,
   Award,
-  Lightbulb,
-  Globe,
   Network,
-  Brain,
-  Zap,
-  Compass,
   Clock3,
   Ticket,
+  Check,
+  Images,
 } from "lucide-react"
-import { getLocale, getActiveEvent, pick } from "@/lib/site-data"
-import { Countdown } from "@/components/public/countdown"
+import type { Metadata } from "next"
+import { getLocale, getActiveEvent, getUiText, pick } from "@/lib/site-data"
+import { buildPageMetadata } from "@/lib/seo"
+import { HeroSection } from "@/components/public/hero-section"
 import { SpeakersHomePreview } from "@/components/public/speakers-home-preview"
 import { ProgrammeHomePreview } from "@/components/public/programme-home-preview"
 import { PassesHomePreview } from "@/components/public/passes-home-preview"
+import { GalleryGrid } from "@/components/public/gallery-grid"
+import { EventStructuredData } from "@/components/public/structured-data"
 
 export const dynamic = "force-dynamic"
 
-const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  Sparkles, Rocket, Users, TrendingUp, Target, Award, Lightbulb, Globe,
-  Network, Brain, Zap, Compass,
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  return buildPageMetadata({
+    page: "home",
+    path: "",
+    locale,
+    absoluteTitle: true,
+    defaults: {
+      titleFr: "PMO Mastery — Le PMO du Futur : Stratégie, IA et Performance",
+      titleEn: "PMO Mastery — International Event for PMO Leaders",
+      descriptionFr:
+        "Événement international pour les leaders des PMO. Deux jours intensifs au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership.",
+      descriptionEn:
+        "International event for PMO leaders. Two intensive days on best practices in project management, PMO, change management, AI and leadership.",
+    },
+  })
+}
+
+const SESSION_TYPE_KEYS = ["KEYNOTE", "PANEL", "BREAK", "NETWORKING", "CLOSING", "WORKSHOP", "SESSION", "PMO_TALKS", "MASTERCLASS"]
+const SESSION_TYPE_DEFAULTS: Record<string, string> = {
+  KEYNOTE: "Keynote", PANEL: "Panel", BREAK: "Pause", NETWORKING: "Networking",
+  CLOSING: "Clôture", WORKSHOP: "Atelier", SESSION: "Session", PMO_TALKS: "PMO Talks", MASTERCLASS: "Masterclass",
 }
 
 export default async function HomePage() {
   const locale = await getLocale()
   const dateLocale = locale === "fr" ? fr : enUS
   const event = await getActiveEvent()
+  const ui = await getUiText(locale)
 
   if (!event) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-4">
         <div className="text-center">
           <h1 className="font-display text-2xl font-bold mb-3">
-            {locale === "fr" ? "Événement à venir" : "Event coming soon"}
+            {ui("home.emptyState.title", "Événement à venir")}
           </h1>
           <p className="text-muted-foreground">
-            {locale === "fr"
-              ? "Les informations sur le prochain événement PMO Mastery seront bientôt disponibles."
-              : "Information about the next PMO Mastery event will be available soon."}
+            {ui("home.emptyState.body", "Les informations sur le prochain événement PMO Mastery seront bientôt disponibles.")}
           </p>
         </div>
       </div>
     )
   }
 
-  const t = locale === "fr"
-    ? {
-        heroBadge: "Événement international",
-        heroCta: "Je m'inscris",
-        heroCtaSecondary: "Découvrir le programme",
-        whyTitle: "Pourquoi y participer ?",
-        aboutTitle: "À propos de l'événement",
-        aboutCta: "En savoir plus",
-        speakersTitle: "Intervenants",
-        speakersSubtitle: "Des experts reconnus partagent leur vision",
-        speakersCta: "Voir tous les intervenants",
-        programmeTitle: "Programme",
-        programmeSubtitle: "2 jours intensifs d'échanges et d'apprentissage",
-        programmeCta: "Voir le programme complet",
-        passesTitle: "Choisissez votre pass",
-        passesSubtitle: "Des formules adaptées à chaque besoin",
-        passesCta: "Comparer tous les passes",
-        partnersTitle: "Partenaires",
-        partnersSubtitle: "Ils soutiennent PMO Mastery",
-        countdownLabel: "Plus que",
-        editionLabel: "Édition",
-      }
-    : {
-        heroBadge: "International event",
-        heroCta: "Register now",
-        heroCtaSecondary: "View programme",
-        whyTitle: "Why participate?",
-        aboutTitle: "About the event",
-        aboutCta: "Learn more",
-        speakersTitle: "Speakers",
-        speakersSubtitle: "Renowned experts share their vision",
-        speakersCta: "View all speakers",
-        programmeTitle: "Programme",
-        programmeSubtitle: "2 intensive days of exchange and learning",
-        programmeCta: "View full programme",
-        passesTitle: "Choose your pass",
-        passesSubtitle: "Options for every need",
-        passesCta: "Compare all passes",
-        partnersTitle: "Partners",
-        partnersSubtitle: "They support PMO Mastery",
-        countdownLabel: "Only",
-        editionLabel: "Edition",
-      }
+  const t = {
+    heroBadge: ui("home.hero.badge", "Événement international"),
+    heroCta: ui("common.cta.register", "Je m'inscris"),
+    heroCtaSecondary: ui("home.hero.ctaSecondary", "Découvrir le programme"),
+    whyTitle: ui("common.why.titleFallback", "Pourquoi y participer ?"),
+    aboutTitle: ui("common.about.titleFallback", "À propos de l'événement"),
+    aboutCta: ui("home.aboutCta", "En savoir plus"),
+    speakersTitle: ui("home.speakers.title", "Intervenants"),
+    speakersSubtitle: ui("home.speakers.subtitle", "Des experts reconnus partagent leur vision"),
+    speakersCta: ui("home.speakers.cta", "Voir tous les intervenants"),
+    programmeTitle: ui("home.programme.title", "Programme"),
+    programmeSubtitle: ui("home.programme.subtitle", "2 jours intensifs d'échanges et d'apprentissage"),
+    programmeCta: ui("home.programme.cta", "Voir le programme complet"),
+    passesTitle: ui("home.passes.title", "Choisissez votre pass"),
+    passesSubtitle: ui("home.passes.subtitle", "Des formules adaptées à chaque besoin"),
+    passesCta: ui("home.passes.cta", "Comparer tous les passes"),
+    partnersTitle: ui("home.partners.title", "Partenaires"),
+    partnersSubtitle: ui("home.partners.subtitle", "Ils soutiennent PMO Mastery"),
+    partnersViewAll: ui("home.partners.viewAll", "Voir tous les partenaires"),
+    galleryTitle: ui("home.gallery.title", "Galerie"),
+    gallerySubtitle: ui("home.gallery.subtitle", "Revivez les temps forts en images et en vidéos"),
+    galleryCta: ui("home.gallery.cta", "Voir toute la galerie"),
+    countdownLabel: ui("home.countdownLabel", "Plus que"),
+    editionLabel: ui("home.editionLabel", "Édition"),
+    venueLink: ui("home.venueLink", "Voir le lieu"),
+    statSpeakers: ui("home.stat.speakers", "Intervenants"),
+    statDays: ui("home.stat.days", "Jours"),
+    statPasses: ui("home.stat.passes", "Pass disponibles"),
+    statPartners: ui("home.stat.partners", "Partenaires"),
+  }
+
+  const countdownLabels = {
+    days: ui("countdown.days", "Jours"),
+    hours: ui("countdown.hours", "Heures"),
+    minutes: ui("countdown.minutes", "Minutes"),
+    seconds: ui("countdown.seconds", "Secondes"),
+    inProgress: ui("countdown.inProgress", "Événement en cours"),
+    ended: ui("countdown.ended", "Événement terminé"),
+  }
+
+  const speakerLabels = {
+    viewProfile: ui("common.speaker.viewProfile", "Voir le profil"),
+    biography: ui("speakers.modal.biography", "Biographie"),
+    featuredBadge: ui("speakers.modal.featuredBadge", "Speaker vedette"),
+  }
+
+  const sessionTypeLabels = Object.fromEntries(
+    SESSION_TYPE_KEYS.map((k) => [k, ui(`programme.sessionType.${k}`, SESSION_TYPE_DEFAULTS[k])]),
+  )
+
+  const passLabels = {
+    recommended: ui("passes.recommended", "Recommandé"),
+    priceHt: ui("passes.detail.priceHt", "HT"),
+    vat: ui("passes.detail.vat", "TVA"),
+    ttc: ui("passes.detail.ttc", "TTC"),
+    viewDetails: ui("common.cta.viewDetails", "Voir les détails"),
+  }
 
   const heroSection = event.websiteSections.find((s) => s.sectionKey === "HERO")
   const whySection = event.websiteSections.find((s) => s.sectionKey === "WHY_PARTICIPATE")
   const aboutSection = event.websiteSections.find((s) => s.sectionKey === "ABOUT")
+  const countdownSection = event.websiteSections.find((s) => s.sectionKey === "COUNTDOWN")
+  const showCountdown = countdownSection?.isActive !== false
 
   const heroTitle = pick(heroSection?.titleFr, heroSection?.titleEn, locale) ?? event.titleFr
   const heroSubtitle = pick(heroSection?.subtitleFr, heroSection?.subtitleEn, locale) ?? ""
-  const heroDescription = pick(heroSection?.descriptionFr, heroSection?.descriptionEn, locale) ?? ""
   const heroBg = heroSection?.backgroundImage ?? event.heroImageDesktop ?? null
   const heroCtaUrl = heroSection?.ctaUrl ?? "/pass-duo"
 
   const whyTitle = pick(whySection?.titleFr, whySection?.titleEn, locale) ?? t.whyTitle
   const whyDesc = pick(whySection?.descriptionFr, whySection?.descriptionEn, locale) ?? ""
   const whyBenefits = whySection?.benefits ?? []
+  const whyBg = whySection?.backgroundImage ?? null
 
   const aboutTitle = pick(aboutSection?.titleFr, aboutSection?.titleEn, locale) ?? t.aboutTitle
   const aboutDesc = pick(aboutSection?.descriptionFr, aboutSection?.descriptionEn, locale) ?? ""
+  const aboutBg = aboutSection?.backgroundImage ?? null
 
   const featuredSpeakers = event.speakers.filter((s) => s.isFeatured).slice(0, 4)
   const speakersPreview = featuredSpeakers.length > 0 ? featuredSpeakers : event.speakers.slice(0, 4)
   const programmePreviewDays = event.programmeDays.slice(0, 1) // first day preview
   const featuredPasses = event.passes.slice(0, 3)
   const featuredPartners = event.partners.slice(0, 7)
+  const galleryPreview = event.galleryItems.slice(0, 6).map((item) => ({
+    id: item.id,
+    type: item.type as "IMAGE" | "VIDEO",
+    imageUrl: item.imageUrl,
+    videoUrl: item.videoUrl,
+    thumbnail: item.thumbnail,
+    caption: pick(item.captionFr, item.captionEn, locale),
+  }))
 
   const countdownTarget = event.countdownTarget ?? event.startDate
   const eventDateStr = event.endDate
@@ -129,130 +169,67 @@ export default async function HomePage() {
 
   return (
     <>
+      <EventStructuredData
+        event={event}
+        locale={locale}
+        url={(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.pmomastery.tn").replace(/\/$/, "")}
+      />
       {/* ============================ HERO ============================ */}
-      <section id="hero" className="relative min-h-screen flex items-center bg-pmo-navy-gradient text-white overflow-hidden">
-        {/* Background image */}
-        {heroBg && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={heroBg}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover opacity-25"
-          />
-        )}
-        <div className="absolute inset-0 bg-grid opacity-20" />
-        <div className="absolute -top-32 right-1/4 w-[500px] h-[500px] rounded-full bg-pmo-violet/20 blur-3xl" />
-        <div className="absolute -bottom-32 left-1/4 w-[400px] h-[400px] rounded-full bg-pmo-gold/10 blur-3xl" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 w-full">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-gold mb-6">
-              <Sparkles className="w-3.5 h-3.5" />
-              {t.heroBadge} · {event.editionName}
-            </div>
-
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05] text-balance">
-              {heroTitle}
-            </h1>
-
-            {heroSubtitle && (
-              <p className="text-lg sm:text-xl text-pmo-gold font-medium mt-4 flex items-center gap-2 flex-wrap">
-                <Calendar className="w-5 h-5" />
-                {heroSubtitle}
-                {event.venue && (
-                  <>
-                    <span className="text-white/40">·</span>
-                    <MapPin className="w-5 h-5" />
-                    {event.venue}, {event.city}
-                  </>
-                )}
-              </p>
-            )}
-
-            {heroDescription && (
-              <p className="text-white/70 text-lg mt-6 max-w-2xl text-pretty leading-relaxed">
-                {heroDescription}
-              </p>
-            )}
-
-            {/* Countdown */}
-            <div className="mt-8">
-              <p className="text-xs uppercase tracking-widest text-white/50 mb-3">{t.countdownLabel}</p>
-              <Countdown target={countdownTarget.toISOString()} locale={locale} />
-            </div>
-
-            {/* CTAs */}
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              {event.registrationEnabled && (
-                <Link
-                  href={heroCtaUrl.startsWith("#") ? "/pass-duo" : heroCtaUrl}
-                  className="inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-pmo-navy px-6 py-3 font-semibold shadow-premium hover:scale-[1.02] transition-transform"
-                >
-                  {t.heroCta}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              )}
-              <Link
-                href="/programme"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 backdrop-blur-sm text-white px-6 py-3 font-semibold hover:bg-white/10 transition-colors"
-              >
-                {t.heroCtaSecondary}
-              </Link>
-            </div>
-
-            {/* Quick stats */}
-            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
-              {[
-                { icon: Users, value: `${event.speakers.length}+`, label: locale === "fr" ? "Intervenants" : "Speakers" },
-                { icon: Calendar, value: `${event.programmeDays.length}`, label: locale === "fr" ? "Jours" : "Days" },
-                { icon: Ticket, value: `${event.passes.length}`, label: locale === "fr" ? "Pass disponibles" : "Passes" },
-                { icon: Network, value: `${event.partners.length}`, label: locale === "fr" ? "Partenaires" : "Partners" },
-              ].map((stat, i) => (
-                <div key={i} className="rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm p-3">
-                  <stat.icon className="w-4 h-4 text-pmo-gold mb-1.5" />
-                  <div className="font-display text-xl font-bold">{stat.value}</div>
-                  <div className="text-[11px] text-white/60 uppercase tracking-wide">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSection
+        heroBg={heroBg}
+        badgeText={`${t.heroBadge} · ${event.editionName}`}
+        title={heroTitle}
+        subtitle={heroSubtitle || undefined}
+        ctaLabel={t.heroCta}
+        ctaHref={heroCtaUrl.startsWith("#") ? "/pass-duo" : heroCtaUrl}
+        showCta={event.registrationEnabled}
+        ctaSecondaryLabel={t.heroCtaSecondary}
+        ctaSecondaryHref="/programme"
+        showCountdown={showCountdown}
+        countdownLabel={t.countdownLabel}
+        countdownTarget={countdownTarget.toISOString()}
+        countdownLabels={countdownLabels}
+      />
 
       {/* ====================== WHY PARTICIPATE ====================== */}
       {whySection?.isActive !== false && whyBenefits.length > 0 && (
-        <section className="py-20 sm:py-28 bg-[#f6f7fb] relative overflow-hidden">
-          <div className="absolute inset-0 bg-grid-dark opacity-50" />
+        <section className="py-20 sm:py-28 bg-white relative overflow-hidden">
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12 max-w-3xl mx-auto">
-              <div className="inline-flex items-center gap-2 rounded-full bg-pmo-violet/10 border border-pmo-violet/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-violet mb-4">
-                <Target className="w-3.5 h-3.5" />
-                {t.whyTitle}
-              </div>
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">{whyTitle}</h2>
-              {whyDesc && (
-                <p className="text-muted-foreground text-lg text-pretty">{whyDesc}</p>
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              {whyBg && (
+                <div className="relative rounded-3xl overflow-hidden shadow-premium-lg aspect-[4/3] lg:order-1">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={whyBg} alt="" className="w-full h-full object-cover" />
+                </div>
               )}
-            </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {whyBenefits.map((benefit) => {
-                const Icon = ICONS[benefit.icon ?? ""] ?? Sparkles
-                const title = pick(benefit.titleFr, benefit.titleEn, locale) ?? ""
-                const desc = pick(benefit.descriptionFr, benefit.descriptionEn, locale) ?? ""
-                return (
-                  <div
-                    key={benefit.id}
-                    className="group rounded-2xl bg-white border border-border p-6 hover:shadow-premium-lg hover:border-primary/30 transition-all hover:-translate-y-1"
-                  >
-                    <div className="w-12 h-12 rounded-xl bg-pmo-violet/10 flex items-center justify-center mb-4 group-hover:bg-pmo-violet-gradient group-hover:scale-105 transition-all">
-                      <Icon className="w-6 h-6 text-pmo-violet group-hover:text-white transition-colors" />
-                    </div>
-                    <h3 className="font-display text-lg font-semibold mb-2">{title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+              <div className={whyBg ? "lg:order-2" : "max-w-3xl"}>
+                <p className="text-[#e5005a] font-semibold text-xs sm:text-sm uppercase tracking-[0.15em] mb-5">
+                  {whyTitle}
+                </p>
+                <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.15] mb-6 text-balance">{whyTitle}</h2>
+                {whyDesc && (
+                  <div className="text-muted-foreground text-[15px] sm:text-base leading-[1.7] mb-8 text-pretty">
+                    {whyDesc.split("\n").filter((p) => p.trim().length > 0).map((paragraph, i) => (
+                      <p key={i} className="mb-3">{paragraph}</p>
+                    ))}
                   </div>
-                )
-              })}
+                )}
+
+                <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
+                  {whyBenefits.map((benefit) => {
+                    const title = pick(benefit.titleFr, benefit.titleEn, locale) ?? ""
+                    return (
+                      <div key={benefit.id} className="flex items-start gap-3">
+                        <span className="hero-btn-gradient shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5">
+                          <Check className="w-3.5 h-3.5 text-white" />
+                        </span>
+                        <span className="text-sm font-medium text-foreground leading-snug">{title}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -292,6 +269,13 @@ export default async function HomePage() {
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-br from-pmo-violet/20 to-pmo-gold/10 rounded-3xl blur-2xl" />
                 <div className="relative rounded-3xl bg-pmo-navy-gradient text-white p-8 shadow-premium-lg overflow-hidden">
+                  {aboutBg && (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={aboutBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-pmo-navy via-pmo-navy/85 to-pmo-navy/60" />
+                    </>
+                  )}
                   <div className="absolute inset-0 bg-grid opacity-20" />
                   <div className="relative">
                     <div className="flex items-center gap-3 mb-6">
@@ -336,7 +320,7 @@ export default async function HomePage() {
                         className="mt-6 inline-flex items-center gap-2 text-sm text-pmo-gold hover:underline"
                       >
                         <MapPin className="w-4 h-4" />
-                        {locale === "fr" ? "Voir le lieu" : "View venue"}
+                        {t.venueLink}
                         <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     )}
@@ -350,7 +334,7 @@ export default async function HomePage() {
 
       {/* ====================== SPEAKERS PREVIEW ====================== */}
       {speakersPreview.length > 0 && (
-        <section className="py-20 sm:py-28 bg-[#f6f7fb] relative overflow-hidden">
+        <section className="py-20 sm:py-28 bg-pmo-light-bg relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-dark opacity-50" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
@@ -362,7 +346,7 @@ export default async function HomePage() {
               <p className="text-muted-foreground text-lg">{t.speakersSubtitle}</p>
             </div>
 
-            <SpeakersHomePreview speakers={event.speakers} locale={locale} />
+            <SpeakersHomePreview speakers={event.speakers} locale={locale} labels={speakerLabels} />
 
             <div className="text-center mt-10">
               <Link
@@ -390,7 +374,7 @@ export default async function HomePage() {
               <p className="text-muted-foreground text-lg">{t.programmeSubtitle}</p>
             </div>
 
-            <ProgrammeHomePreview days={programmePreviewDays} locale={locale} />
+            <ProgrammeHomePreview days={programmePreviewDays} locale={locale} sessionTypeLabels={sessionTypeLabels} />
 
             <div className="text-center mt-10">
               <Link
@@ -422,7 +406,7 @@ export default async function HomePage() {
               <p className="text-white/70 text-lg">{t.passesSubtitle}</p>
             </div>
 
-            <PassesHomePreview passes={featuredPasses} locale={locale} />
+            <PassesHomePreview passes={featuredPasses} locale={locale} labels={passLabels} />
 
             <div className="text-center mt-10">
               <Link
@@ -475,8 +459,37 @@ export default async function HomePage() {
                 href="/partenaires"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
               >
-                {locale === "fr" ? "Voir tous les partenaires" : "View all partners"}
+                {t.partnersViewAll}
                 <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ====================== GALLERY PREVIEW ====================== */}
+      {galleryPreview.length > 0 && (
+        <section className="py-20 sm:py-28 bg-pmo-light-bg relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-dark opacity-50" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 rounded-full bg-pmo-violet/10 border border-pmo-violet/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-violet mb-4">
+                <Images className="w-3.5 h-3.5" />
+                {t.galleryTitle}
+              </div>
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">{t.galleryTitle}</h2>
+              <p className="text-muted-foreground text-lg">{t.gallerySubtitle}</p>
+            </div>
+
+            <GalleryGrid items={galleryPreview} emptyLabel="" />
+
+            <div className="text-center mt-10">
+              <Link
+                href="/galerie"
+                className="inline-flex items-center gap-2 rounded-xl border-2 border-primary/20 hover:border-primary hover:bg-primary/5 px-6 py-3 font-semibold text-primary transition-all"
+              >
+                {t.galleryCta}
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>

@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       slug,
       firstName: body.firstName,
       lastName: body.lastName,
-      photo: safeUrl(body.photo) ?? body.photo ?? null,
+      photo: safeUrl(body.photo),
       positionFr: body.positionFr ?? null,
       positionEn: body.positionEn ?? null,
       company: body.company ?? null,

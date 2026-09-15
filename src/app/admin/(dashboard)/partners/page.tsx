@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
   SelectContent,
@@ -23,8 +24,37 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Loader2, Plus, Save, Pencil, Trash2, Handshake, ExternalLink } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Loader2, Plus, Save, Pencil, Trash2, Handshake, ExternalLink, AlertTriangle, GripVertical } from "lucide-react"
 import { toast } from "sonner"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { cn } from "@/lib/utils"
 
 interface Partner {
   id: string
@@ -43,6 +73,7 @@ const CATEGORIES: Record<string, { label: string; color: string }> = {
   DIAMOND: { label: "Diamond", color: "bg-cyan-100 text-cyan-700" },
   GOLD: { label: "Gold", color: "bg-amber-100 text-amber-700" },
   SILVER: { label: "Silver", color: "bg-zinc-100 text-zinc-700" },
+  BRONZE: { label: "Bronze", color: "bg-orange-100 text-orange-700" },
   MEDIA: { label: "Média", color: "bg-blue-100 text-blue-700" },
   INSTITUTIONAL: { label: "Institutionnel", color: "bg-emerald-100 text-emerald-700" },
   PARTNER: { label: "Partenaire", color: "bg-zinc-100 text-zinc-700" },
@@ -124,9 +155,9 @@ export default function PartnersPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Supprimer ce partenaire ?")) return
     try {
-      await fetch(`/api/admin/partners/${id}`, { method: "DELETE" })
+      const res = await fetch(`/api/admin/partners/${id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error("Failed")
       toast.success("Partenaire supprimé.")
       await load()
     } catch {
@@ -134,7 +165,45 @@ export default function PartnersPage() {
     }
   }
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
   const filtered = list.filter((p) => filter === "all" || p.category === filter)
+
+  async function onDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = filtered.findIndex((p) => p.id === active.id)
+    const newIndex = filtered.findIndex((p) => p.id === over.id)
+    if (oldIndex < 0 || newIndex < 0) return
+
+    const reordered = arrayMove(filtered, oldIndex, newIndex).map((p, idx) => ({
+      ...p,
+      displayOrder: idx,
+    }))
+
+    // Optimistic update: splice the reordered subset back into the full
+    // list, then re-sort so it matches what the API would return.
+    setList((prev) => {
+      const byId = new Map(reordered.map((p) => [p.id, p]))
+      const merged = prev.map((p) => byId.get(p.id) ?? p)
+      return [...merged].sort(
+        (a, b) => a.displayOrder - b.displayOrder || a.name.localeCompare(b.name),
+      )
+    })
+
+    await Promise.all(
+      reordered.map((p) =>
+        fetch(`/api/admin/partners/${p.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(p),
+        }),
+      ),
+    )
+  }
 
   if (loading) {
     return (
@@ -196,59 +265,26 @@ export default function PartnersPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((p) => {
-            const cat = CATEGORIES[p.category] ?? CATEGORIES.PARTNER
-            return (
-              <div key={p.id} className="bg-white rounded-2xl shadow-premium p-5 group">
-                <div className="flex items-start justify-between mb-3">
-                  <Badge className={cat.color} variant="secondary">
-                    {cat.label}
-                  </Badge>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => startEdit(p)}
-                      className="p-1 rounded-md text-muted-foreground hover:bg-muted hover:text-primary"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => remove(p.id)}
-                      className="p-1 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-                <div className="aspect-[3/2] bg-muted rounded-lg overflow-hidden flex items-center justify-center mb-3">
-                  {p.logo ? (
-                     
-                    <img src={p.logo} alt={p.name} className="w-full h-full object-contain p-3" />
-                  ) : (
-                    <Handshake className="w-8 h-8 text-muted-foreground/50" />
-                  )}
-                </div>
-                <div className="font-display font-semibold text-center truncate">{p.name}</div>
-                {p.websiteUrl && (
-                  <a
-                    href={p.websiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-primary hover:underline flex items-center justify-center gap-1 mt-1"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    Site web
-                  </a>
-                )}
-              </div>
-            )
-          })}
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <SortableContext items={filtered.map((p) => p.id)} strategy={rectSortingStrategy}>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filtered.map((p) => (
+                <SortablePartnerCard
+                  key={p.id}
+                  partner={p}
+                  category={CATEGORIES[p.category] ?? CATEGORIES.PARTNER}
+                  onEdit={() => startEdit(p)}
+                  onDelete={() => remove(p.id)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {/* Editor */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editing && "id" in editing && editing.id ? "Modifier" : "Nouveau"} partenaire
@@ -297,13 +333,30 @@ export default function PartnersPage() {
                 />
               </Field>
 
-              <Field label="Description (FR)">
-                <Textarea
-                  value={editing.descriptionFr ?? ""}
-                  onChange={(e) => setEditing({ ...editing, descriptionFr: e.target.value })}
-                  rows={3}
-                />
-              </Field>
+              <Tabs defaultValue="fr">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="fr">🇫🇷 FR</TabsTrigger>
+                  <TabsTrigger value="en">🇬🇧 EN</TabsTrigger>
+                </TabsList>
+                <TabsContent value="fr">
+                  <Field label="Description (FR)">
+                    <Textarea
+                      value={editing.descriptionFr ?? ""}
+                      onChange={(e) => setEditing({ ...editing, descriptionFr: e.target.value })}
+                      rows={3}
+                    />
+                  </Field>
+                </TabsContent>
+                <TabsContent value="en">
+                  <Field label="Description (EN)">
+                    <Textarea
+                      value={editing.descriptionEn ?? ""}
+                      onChange={(e) => setEditing({ ...editing, descriptionEn: e.target.value })}
+                      rows={3}
+                    />
+                  </Field>
+                </TabsContent>
+              </Tabs>
 
               <div className="flex items-center justify-between p-3 rounded-lg border">
                 <Label className="text-sm">Actif</Label>
@@ -349,6 +402,124 @@ function Field({
         {required && <span className="text-destructive ml-1">*</span>}
       </Label>
       {children}
+    </div>
+  )
+}
+
+function SortablePartnerCard({
+  partner: p,
+  category: cat,
+  onEdit,
+  onDelete,
+}: {
+  partner: Partner
+  category: { label: string; color: string }
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: p.id,
+  })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "bg-white rounded-2xl shadow-premium p-5 group relative",
+        isDragging && "opacity-50 shadow-premium-lg ring-2 ring-primary z-10",
+      )}
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-1">
+          <button
+            {...attributes}
+            {...listeners}
+            className="p-1 -ml-1 rounded-md text-muted-foreground/50 hover:text-muted-foreground cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-100 transition-opacity"
+            aria-label="Réordonner"
+          >
+            <GripVertical className="w-3.5 h-3.5" />
+          </button>
+          <Badge className={cat.color} variant="secondary">
+            {cat.label}
+          </Badge>
+        </div>
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={onEdit}
+            className="p-1 rounded-md text-muted-foreground hover:bg-muted hover:text-primary"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button className="p-1 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <div className="mx-auto sm:mx-0 flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-lg bg-muted overflow-hidden shrink-0 flex items-center justify-center">
+                    {p.logo ? (
+
+                      <img src={p.logo} alt={p.name} className="w-full h-full object-contain p-1.5" />
+                    ) : (
+                      <Handshake className="w-6 h-6 text-muted-foreground/50" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <AlertDialogTitle className="truncate">{p.name}</AlertDialogTitle>
+                    <Badge className={cat.color} variant="secondary">
+                      {cat.label}
+                    </Badge>
+                  </div>
+                </div>
+                <AlertDialogDescription className="flex items-start gap-2 pt-2">
+                  <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                  <span>
+                    Ce partenaire sera définitivement supprimé{p.logo ? ", ainsi que son logo" : ""}.
+                    Cette action est irréversible.
+                  </span>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={onDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Supprimer définitivement
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+      <div className="aspect-[3/2] bg-muted rounded-lg overflow-hidden flex items-center justify-center mb-3">
+        {p.logo ? (
+
+          <img src={p.logo} alt={p.name} className="w-full h-full object-contain p-3" />
+        ) : (
+          <Handshake className="w-8 h-8 text-muted-foreground/50" />
+        )}
+      </div>
+      <div className="font-display font-semibold text-center truncate">{p.name}</div>
+      {p.websiteUrl && (
+        <a
+          href={p.websiteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-primary hover:underline flex items-center justify-center gap-1 mt-1"
+        >
+          <ExternalLink className="w-3 h-3" />
+          Site web
+        </a>
+      )}
     </div>
   )
 }

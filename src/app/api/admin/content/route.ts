@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { requireAdmin, ok, fail, safeUrl } from "@/lib/api"
+import { deleteUploadedImage } from "@/lib/uploads"
 import { Prisma } from "@prisma/client"
 
 export const dynamic = "force-dynamic"
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
       ctaTextFr: body.ctaTextFr ?? null,
       ctaTextEn: body.ctaTextEn ?? null,
       ctaUrl: safeUrl(body.ctaUrl),
-      backgroundImage: safeUrl(body.backgroundImage) ?? body.backgroundImage ?? null,
+      backgroundImage: safeUrl(body.backgroundImage),
       isActive: body.isActive ?? true,
     }
 
@@ -69,6 +70,10 @@ export async function POST(req: NextRequest) {
         where: { id: existing.id },
         data: payload,
       })
+      // A new background image replaced the old one — remove the orphan.
+      if (existing.backgroundImage && existing.backgroundImage !== payload.backgroundImage) {
+        await deleteUploadedImage(existing.backgroundImage)
+      }
     } else {
       section = await db.websiteSection.create({ data: payload })
     }

@@ -4,6 +4,14 @@ import { useEffect, useState } from "react"
 
 interface CountdownProps {
   target: string // ISO date string
+  labels: {
+    days: string
+    hours: string
+    minutes: string
+    seconds: string
+    inProgress: string
+    ended: string
+  }
 }
 
 function calcRemaining(target: number) {
@@ -17,14 +25,7 @@ function calcRemaining(target: number) {
   return { days, hours, minutes, seconds, state: "upcoming" as const }
 }
 
-const UNITS = [
-  { key: "days", labelFr: "Jours", labelEn: "Days" },
-  { key: "hours", labelFr: "Heures", labelEn: "Hours" },
-  { key: "minutes", labelFr: "Minutes", labelEn: "Minutes" },
-  { key: "seconds", labelFr: "Secondes", labelEn: "Seconds" },
-] as const
-
-export function Countdown({ target, locale = "fr" }: CountdownProps & { locale?: "fr" | "en" }) {
+export function Countdown({ target, labels }: CountdownProps) {
   const targetTime = new Date(target).getTime()
   const [data, setData] = useState(() => calcRemaining(targetTime))
   const [mounted, setMounted] = useState(false)
@@ -36,6 +37,13 @@ export function Countdown({ target, locale = "fr" }: CountdownProps & { locale?:
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [targetTime])
+
+  const units = [
+    { key: "days" as const, label: labels.days },
+    { key: "hours" as const, label: labels.hours },
+    { key: "minutes" as const, label: labels.minutes },
+    { key: "seconds" as const, label: labels.seconds },
+  ]
 
   const now = Date.now()
   const startOfDay = new Date(targetTime).setHours(0, 0, 0, 0)
@@ -49,9 +57,7 @@ export function Countdown({ target, locale = "fr" }: CountdownProps & { locale?:
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
         </span>
-        <span className="font-display text-xl font-bold text-emerald-400">
-          {locale === "fr" ? "Événement en cours" : "Event in progress"}
-        </span>
+        <span className="font-display text-xl font-bold text-emerald-400">{labels.inProgress}</span>
       </div>
     )
   }
@@ -59,16 +65,14 @@ export function Countdown({ target, locale = "fr" }: CountdownProps & { locale?:
   if (data.state === "ended") {
     return (
       <div className="inline-flex items-center gap-3 rounded-2xl bg-white/5 border border-white/10 px-6 py-4">
-        <span className="font-display text-xl font-bold text-white/70">
-          {locale === "fr" ? "Événement terminé" : "Event ended"}
-        </span>
+        <span className="font-display text-xl font-bold text-white/70">{labels.ended}</span>
       </div>
     )
   }
 
   return (
     <div className="grid grid-cols-4 gap-2 sm:gap-3 max-w-md">
-      {UNITS.map((u) => {
+      {units.map((u) => {
         const value = data[u.key]
         return (
           <div
@@ -80,7 +84,7 @@ export function Countdown({ target, locale = "fr" }: CountdownProps & { locale?:
               {mounted ? String(value).padStart(2, "0") : "--"}
             </div>
             <div className="relative text-[10px] sm:text-xs uppercase tracking-widest text-white/60 mt-1">
-              {locale === "fr" ? u.labelFr : u.labelEn}
+              {u.label}
             </div>
           </div>
         )

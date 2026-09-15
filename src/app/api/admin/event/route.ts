@@ -5,18 +5,29 @@ import { Prisma } from "@prisma/client"
 
 export const dynamic = "force-dynamic"
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { error } = await requireAdmin()
   if (error) return error
 
-  const event = await db.event.findFirst({
-    where: { isActive: true },
-    orderBy: { startDate: "desc" },
-    include: {
-      contactInfo: true,
-      websiteSections: { include: { benefits: { orderBy: { displayOrder: "asc" } } } },
-    },
-  })
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get("id")
+
+  const event = id
+    ? await db.event.findUnique({
+        where: { id },
+        include: {
+          contactInfo: true,
+          websiteSections: { include: { benefits: { orderBy: { displayOrder: "asc" } } } },
+        },
+      })
+    : await db.event.findFirst({
+        where: { isActive: true },
+        orderBy: { startDate: "desc" },
+        include: {
+          contactInfo: true,
+          websiteSections: { include: { benefits: { orderBy: { displayOrder: "asc" } } } },
+        },
+      })
 
   const allEvents = await db.event.findMany({
     orderBy: { startDate: "desc" },
@@ -71,10 +82,10 @@ export async function POST(req: NextRequest) {
       latitude: typeof body.latitude === "number" ? body.latitude : null,
       longitude: typeof body.longitude === "number" ? body.longitude : null,
       mapUrl: safeUrl(body.mapUrl),
-      heroImageDesktop: safeUrl(body.heroImageDesktop) ?? body.heroImageDesktop ?? null,
-      heroImageMobile: safeUrl(body.heroImageMobile) ?? body.heroImageMobile ?? null,
-      heroLogo: safeUrl(body.heroLogo) ?? body.heroLogo ?? null,
-      ogImage: safeUrl(body.ogImage) ?? body.ogImage ?? null,
+      heroImageDesktop: safeUrl(body.heroImageDesktop),
+      heroImageMobile: safeUrl(body.heroImageMobile),
+      heroLogo: safeUrl(body.heroLogo),
+      ogImage: safeUrl(body.ogImage),
       registrationEnabled: body.registrationEnabled ?? true,
       status: body.status ?? "UPCOMING",
       isActive: body.isActive ?? true,
@@ -84,11 +95,17 @@ export async function POST(req: NextRequest) {
       await db.event.updateMany({ where: { isActive: true }, data: { isActive: false } })
     }
 
-    const event = await db.event.create({ data })
-    await db.contactInfo.create({ data: { eventId: event.id } })
+    const event = await db.$transaction(async (tx) => {
+      const created = await tx.event.create({ data })
+      await tx.contactInfo.create({ data: { eventId: created.id } })
+      return created
+    })
 
     return ok(event, 201)
   } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return fail("Ce slug est déjà utilisé par une autre édition.", 400)
+    }
     return fail(
       e instanceof Error ? e.message : "Failed to create event",
       500,

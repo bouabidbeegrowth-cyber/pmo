@@ -25,9 +25,19 @@ interface Speaker {
 interface Props {
   speakers: Speaker[]
   locale: Locale
+  labels: {
+    searchPlaceholder: string
+    filterAll: string
+    filterFeatured: string
+    noResults: string
+    badgeFeatured: string
+    viewProfile: string
+    biography: string
+    featuredBadge: string
+  }
 }
 
-export function SpeakersGrid({ speakers, locale }: Props) {
+export function SpeakersGrid({ speakers, locale, labels }: Props) {
   const [selected, setSelected] = useState<Speaker | null>(null)
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState<"all" | "featured">("all")
@@ -48,7 +58,7 @@ export function SpeakersGrid({ speakers, locale }: Props) {
   }, [speakers, query, filter, locale])
 
   return (
-    <section className="py-12 sm:py-16 bg-[#f6f7fb] relative overflow-hidden">
+    <section className="py-12 sm:py-16 bg-pmo-light-bg relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-dark opacity-50" />
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Search + filter */}
@@ -58,7 +68,7 @@ export function SpeakersGrid({ speakers, locale }: Props) {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={locale === "fr" ? "Rechercher un intervenant…" : "Search a speaker…"}
+              placeholder={labels.searchPlaceholder}
               className="pl-9 bg-white"
             />
           </div>
@@ -69,7 +79,7 @@ export function SpeakersGrid({ speakers, locale }: Props) {
                 filter === "all" ? "bg-pmo-violet text-white" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {locale === "fr" ? "Tous" : "All"}
+              {labels.filterAll}
             </button>
             <button
               onClick={() => setFilter("featured")}
@@ -78,16 +88,14 @@ export function SpeakersGrid({ speakers, locale }: Props) {
               }`}
             >
               <Star className="w-3.5 h-3.5" />
-              {locale === "fr" ? "Vedettes" : "Featured"}
+              {labels.filterFeatured}
             </button>
           </div>
         </div>
 
         {filtered.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-muted-foreground">
-              {locale === "fr" ? "Aucun intervenant trouvé." : "No speakers found."}
-            </p>
+            <p className="text-muted-foreground">{labels.noResults}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -118,13 +126,13 @@ export function SpeakersGrid({ speakers, locale }: Props) {
                     {sp.isFeatured && (
                       <div className="absolute top-2 right-2 rounded-full bg-pmo-gold text-pmo-navy text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 flex items-center gap-0.5">
                         <Star className="w-2.5 h-2.5 fill-current" />
-                        {locale === "fr" ? "Vedette" : "Featured"}
+                        {labels.badgeFeatured}
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0">
                       <span className="inline-flex items-center gap-1 text-xs text-white font-medium">
-                        {locale === "fr" ? "Voir le profil" : "View profile"}
+                        {labels.viewProfile}
                         <ArrowRight className="w-3 h-3" />
                       </span>
                     </div>
@@ -152,6 +160,7 @@ export function SpeakersGrid({ speakers, locale }: Props) {
         locale={locale}
         open={!!selected}
         onOpenChange={(o) => !o && setSelected(null)}
+        labels={labels}
       />
     </section>
   )

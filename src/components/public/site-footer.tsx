@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { Linkedin, Facebook, Instagram, Youtube, Mail, Phone, MapPin, Globe } from "lucide-react"
-import type { Locale } from "@/lib/site-data"
 
 interface ContactInfo {
   email?: string | null
@@ -17,39 +16,36 @@ interface ContactInfo {
   websiteUrl?: string | null
 }
 
-interface FooterProps {
-  locale: Locale
-  contact: ContactInfo | null
-  footerText?: string | null
-  editionName?: string | null
+interface FooterLabels {
+  nav: string
+  home: string
+  event: string
+  programme: string
+  passesHeading: string
+  passEvenement: string
+  passFormation: string
+  passDuo: string
+  speakers: string
+  organizers: string
+  partners: string
+  gallery: string
+  contact: string
+  followUs: string
+  rights: string
+  taglineDefault: string
+  bottomTagline: string
 }
 
-export function SiteFooter({ locale, contact, footerText, editionName }: FooterProps) {
-  const t = locale === "fr"
-    ? {
-        nav: "Navigation",
-        event: "Événement",
-        programme: "Programme",
-        passes: "Pass",
-        speakers: "Intervenants",
-        organizers: "Organisateurs",
-        partners: "Partenaires",
-        contact: "Contact",
-        followUs: "Suivez-nous",
-        rights: "Tous droits réservés.",
-      }
-    : {
-        nav: "Navigation",
-        event: "Event",
-        programme: "Programme",
-        passes: "Pass",
-        speakers: "Speakers",
-        organizers: "Organizers",
-        partners: "Partners",
-        contact: "Contact",
-        followUs: "Follow us",
-        rights: "All rights reserved.",
-      }
+interface FooterProps {
+  contact: ContactInfo | null
+  footerText?: string | null
+  copyrightText?: string | null
+  editionName?: string | null
+  logo?: string | null
+  labels: FooterLabels
+}
+
+export function SiteFooter({ contact, footerText, copyrightText, editionName, logo, labels: t }: FooterProps) {
 
   return (
     <footer className="bg-pmo-navy-gradient text-white relative overflow-hidden mt-auto">
@@ -61,20 +57,25 @@ export function SiteFooter({ locale, contact, footerText, editionName }: FooterP
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-pmo-violet-gradient flex items-center justify-center font-display font-bold text-white text-base shadow-premium">
-                P
-              </div>
-              <span className="font-display font-semibold text-white text-lg tracking-tight">
-                PMO Mastery
-              </span>
+              {logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logo} alt="PMO Mastery" className="h-9 w-auto" />
+              ) : (
+                <>
+                  <div className="w-9 h-9 rounded-xl bg-pmo-violet-gradient flex items-center justify-center font-display font-bold text-white text-base shadow-premium">
+                    P
+                  </div>
+                  <span className="font-display font-semibold text-white text-lg tracking-tight">
+                    PMO Mastery
+                  </span>
+                </>
+              )}
             </Link>
             {editionName && (
               <p className="text-pmo-gold text-sm font-medium mb-3">{editionName}</p>
             )}
             <p className="text-white/60 text-sm leading-relaxed">
-              {footerText ?? (locale === "fr"
-                ? "Événement international pour les leaders des PMO."
-                : "International event for PMO leaders.")}
+              {footerText ?? t.taglineDefault}
             </p>
           </div>
 
@@ -86,7 +87,7 @@ export function SiteFooter({ locale, contact, footerText, editionName }: FooterP
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link href="/" className="text-white/70 hover:text-white transition-colors">
-                  {locale === "fr" ? "Accueil" : "Home"}
+                  {t.home}
                 </Link>
               </li>
               <li>
@@ -110,6 +111,11 @@ export function SiteFooter({ locale, contact, footerText, editionName }: FooterP
                 </Link>
               </li>
               <li>
+                <Link href="/galerie" className="text-white/70 hover:text-white transition-colors">
+                  {t.gallery}
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="text-white/70 hover:text-white transition-colors">
                   {t.contact}
                 </Link>
@@ -120,22 +126,22 @@ export function SiteFooter({ locale, contact, footerText, editionName }: FooterP
           {/* Passes */}
           <div>
             <h4 className="font-display font-semibold text-sm uppercase tracking-widest text-white/50 mb-4">
-              {t.passes}
+              {t.passesHeading}
             </h4>
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link href="/pass-evenement" className="text-white/70 hover:text-white transition-colors">
-                  {locale === "fr" ? "Pass Événement" : "Event Pass"}
+                  {t.passEvenement}
                 </Link>
               </li>
               <li>
                 <Link href="/pass-formation" className="text-white/70 hover:text-white transition-colors">
-                  {locale === "fr" ? "Pass Formation" : "Training Pass"}
+                  {t.passFormation}
                 </Link>
               </li>
               <li>
                 <Link href="/pass-duo" className="text-white/70 hover:text-white transition-colors">
-                  {locale === "fr" ? "Pass Duo" : "Duo Pass"}
+                  {t.passDuo}
                 </Link>
               </li>
             </ul>
@@ -219,10 +225,10 @@ export function SiteFooter({ locale, contact, footerText, editionName }: FooterP
 
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
           <p>
-            © {new Date().getFullYear()} PMO Mastery — Empowerment Paths. {t.rights}
+            {copyrightText || `© ${new Date().getFullYear()} PMO Mastery — Empowerment Paths. ${t.rights}`}
           </p>
           <p className="text-white/40">
-            {locale === "fr" ? "Conçu avec passion pour les leaders PMO" : "Crafted with passion for PMO leaders"}
+            {t.bottomTagline}
           </p>
         </div>
       </div>

@@ -39,19 +39,22 @@ interface Day {
 interface Props {
   days: Day[]
   locale: Locale
+  sessionTypeLabels: Record<string, string>
 }
 
-const TYPE_STYLES: Record<string, { label: string; color: string; dot: string }> = {
-  KEYNOTE: { label: "Keynote", color: "bg-violet-100 text-violet-700 border-violet-200", dot: "bg-violet-500" },
-  PANEL: { label: "Panel", color: "bg-blue-100 text-blue-700 border-blue-200", dot: "bg-blue-500" },
-  BREAK: { label: "Pause", color: "bg-amber-100 text-amber-700 border-amber-200", dot: "bg-amber-500" },
-  NETWORKING: { label: "Networking", color: "bg-emerald-100 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" },
-  CLOSING: { label: "Clôture", color: "bg-rose-100 text-rose-700 border-rose-200", dot: "bg-rose-500" },
-  WORKSHOP: { label: "Atelier", color: "bg-cyan-100 text-cyan-700 border-cyan-200", dot: "bg-cyan-500" },
-  SESSION: { label: "Session", color: "bg-zinc-100 text-zinc-700 border-zinc-200", dot: "bg-zinc-500" },
+const TYPE_STYLES: Record<string, { color: string; dot: string }> = {
+  KEYNOTE: { color: "bg-pmo-blue/10 text-pmo-blue border-pmo-blue/20", dot: "bg-pmo-blue" },
+  PANEL: { color: "bg-pmo-sky-blue/15 text-pmo-sky-blue border-pmo-sky-blue/25", dot: "bg-pmo-sky-blue" },
+  BREAK: { color: "bg-pmo-bright-orange/10 text-pmo-bright-orange border-pmo-bright-orange/20", dot: "bg-pmo-bright-orange" },
+  NETWORKING: { color: "bg-pmo-pink/10 text-pmo-pink border-pmo-pink/20", dot: "bg-pmo-pink" },
+  CLOSING: { color: "bg-pmo-navy-deep/10 text-pmo-navy-deep border-pmo-navy-deep/20", dot: "bg-pmo-navy-deep" },
+  WORKSHOP: { color: "bg-pmo-sky-blue/15 text-pmo-sky-blue border-pmo-sky-blue/25", dot: "bg-pmo-sky-blue" },
+  SESSION: { color: "bg-pmo-text-navy/10 text-pmo-text-navy border-pmo-text-navy/20", dot: "bg-pmo-text-navy" },
+  PMO_TALKS: { color: "bg-pmo-blue/10 text-pmo-blue border-pmo-blue/20", dot: "bg-pmo-blue" },
+  MASTERCLASS: { color: "bg-pmo-pink/10 text-pmo-pink border-pmo-pink/20", dot: "bg-pmo-pink" },
 }
 
-export function ProgrammeHomePreview({ days, locale }: Props) {
+export function ProgrammeHomePreview({ days, locale, sessionTypeLabels }: Props) {
   const dateLocale = locale === "fr" ? fr : enUS
   // Show first day, first 5 sessions as preview
   const day = days[0]
@@ -62,7 +65,7 @@ export function ProgrammeHomePreview({ days, locale }: Props) {
     <div className="max-w-4xl mx-auto">
       <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-premium">
         {/* Day header */}
-        <div className="bg-pmo-navy-gradient text-white px-6 py-4 flex items-center justify-between">
+        <div className="bg-pmo-navy-deep text-white px-6 py-4 flex items-center justify-between">
           <div>
             <div className="font-display font-semibold text-lg">
               {locale === "en" ? day.nameEn ?? day.nameFr : day.nameFr}
@@ -71,13 +74,14 @@ export function ProgrammeHomePreview({ days, locale }: Props) {
               {format(new Date(day.date), "EEEE dd MMMM yyyy", { locale: dateLocale })}
             </div>
           </div>
-          <Clock3 className="w-5 h-5 text-pmo-gold" />
+          <Clock3 className="w-5 h-5 text-pmo-sky-blue" />
         </div>
 
         {/* Sessions */}
         <div className="divide-y divide-border">
           {previewSessions.map((session) => {
             const typeMeta = TYPE_STYLES[session.sessionType] ?? TYPE_STYLES.SESSION
+            const typeLabel = sessionTypeLabels[session.sessionType] ?? session.sessionType
             const title = locale === "en"
               ? session.titleEn ?? session.titleFr
               : session.titleFr
@@ -93,7 +97,7 @@ export function ProgrammeHomePreview({ days, locale }: Props) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className={cn("text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border", typeMeta.color)}>
-                      {typeMeta.label}
+                      {typeLabel}
                     </span>
                     {session.language && (
                       <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-muted text-muted-foreground">

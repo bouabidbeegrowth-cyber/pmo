@@ -48,6 +48,14 @@ export async function getActiveEvent() {
         where: { isActive: true },
         orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
       },
+      popups: {
+        where: { isActive: true },
+        orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }],
+      },
+      galleryItems: {
+        where: { isActive: true },
+        orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }],
+      },
       websiteSections: {
         include: { benefits: { orderBy: { displayOrder: "asc" } } },
       },
@@ -58,7 +66,42 @@ export async function getActiveEvent() {
 
 export type EventWithRelations = Awaited<ReturnType<typeof getActiveEvent>>
 
+/**
+ * All event editions that have at least one active gallery item, newest
+ * first, each with its active gallery items. Used by the /galerie page,
+ * which — unlike the rest of the public site — shows every edition, not
+ * just the currently active one.
+ */
+export async function getEditionsWithGallery() {
+  const events = await db.event.findMany({
+    where: { galleryItems: { some: { isActive: true } } },
+    orderBy: { startDate: "desc" },
+    select: {
+      id: true,
+      editionName: true,
+      isActive: true,
+      galleryItems: {
+        where: { isActive: true },
+        orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }],
+      },
+    },
+  })
+  return events
+}
+
 /** Helper to pick the right localized string. */
 export function pick<T>(fr: T | null | undefined, en: T | null | undefined, locale: Locale): T | null | undefined {
   return locale === "en" ? (en ?? fr) : fr
+}
+
+/**
+ * Admin-editable UI text (nav labels, headings, buttons, empty states —
+ * everything that isn't part of the richer WebsiteSection content model).
+ * Returns a lookup function; callers always pass their current hardcoded
+ * string as `fallback`, so a missing key never renders blank/undefined.
+ */
+export async function getUiText(locale: Locale) {
+  const rows = await db.uiText.findMany()
+  const map = new Map(rows.map((r) => [r.key, pick(r.valueFr, r.valueEn, locale) ?? r.valueFr]))
+  return (key: string, fallback: string) => map.get(key) ?? fallback
 }

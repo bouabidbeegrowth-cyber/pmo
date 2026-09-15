@@ -37,6 +37,24 @@ interface Props {
   otherPasses: OtherPass[]
   locale: Locale
   theme: "violet" | "gold" | "navy"
+  labels: {
+    includes: string
+    priceHt: string
+    vat: string
+    ttc: string
+    register: string
+    registrationSoon: string
+    minQty: string
+    otherPasses: string
+    guarantee: string
+    backToPasses: string
+    perPerson: string
+    recommendedBadge: string
+    priceLabel: string
+    access2days: string
+    networkingIncluded: string
+    viewDetails: string
+  }
 }
 
 const SLUG_TO_HREF: Record<string, string> = {
@@ -55,7 +73,7 @@ const THEME_STYLES = {
   },
   gold: {
     badge: "bg-pmo-gold/10 border-pmo-gold/20 text-pmo-gold",
-    accent: "bg-pmo-gold-gradient text-pmo-navy",
+    accent: "bg-pmo-gold-gradient text-white",
     icon: "bg-pmo-gold/10 text-pmo-gold",
     ring: "ring-pmo-gold/30",
     glow: "from-pmo-gold/20",
@@ -69,7 +87,7 @@ const THEME_STYLES = {
   },
 }
 
-export function PassDetail({ pass, otherPasses, locale, theme }: Props) {
+export function PassDetail({ pass, otherPasses, locale, theme, labels: t }: Props) {
   const styles = THEME_STYLES[theme]
   const name = locale === "en" ? pass.nameEn ?? pass.nameFr : pass.nameFr
   const description = locale === "en"
@@ -80,34 +98,6 @@ export function PassDetail({ pass, otherPasses, locale, theme }: Props) {
   )
   const priceTtc = pass.price + pass.price * pass.vatRate
 
-  const t = locale === "fr"
-    ? {
-        includes: "Ce pass inclut",
-        priceHt: "HT",
-        vat: "TVA",
-        ttc: "TTC",
-        register: "Je m'inscris",
-        registrationSoon: "Inscriptions bientôt ouvertes",
-        minQty: "Quantité minimum",
-        otherPasses: "Autres passes",
-        guarantee: "Paiement sécurisé",
-        backToPasses: "Voir tous les passes",
-        perPerson: "/ personne",
-      }
-    : {
-        includes: "This pass includes",
-        priceHt: "ex. VAT",
-        vat: "VAT",
-        ttc: "inc. VAT",
-        register: "Register now",
-        registrationSoon: "Registration opening soon",
-        minQty: "Minimum quantity",
-        otherPasses: "Other passes",
-        guarantee: "Secure payment",
-        backToPasses: "View all passes",
-        perPerson: "/ person",
-      }
-
   return (
     <div className="py-12 sm:py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -117,7 +107,7 @@ export function PassDetail({ pass, otherPasses, locale, theme }: Props) {
             {pass.isFeatured && (
               <div className={cn("inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold mb-4", styles.badge)}>
                 <Star className="w-3 h-3 fill-current" />
-                {locale === "fr" ? "Formule recommandée" : "Recommended package"}
+                {t.recommendedBadge}
               </div>
             )}
             <h1 className="font-display text-3xl sm:text-4xl font-bold mb-3">{name}</h1>
@@ -149,8 +139,8 @@ export function PassDetail({ pass, otherPasses, locale, theme }: Props) {
             <div className="mt-8 grid sm:grid-cols-3 gap-4">
               {[
                 { icon: Shield, label: t.guarantee },
-                { icon: Clock, label: locale === "fr" ? "Accès 2 jours" : "2-day access" },
-                { icon: Users, label: locale === "fr" ? "Networking inclus" : "Networking included" },
+                { icon: Clock, label: t.access2days },
+                { icon: Users, label: t.networkingIncluded },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2.5 rounded-xl bg-muted/50 p-3">
                   <item.icon className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -167,7 +157,7 @@ export function PassDetail({ pass, otherPasses, locale, theme }: Props) {
               <div className={cn("relative rounded-3xl border-2 bg-card p-6 sm:p-8 shadow-premium-lg", `ring-4 ${styles.ring}`)}>
                 <div className="text-center mb-6">
                   <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
-                    {locale === "fr" ? "Tarif" : "Price"}
+                    {t.priceLabel}
                   </p>
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="font-display text-5xl font-bold">
@@ -255,7 +245,7 @@ export function PassDetail({ pass, otherPasses, locale, theme }: Props) {
                       <span className="text-xs text-muted-foreground">{t.priceHt}</span>
                     </div>
                     <div className="mt-3 flex items-center gap-1 text-sm text-primary group-hover:gap-2 transition-all">
-                      {locale === "fr" ? "Voir les détails" : "View details"}
+                      {t.viewDetails}
                       <ArrowRight className="w-3.5 h-3.5" />
                     </div>
                   </Link>

@@ -102,3 +102,23 @@ async function persistRecord(meta: Omit<UploadedFile, "url"> & { url: string }) 
   await db.mediaAsset.create({ data: meta })
   return meta
 }
+
+/**
+ * Delete a previously-uploaded image: removes the file from /public/uploads
+ * and its MediaAsset record. Safe no-op for null/external URLs (anything not
+ * under /uploads/) so it can be called unconditionally on delete/replace.
+ */
+export async function deleteUploadedImage(url: string | null | undefined): Promise<void> {
+  if (!url || !url.startsWith("/uploads/")) return
+
+  const filename = url.replace(/^\/uploads\//, "")
+  if (!filename || filename.includes("/") || filename.includes("..")) return
+
+  const filepath = path.join(UPLOAD_DIR, filename)
+  try {
+    await fs.unlink(filepath)
+  } catch {
+    // already gone — ignore
+  }
+  await db.mediaAsset.deleteMany({ where: { filename } })
+}

@@ -1,15 +1,35 @@
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getLocale, getActiveEvent } from "@/lib/site-data"
+import { getLocale, getActiveEvent, getUiText } from "@/lib/site-data"
+import { buildPageMetadata } from "@/lib/seo"
 import { PageHero } from "@/components/public/page-hero"
 import { PassDetail } from "@/components/public/pass-detail"
+import { BreadcrumbStructuredData } from "@/components/public/structured-data"
 
 export const dynamic = "force-dynamic"
 
 const SLUG = "pass-duo"
 
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  return buildPageMetadata({
+    page: "pass-duo",
+    path: "/pass-duo",
+    locale,
+    defaults: {
+      titleFr: "Pass Duo",
+      titleEn: "Duo Pass",
+      descriptionFr:
+        "La formule complète : Événement + 1 jour de Formation. Le meilleur rapport qualité-prix.",
+      descriptionEn: "The complete package: Event + 1 Training day. Best value for money.",
+    },
+  })
+}
+
 export default async function PassDuoPage() {
   const locale = await getLocale()
   const event = await getActiveEvent()
+  const ui = await getUiText(locale)
 
   if (!event) return notFound()
 
@@ -29,31 +49,47 @@ export default async function PassDuoPage() {
       isFeatured: p.isFeatured,
     }))
 
-  const t = locale === "fr"
-    ? {
-        eyebrow: "Billet",
-        title: "Pass Duo",
-        subtitle: "La formule complète : Événement + 1 jour de Formation. Le meilleur rapport qualité-prix.",
-      }
-    : {
-        eyebrow: "Ticket",
-        title: "Duo Pass",
-        subtitle: "The complete package: Event + 1 Training day. Best value for money.",
-      }
+  const t = {
+    eyebrow: ui("passes.duo.eyebrow", "Billet"),
+    title: ui("passes.duo.title", "Pass Duo"),
+    subtitle: ui("passes.duo.subtitle", "La formule complète : Événement + 1 jour de Formation. Le meilleur rapport qualité-prix."),
+  }
+
+  const detailLabels = {
+    includes: ui("passes.detail.includes", "Ce pass inclut"),
+    priceHt: ui("passes.detail.priceHt", "HT"),
+    vat: ui("passes.detail.vat", "TVA"),
+    ttc: ui("passes.detail.ttc", "TTC"),
+    register: ui("common.cta.register", "Je m'inscris"),
+    registrationSoon: ui("passes.detail.registrationSoon", "Inscriptions bientôt ouvertes"),
+    minQty: ui("passes.detail.minQty", "Quantité minimum"),
+    otherPasses: ui("passes.detail.otherPasses", "Autres passes"),
+    guarantee: ui("passes.detail.guarantee", "Paiement sécurisé"),
+    backToPasses: ui("passes.detail.backToPasses", "Voir tous les passes"),
+    perPerson: ui("passes.detail.perPerson", "/ personne"),
+    recommendedBadge: ui("passes.detail.recommendedBadge", "Formule recommandée"),
+    priceLabel: ui("passes.detail.priceLabel", "Tarif"),
+    access2days: ui("passes.detail.access2days", "Accès 2 jours"),
+    networkingIncluded: ui("passes.detail.networkingIncluded", "Networking inclus"),
+    viewDetails: ui("common.cta.viewDetails", "Voir les détails"),
+  }
+
+  const breadcrumbs = [
+    { href: "/", label: ui("common.breadcrumb.home", "Accueil") },
+    { href: "/evenement", label: ui("common.breadcrumb.event", "Événement") },
+    { label: t.title },
+  ]
 
   return (
     <>
+      <BreadcrumbStructuredData items={breadcrumbs} />
       <PageHero
         eyebrow={t.eyebrow}
         title={t.title}
         subtitle={t.subtitle}
-        breadcrumbs={[
-          { href: "/", label: locale === "fr" ? "Accueil" : "Home" },
-          { href: "/evenement", label: locale === "fr" ? "Événement" : "Event" },
-          { label: t.title },
-        ]}
+        breadcrumbs={breadcrumbs}
       />
-      <PassDetail pass={pass} otherPasses={otherPasses} locale={locale} theme="navy" />
+      <PassDetail pass={pass} otherPasses={otherPasses} locale={locale} theme="navy" labels={detailLabels} />
     </>
   )
 }

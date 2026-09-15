@@ -22,11 +22,31 @@ import {
   Building2,
   Navigation,
 } from "lucide-react"
-import { getLocale, getActiveEvent, pick } from "@/lib/site-data"
+import type { Metadata } from "next"
+import { getLocale, getActiveEvent, getUiText, pick } from "@/lib/site-data"
+import { buildPageMetadata } from "@/lib/seo"
 import { PageHero } from "@/components/public/page-hero"
 import { Countdown } from "@/components/public/countdown"
+import { EventStructuredData, BreadcrumbStructuredData } from "@/components/public/structured-data"
 
 export const dynamic = "force-dynamic"
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  return buildPageMetadata({
+    page: "evenement",
+    path: "/evenement",
+    locale,
+    defaults: {
+      titleFr: "L'événement",
+      titleEn: "The Event",
+      descriptionFr:
+        "Dates, lieu, programme et informations pratiques sur PMO Mastery — l'événement international dédié aux leaders PMO.",
+      descriptionEn:
+        "Dates, venue, programme and practical information about PMO Mastery — the international event for PMO leaders.",
+    },
+  })
+}
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Sparkles, Rocket, Users, TrendingUp, Target, Award, Lightbulb, Globe,
@@ -37,52 +57,46 @@ export default async function EvenementPage() {
   const locale = await getLocale()
   const dateLocale = locale === "fr" ? fr : enUS
   const event = await getActiveEvent()
+  const ui = await getUiText(locale)
 
   if (!event) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-4">
         <p className="text-muted-foreground">
-          {locale === "fr" ? "Événement à venir." : "Event coming soon."}
+          {ui("event.emptyState", "Événement à venir.")}
         </p>
       </div>
     )
   }
 
-  const t = locale === "fr"
-    ? {
-        heroEyebrow: "L'événement",
-        heroTitle: event.titleFr,
-        heroSubtitle: event.subtitleFr ?? event.themeTaglineFr ?? "",
-        whyTitle: "Pourquoi y participer ?",
-        aboutTitle: "À propos de l'événement",
-        venueTitle: "Le lieu",
-        venueAddress: "Adresse",
-        venueMap: "Voir sur la carte",
-        countdownLabel: "L'événement commence dans",
-        editionLabel: "Édition",
-        dateLabel: "Dates",
-        timeLabel: "Horaires",
-        cityLabel: "Ville",
-        ctaProgramme: "Voir le programme",
-        ctaRegister: "Je m'inscris",
-      }
-    : {
-        heroEyebrow: "The event",
-        heroTitle: event.titleEn ?? event.titleFr,
-        heroSubtitle: event.subtitleEn ?? event.themeTaglineEn ?? "",
-        whyTitle: "Why participate?",
-        aboutTitle: "About the event",
-        venueTitle: "The venue",
-        venueAddress: "Address",
-        venueMap: "View on map",
-        countdownLabel: "The event starts in",
-        editionLabel: "Edition",
-        dateLabel: "Dates",
-        timeLabel: "Hours",
-        cityLabel: "City",
-        ctaProgramme: "View programme",
-        ctaRegister: "Register now",
-      }
+  const t = {
+    heroEyebrow: ui("event.hero.eyebrow", "L'événement"),
+    heroTitle: locale === "fr" ? event.titleFr : event.titleEn ?? event.titleFr,
+    heroSubtitle: locale === "fr"
+      ? event.subtitleFr ?? event.themeTaglineFr ?? ""
+      : event.subtitleEn ?? event.themeTaglineEn ?? "",
+    whyTitle: ui("common.why.titleFallback", "Pourquoi y participer ?"),
+    aboutTitle: ui("common.about.titleFallback", "À propos de l'événement"),
+    venueTitle: ui("event.venueTitle", "Le lieu"),
+    venueAddress: ui("event.venueAddress", "Adresse"),
+    venueMap: ui("event.venueMap", "Voir sur la carte"),
+    countdownLabel: ui("event.countdownLabel", "L'événement commence dans"),
+    editionLabel: ui("event.editionLabel", "Édition"),
+    dateLabel: ui("event.dateLabel", "Dates"),
+    timeLabel: ui("event.timeLabel", "Horaires"),
+    cityLabel: ui("event.cityLabel", "Ville"),
+    ctaProgramme: ui("event.ctaProgramme", "Voir le programme"),
+    ctaRegister: ui("common.cta.register", "Je m'inscris"),
+  }
+
+  const countdownLabels = {
+    days: ui("countdown.days", "Jours"),
+    hours: ui("countdown.hours", "Heures"),
+    minutes: ui("countdown.minutes", "Minutes"),
+    seconds: ui("countdown.seconds", "Secondes"),
+    inProgress: ui("countdown.inProgress", "Événement en cours"),
+    ended: ui("countdown.ended", "Événement terminé"),
+  }
 
   const whySection = event.websiteSections.find((s) => s.sectionKey === "WHY_PARTICIPATE")
   const aboutSection = event.websiteSections.find((s) => s.sectionKey === "ABOUT")
@@ -94,14 +108,21 @@ export default async function EvenementPage() {
     : format(event.startDate, "dd MMMM yyyy", { locale: dateLocale })
 
   const countdownTarget = event.countdownTarget ?? event.startDate
+  const breadcrumbs = [{ href: "/", label: ui("common.breadcrumb.home", "Accueil") }, { label: t.heroEyebrow }]
 
   return (
     <>
+      <EventStructuredData
+        event={event}
+        locale={locale}
+        url={`${(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.pmomastery.tn").replace(/\/$/, "")}/evenement`}
+      />
+      <BreadcrumbStructuredData items={breadcrumbs} />
       <PageHero
         eyebrow={t.heroEyebrow}
         title={t.heroTitle}
         subtitle={t.heroSubtitle}
-        breadcrumbs={[{ href: "/", label: locale === "fr" ? "Accueil" : "Home" }, { label: t.heroEyebrow }]}
+        breadcrumbs={breadcrumbs}
       />
 
       {/* Countdown + key info */}
@@ -110,7 +131,7 @@ export default async function EvenementPage() {
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">{t.countdownLabel}</p>
-              <Countdown target={countdownTarget.toISOString()} locale={locale} />
+              <Countdown target={countdownTarget.toISOString()} labels={countdownLabels} />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               {[
@@ -148,7 +169,7 @@ export default async function EvenementPage() {
 
       {/* About */}
       {aboutSection?.isActive !== false && (
-        <section className="py-20 sm:py-24 bg-[#f6f7fb] relative overflow-hidden">
+        <section className="py-20 sm:py-24 bg-pmo-light-bg relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-dark opacity-50" />
           <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
@@ -237,7 +258,7 @@ export default async function EvenementPage() {
                     href={event.mapUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-pmo-navy px-6 py-3 font-semibold shadow-premium hover:scale-[1.02] transition-transform"
+                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-white px-6 py-3 font-semibold shadow-premium hover:scale-[1.02] transition-transform"
                   >
                     <Navigation className="w-4 h-4" />
                     {t.venueMap}

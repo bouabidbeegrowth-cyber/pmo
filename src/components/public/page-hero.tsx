@@ -47,7 +47,7 @@ export function PageHero({ eyebrow, title, subtitle, breadcrumbs }: PageHeroProp
             {eyebrow}
           </div>
         )}
-        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-balance max-w-3xl">
+        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-balance max-w-3xl">
           {title}
         </h1>
         {subtitle && (

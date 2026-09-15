@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Poppins, Unbounded } from "next/font/google"
+import { Poppins } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "@/components/ui/sonner"
@@ -8,13 +8,6 @@ const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
-  display: "swap",
-})
-
-const unbounded = Unbounded({
-  variable: "--font-unbounded",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 })
 
@@ -65,7 +58,8 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
-        className={`${poppins.variable} ${unbounded.variable} font-sans antialiased bg-background text-foreground`}
+        className={`${poppins.variable} font-sans antialiased bg-background text-foreground`}
+        suppressHydrationWarning
       >
         {children}
         <Toaster />

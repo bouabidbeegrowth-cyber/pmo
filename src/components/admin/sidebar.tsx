@@ -11,9 +11,12 @@ import {
   Ticket,
   Building2,
   Handshake,
-  Image as ImageIcon,
   FileText,
-  Settings,
+  UserCog,
+  Search,
+  MessageSquareText,
+  ArrowRightLeft,
+  Images,
   LogOut,
   ChevronRight,
 } from "lucide-react"
@@ -45,7 +48,10 @@ const NAV_GROUPS: NavGroup[] = [
       { label: "Speakers", href: "/admin/speakers", icon: Users },
       { label: "Programme", href: "/admin/programme", icon: Clock3 },
       { label: "Passes", href: "/admin/passes", icon: Ticket },
+      { label: "Galerie", href: "/admin/gallery", icon: Images },
       { label: "CMS", href: "/admin/content", icon: FileText },
+      { label: "SEO", href: "/admin/seo", icon: Search },
+      { label: "Redirections", href: "/admin/redirects", icon: ArrowRightLeft },
     ],
   },
   {
@@ -53,12 +59,12 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: "Organisateurs", href: "/admin/organizers", icon: Building2 },
       { label: "Partenaires", href: "/admin/partners", icon: Handshake },
-      { label: "Médiathèque", href: "/admin/media", icon: ImageIcon },
+      { label: "Popups", href: "/admin/popups", icon: MessageSquareText },
     ],
   },
   {
     label: "Système",
-    items: [{ label: "Paramètres", href: "/admin/settings", icon: Settings }],
+    items: [{ label: "Utilisateurs", href: "/admin/users", icon: UserCog }],
   },
 ]
 

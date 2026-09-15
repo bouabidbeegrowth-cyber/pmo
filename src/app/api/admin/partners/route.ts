@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const data: Prisma.PartnerCreateInput = {
       event: { connect: { id: eventId } },
       name: body.name,
-      logo: safeUrl(body.logo) ?? body.logo ?? null,
+      logo: safeUrl(body.logo),
       category: body.category ?? "PARTNER",
       websiteUrl: safeUrl(body.websiteUrl),
       descriptionFr: body.descriptionFr ?? null,

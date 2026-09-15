@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Menu, X, Globe, ChevronDown, CalendarDays } from "lucide-react"
+import { Menu, X, Globe, ChevronDown, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -20,62 +20,61 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
+interface NavLabels {
+  home: string
+  event: string
+  eventProgramme: string
+  eventPassEvenement: string
+  eventPassFormation: string
+  eventPassDuo: string
+  speakers: string
+  orgPartners: string
+  organizers: string
+  partners: string
+  gallery: string
+  contact: string
+  register: string
+}
+
 interface HeaderProps {
   locale: "fr" | "en"
   onLocaleChange?: (l: "fr" | "en") => void
   registrationEnabled: boolean
   logo?: string | null
+  labels: NavLabels
 }
 
-// Multi-page navigation — mirrors the original PMO Mastery site menu exactly
-const NAV_FR = [
-  { href: "/", label: "Accueil" },
-  {
-    label: "Événement",
-    href: "/evenement",
-    children: [
-      { href: "/programme", label: "Programme" },
-      { href: "/pass-evenement", label: "Pass Événement" },
-      { href: "/pass-formation", label: "Pass Formation" },
-      { href: "/pass-duo", label: "Pass Duo" },
-    ],
-  },
-  { href: "/intervenants", label: "Intervenants" },
-  {
-    label: "Organisateurs & Partenaires",
-    href: "/organisateurs",
-    children: [
-      { href: "/organisateurs", label: "Organisateurs" },
-      { href: "/partenaires", label: "Partenaires" },
-    ],
-  },
-  { href: "/contact", label: "Contact" },
-]
-const NAV_EN = [
-  { href: "/", label: "Home" },
-  {
-    label: "Event",
-    href: "/evenement",
-    children: [
-      { href: "/programme", label: "Programme" },
-      { href: "/pass-evenement", label: "Event Pass" },
-      { href: "/pass-formation", label: "Training Pass" },
-      { href: "/pass-duo", label: "Duo Pass" },
-    ],
-  },
-  { href: "/intervenants", label: "Speakers" },
-  {
-    label: "Organizers & Partners",
-    href: "/organisateurs",
-    children: [
-      { href: "/organisateurs", label: "Organizers" },
-      { href: "/partenaires", label: "Partners" },
-    ],
-  },
-  { href: "/contact", label: "Contact" },
-]
+// Multi-page navigation structure — mirrors the original PMO Mastery site
+// menu exactly. The hierarchy/hrefs are fixed; only the labels are editable
+// (via the `labels` prop, sourced from the admin-managed UI text catalog).
+function buildNav(t: NavLabels) {
+  return [
+    { href: "/", label: t.home },
+    {
+      label: t.event,
+      href: "/evenement",
+      children: [
+        { href: "/programme", label: t.eventProgramme },
+        { href: "/pass-evenement", label: t.eventPassEvenement },
+        { href: "/pass-formation", label: t.eventPassFormation },
+        { href: "/pass-duo", label: t.eventPassDuo },
+      ],
+    },
+    { href: "/intervenants", label: t.speakers },
+    {
+      label: t.orgPartners,
+      href: "/organisateurs",
+      children: [
+        { href: "/organisateurs", label: t.organizers },
+        { href: "/partenaires", label: t.partners },
+      ],
+    },
+    { href: "/galerie", label: t.gallery },
+    { href: "/contact", label: t.contact },
+  ]
+}
 
-export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo }: HeaderProps) {
+export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, labels }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
@@ -98,7 +97,7 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo }
     return () => window.removeEventListener("popstate", handler)
   }, [pathname, mobileOpen])
 
-  const nav = locale === "fr" ? NAV_FR : NAV_EN
+  const nav = buildNav(labels)
 
   function changeLocale(next: "fr" | "en") {
     if (next === locale) return
@@ -127,7 +126,7 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo }
       className={cn(
         "fixed top-0 inset-x-0 z-50 transition-all duration-300",
         scrolled || pathname !== "/"
-          ? "bg-pmo-navy-gradient/95 backdrop-blur-md shadow-premium py-3"
+          ? "bg-pmo-navy-deep/95 backdrop-blur-md shadow-premium py-3"
           : "bg-transparent py-5",
       )}
     >
@@ -135,13 +134,13 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo }
         <Link href="/" className="flex items-center gap-3 group shrink-0">
           {logo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logo} alt="PMO Mastery" className="h-10 w-auto" />
+            <img src={logo} alt="PMO Mastery" className="h-14 sm:h-26 w-auto" />
           ) : (
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-pmo-violet-gradient flex items-center justify-center font-display font-bold text-white text-base shadow-premium group-hover:scale-105 transition-transform">
+            <div className="flex items-center gap-2.5">
+              <div className="w-12 h-12 rounded-xl bg-pmo-violet-gradient flex items-center justify-center font-display font-bold text-white text-xl shadow-premium group-hover:scale-105 transition-transform">
                 P
               </div>
-              <span className="font-display font-semibold text-white text-lg tracking-tight">
+              <span className="font-display font-semibold text-white text-xl tracking-tight">
                 PMO Mastery
               </span>
             </div>
@@ -239,11 +238,11 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo }
           {registrationEnabled && (
             <Button
               asChild
-              className="hidden sm:flex bg-pmo-gold-gradient text-pmo-navy hover:opacity-90 font-semibold shadow-premium"
+              className="hidden sm:flex hero-btn-gradient text-white hover:opacity-95 font-semibold rounded-full shadow-premium"
             >
               <Link href="/pass-duo">
-                <CalendarDays className="w-4 h-4 mr-1.5" />
-                {locale === "fr" ? "Je m'inscris" : "Register"}
+                {labels.register}
+                <ArrowRight className="w-4 h-4 ml-1.5" />
               </Link>
             </Button>
           )}
@@ -312,11 +311,11 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo }
                 {registrationEnabled && (
                   <Button
                     asChild
-                    className="mt-auto bg-pmo-gold-gradient text-pmo-navy hover:opacity-90 font-semibold"
+                    className="mt-auto hero-btn-gradient text-white hover:opacity-95 font-semibold rounded-full"
                   >
                     <Link href="/pass-duo">
-                      <CalendarDays className="w-4 h-4 mr-1.5" />
-                      {locale === "fr" ? "Je m'inscris" : "Register"}
+                      {labels.register}
+                      <ArrowRight className="w-4 h-4 ml-1.5" />
                     </Link>
                   </Button>
                 )}

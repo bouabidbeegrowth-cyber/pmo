@@ -15,6 +15,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const existing = await db.programmeSession.findUnique({ where: { id } })
   if (!existing) return fail("Session not found", 404)
 
+  if (typeof body.titleFr === "string" && !body.titleFr.trim()) {
+    return fail("titleFr cannot be empty", 400)
+  }
+  if (typeof body.startTime === "string" && !body.startTime.trim()) {
+    return fail("startTime cannot be empty", 400)
+  }
+
   const { speakerIds, moderatorId, ...rest } = body
   try {
     const data: Prisma.ProgrammeSessionUpdateInput = {

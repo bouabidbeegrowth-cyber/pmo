@@ -18,6 +18,17 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
   Loader2,
   Plus,
   Save,
@@ -25,6 +36,7 @@ import {
   Trash2,
   Building2,
   ExternalLink,
+  AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -127,9 +139,9 @@ export default function OrganizersPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Supprimer cet organisateur ?")) return
     try {
-      await fetch(`/api/admin/organizers/${id}`, { method: "DELETE" })
+      const res = await fetch(`/api/admin/organizers/${id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error("Failed")
       toast.success("Organisateur supprimé.")
       await load()
     } catch {
@@ -219,12 +231,50 @@ export default function OrganizersPage() {
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
-                  <button
-                    onClick={() => remove(org.id)}
-                    className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <div className="mx-auto sm:mx-0 flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-lg bg-muted overflow-hidden shrink-0 flex items-center justify-center">
+                            {org.logo ? (
+
+                              <img src={org.logo} alt={org.name} className="w-full h-full object-contain p-1.5" />
+                            ) : (
+                              <Building2 className="w-6 h-6 text-muted-foreground/50" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <AlertDialogTitle className="truncate">{org.name}</AlertDialogTitle>
+                            {org.founderName && (
+                              <p className="text-xs text-muted-foreground truncate">{org.founderName}</p>
+                            )}
+                          </div>
+                        </div>
+                        <AlertDialogDescription className="flex items-start gap-2 pt-2">
+                          <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                          <span>
+                            Cet organisateur sera définitivement supprimé
+                            {org.logo || org.founderPhoto ? ", ainsi que son logo et/ou la photo du fondateur" : ""}.
+                            Cette action est irréversible.
+                          </span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => remove(org.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Supprimer définitivement
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </div>
@@ -234,7 +284,7 @@ export default function OrganizersPage() {
 
       {/* Editor dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editing && "id" in editing && editing.id ? "Modifier" : "Nouvel"} organisateur

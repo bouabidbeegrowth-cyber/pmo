@@ -24,9 +24,10 @@ interface Speaker {
 interface Props {
   speakers: Speaker[]
   locale: Locale
+  labels: { viewProfile: string; biography: string; featuredBadge: string }
 }
 
-export function SpeakersHomePreview({ speakers, locale }: Props) {
+export function SpeakersHomePreview({ speakers, locale, labels }: Props) {
   const [selected, setSelected] = useState<Speaker | null>(null)
   const preview = speakers.slice(0, 8)
 
@@ -65,7 +66,7 @@ export function SpeakersHomePreview({ speakers, locale }: Props) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0">
                   <span className="inline-flex items-center gap-1 text-xs text-white font-medium">
-                    {locale === "fr" ? "Voir le profil" : "View profile"}
+                    {labels.viewProfile}
                     <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
@@ -91,6 +92,7 @@ export function SpeakersHomePreview({ speakers, locale }: Props) {
         locale={locale}
         open={!!selected}
         onOpenChange={(o) => !o && setSelected(null)}
+        labels={labels}
       />
     </>
   )

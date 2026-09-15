@@ -1,32 +1,20 @@
-"use client"
+import { redirect } from "next/navigation"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { AdminShell } from "@/components/admin/admin-shell"
 
-import { useState } from "react"
-import { AdminSidebar } from "@/components/admin/sidebar"
-import { Topbar } from "@/components/admin/topbar"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+export const dynamic = "force-dynamic"
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [mobileOpen, setMobileOpen] = useState(false)
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) redirect("/admin/login")
 
-  return (
-    <div className="min-h-screen bg-[#f6f7fb] flex">
-      <div className="hidden lg:flex lg:sticky lg:top-0 lg:h-screen lg:z-30">
-        <AdminSidebar />
-      </div>
+  // Middleware only checks that the JWT is present/valid — it can't see a
+  // deactivation that happened after the token was issued. Re-check here so
+  // a deactivated admin is bounced out on their very next page load.
+  const user = await db.adminUser.findUnique({ where: { id: session.user.id } })
+  if (!user || !user.isActive) redirect("/admin/login")
 
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-72 p-0 border-0">
-          <SheetHeader className="sr-only">
-            <SheetTitle>Navigation</SheetTitle>
-          </SheetHeader>
-          <AdminSidebar onNavigate={() => setMobileOpen(false)} />
-        </SheetContent>
-      </Sheet>
-
-      <div className="flex-1 flex flex-col min-w-0">
-        <Topbar onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
-      </div>
-    </div>
-  )
+  return <AdminShell>{children}</AdminShell>
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { PageHeader } from "@/components/admin/page-header"
 import { FormCard } from "@/components/admin/form-card"
 import { ImageUploader } from "@/components/admin/image-uploader"
@@ -17,7 +18,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, Save, Plus, Trash2, GripVertical, Phone, Mail, MapPin } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Loader2, Save, Plus, Trash2, GripVertical, Phone, Mail, MapPin, Clock3, ArrowRight, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 
 interface Section {
@@ -82,6 +94,7 @@ const SECTION_LABELS: Record<string, string> = {
   HERO: "Hero",
   WHY_PARTICIPATE: "Pourquoi y participer",
   ABOUT: "À propos",
+  COUNTDOWN: "Compte à rebours",
   FOOTER: "Footer",
 }
 
@@ -96,7 +109,6 @@ export default function ContentPage() {
   }, [])
 
   async function load() {
-    setLoading(true)
     try {
       const res = await fetch("/api/admin/content")
       const json = await res.json()
@@ -104,8 +116,8 @@ export default function ContentPage() {
       for (const s of json.sections ?? []) {
         map[s.sectionKey] = s
       }
-      // Ensure all 4 sections exist locally (even if not in DB yet)
-      for (const k of ["HERO", "WHY_PARTICIPATE", "ABOUT", "FOOTER"]) {
+      // Ensure all sections exist locally (even if not in DB yet)
+      for (const k of ["HERO", "WHY_PARTICIPATE", "ABOUT", "COUNTDOWN", "FOOTER"]) {
         if (!map[k]) {
           map[k] = {
             id: "",
@@ -143,8 +155,8 @@ export default function ContentPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sectionKey: key,
           ...section,
+          sectionKey: key,
           benefits: section.benefits,
         }),
       })
@@ -240,10 +252,11 @@ export default function ContentPage() {
       />
 
       <Tabs defaultValue="HERO">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 mb-6">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 mb-6">
           <TabsTrigger value="HERO">Hero</TabsTrigger>
           <TabsTrigger value="WHY_PARTICIPATE">Pourquoi</TabsTrigger>
           <TabsTrigger value="ABOUT">À propos</TabsTrigger>
+          <TabsTrigger value="COUNTDOWN">Compte à rebours</TabsTrigger>
           <TabsTrigger value="FOOTER">Footer</TabsTrigger>
           <TabsTrigger value="CONTACT">Contact</TabsTrigger>
         </TabsList>
@@ -355,6 +368,12 @@ export default function ContentPage() {
                   rows={3}
                 />
               </Field>
+              <ImageUploader
+                label="Image"
+                value={sections.WHY_PARTICIPATE?.backgroundImage}
+                onChange={(url) => updateSection("WHY_PARTICIPATE", { backgroundImage: url })}
+                aspectRatio="portrait"
+              />
 
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -421,13 +440,39 @@ export default function ContentPage() {
                             </Field>
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeBenefit("WHY_PARTICIPATE", idx)}
-                          className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              type="button"
+                              className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="truncate">
+                                {b.titleFr || "Cet avantage"}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="flex items-start gap-2 pt-2">
+                                <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                                <span>
+                                  Cet avantage sera retiré de la liste. Cliquez « Enregistrer » pour rendre la
+                                  suppression définitive.
+                                </span>
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => removeBenefit("WHY_PARTICIPATE", idx)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Retirer
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   ))}
@@ -481,25 +526,79 @@ export default function ContentPage() {
           </FormCard>
         </TabsContent>
 
+        {/* COUNTDOWN */}
+        <TabsContent value="COUNTDOWN">
+          <FormCard
+            title="Compte à rebours"
+            description="Le compte à rebours affiché sur la page d'accueil compte automatiquement les jours, heures, minutes et secondes jusqu'à la date de l'événement."
+          >
+            <div className="space-y-5">
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <div>
+                  <Label className="text-sm">Afficher sur la page d'accueil</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Désactivez pour masquer le compte à rebours sans le supprimer.
+                  </p>
+                </div>
+                <Switch
+                  checked={sections.COUNTDOWN?.isActive ?? true}
+                  onCheckedChange={(v) => updateSection("COUNTDOWN", { isActive: v })}
+                />
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-lg border bg-muted/20 text-sm text-muted-foreground">
+                <Clock3 className="w-4 h-4 shrink-0 mt-0.5" />
+                <div>
+                  La date de fin du compte à rebours est celle configurée dans{" "}
+                  <Link href="/admin/event" className="text-primary hover:underline inline-flex items-center gap-1">
+                    Événement <ArrowRight className="w-3 h-3" />
+                  </Link>{" "}
+                  (champ « Cible du compte à rebours »).
+                </div>
+              </div>
+            </div>
+            <SaveButton onClick={() => saveSection("COUNTDOWN")} saving={savingKey === "COUNTDOWN"} />
+          </FormCard>
+        </TabsContent>
+
         {/* FOOTER */}
         <TabsContent value="FOOTER">
-          <FormCard title="Footer">
+          <FormCard title="Footer" description="Texte et copyright affichés en bas de chaque page.">
             <div className="space-y-5">
-              <Field label="Description (FR)">
-                <Textarea
-                  value={sections.FOOTER?.descriptionFr ?? ""}
-                  onChange={(e) => updateSection("FOOTER", { descriptionFr: e.target.value })}
-                  rows={4}
-                  placeholder="PMO Mastery se positionne comme un événement de référence…"
-                />
-              </Field>
-              <Field label="Copyright (FR)">
-                <Input
-                  value={sections.FOOTER?.titleFr ?? ""}
-                  onChange={(e) => updateSection("FOOTER", { titleFr: e.target.value })}
-                  placeholder="© 2025 PMO Mastery — Empowerment Paths"
-                />
-              </Field>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Description (FR)">
+                  <Textarea
+                    value={sections.FOOTER?.descriptionFr ?? ""}
+                    onChange={(e) => updateSection("FOOTER", { descriptionFr: e.target.value })}
+                    rows={4}
+                    placeholder="PMO Mastery se positionne comme un événement de référence…"
+                  />
+                </Field>
+                <Field label="Description (EN)">
+                  <Textarea
+                    value={sections.FOOTER?.descriptionEn ?? ""}
+                    onChange={(e) => updateSection("FOOTER", { descriptionEn: e.target.value })}
+                    rows={4}
+                    placeholder="PMO Mastery positions itself as a landmark event…"
+                  />
+                </Field>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Copyright (FR)">
+                  <Input
+                    value={sections.FOOTER?.titleFr ?? ""}
+                    onChange={(e) => updateSection("FOOTER", { titleFr: e.target.value })}
+                    placeholder="© 2025 PMO Mastery — Empowerment Paths"
+                  />
+                </Field>
+                <Field label="Copyright (EN)">
+                  <Input
+                    value={sections.FOOTER?.titleEn ?? ""}
+                    onChange={(e) => updateSection("FOOTER", { titleEn: e.target.value })}
+                    placeholder="© 2025 PMO Mastery — Empowerment Paths"
+                  />
+                </Field>
+              </div>
             </div>
             <SaveButton onClick={() => saveSection("FOOTER")} saving={savingKey === "FOOTER"} />
           </FormCard>

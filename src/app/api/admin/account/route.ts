@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { db } from "@/lib/db"
 import { authOptions, hashPassword, verifyPassword } from "@/lib/auth"
 import { ok, fail } from "@/lib/api"
+import { isStrongPassword } from "@/lib/password"
 
 export const dynamic = "force-dynamic"
 
@@ -18,8 +19,11 @@ export async function PUT(req: NextRequest) {
   if (!currentPassword || !newPassword) {
     return fail("currentPassword and newPassword are required", 400)
   }
-  if (newPassword.length < 8) {
-    return fail("New password must be at least 8 characters", 400)
+  if (!isStrongPassword(newPassword)) {
+    return fail(
+      "New password is too weak. Use at least 8 characters mixing uppercase, lowercase, numbers or symbols.",
+      400,
+    )
   }
 
   const user = await db.adminUser.findUnique({

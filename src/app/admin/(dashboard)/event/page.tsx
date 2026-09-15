@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { PageHeader } from "@/components/admin/page-header"
 import { FormCard } from "@/components/admin/form-card"
 import { ImageUploader } from "@/components/admin/image-uploader"
@@ -19,7 +19,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, Save, Calendar, MapPin, Image as ImageIcon, Settings2, Plus, Check } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Loader2, Save, Calendar, MapPin, Image as ImageIcon, Settings2, Plus, Check, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import { format } from "date-fns"
 
@@ -76,64 +86,66 @@ function toLocalDate(d: string | null | undefined): string {
   }
 }
 
+function blankTemplate(): EventData {
+  return {
+    id: "",
+    slug: "pmo-mastery-" + new Date().getFullYear(),
+    editionName: "PMO Mastery " + new Date().getFullYear(),
+    titleFr: "",
+    titleEn: "",
+    subtitleFr: "",
+    subtitleEn: "",
+    themeTaglineFr: "",
+    themeTaglineEn: "",
+    descriptionFr: "",
+    descriptionEn: "",
+    startDate: new Date().toISOString(),
+    endDate: null,
+    startTime: "09:00",
+    endTime: "18:00",
+    timezone: "Africa/Tunis",
+    countdownTarget: null,
+    venue: "",
+    address: "",
+    city: "Tunis",
+    country: "Tunisie",
+    latitude: null,
+    longitude: null,
+    mapUrl: "",
+    heroImageDesktop: "",
+    heroImageMobile: "",
+    heroLogo: "",
+    ogImage: "",
+    registrationEnabled: true,
+    status: "UPCOMING",
+    isActive: true,
+  }
+}
+
 export default function EventAdminPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [data, setData] = useState<EventData | null>(null)
   const [allEvents, setAllEvents] = useState<
     Array<{ id: string; editionName: string; titleFr: string; startDate: string; isActive: boolean }>
   >([])
+  const [confirmDeactivateOpen, setConfirmDeactivateOpen] = useState(false)
 
   useEffect(() => {
-    void load()
-  }, [])
+    void load(searchParams.get("id") ?? undefined)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
-  async function load() {
+  async function load(id?: string) {
     setLoading(true)
     try {
-      const res = await fetch("/api/admin/event")
+      const res = await fetch(id ? `/api/admin/event?id=${id}` : "/api/admin/event")
       const json = await res.json()
-      if (json.active) {
-        setData(json.active)
-        setAllEvents(json.all ?? [])
-      } else {
-        // No event yet — start with a blank template
-        setData({
-          id: "",
-          slug: "pmo-mastery-" + new Date().getFullYear(),
-          editionName: "PMO Mastery " + new Date().getFullYear(),
-          titleFr: "",
-          titleEn: "",
-          subtitleFr: "",
-          subtitleEn: "",
-          themeTaglineFr: "",
-          themeTaglineEn: "",
-          descriptionFr: "",
-          descriptionEn: "",
-          startDate: new Date().toISOString(),
-          endDate: null,
-          startTime: "09:00",
-          endTime: "18:00",
-          timezone: "Africa/Tunis",
-          countdownTarget: null,
-          venue: "",
-          address: "",
-          city: "Tunis",
-          country: "Tunisie",
-          latitude: null,
-          longitude: null,
-          mapUrl: "",
-          heroImageDesktop: "",
-          heroImageMobile: "",
-          heroLogo: "",
-          ogImage: "",
-          registrationEnabled: true,
-          status: "UPCOMING",
-          isActive: true,
-        })
-        setAllEvents(json.all ?? [])
-      }
+      setAllEvents(json.all ?? [])
+      // No event yet at all — start with a blank template
+      setData(json.active ?? blankTemplate())
     } catch {
       toast.error("Échec du chargement de l'événement.")
     } finally {
@@ -141,8 +153,34 @@ export default function EventAdminPage() {
     }
   }
 
+  function startNewEdition() {
+    // Client-only state reset — no navigation needed, and none wanted:
+    // router.replace() here would re-trigger the searchParams effect below
+    // and immediately refetch + overwrite this blank template with the
+    // active event's data.
+    setData(blankTemplate())
+  }
+
+  // True when `data` is the only currently-active event (per the last load),
+  // so saving it with isActive=false would leave the public site with no
+  // active event at all.
+  function wouldLeaveNoActiveEvent() {
+    if (!data?.id) return false
+    const activeEvents = allEvents.filter((e) => e.isActive)
+    return activeEvents.length === 1 && activeEvents[0].id === data.id
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!data) return
+    if (!data.isActive && wouldLeaveNoActiveEvent()) {
+      setConfirmDeactivateOpen(true)
+      return
+    }
+    await save()
+  }
+
+  async function save() {
     if (!data) return
     setSaving(true)
     try {
@@ -159,12 +197,13 @@ export default function EventAdminPage() {
       if (!res.ok) throw new Error(json.error || "Save failed")
       toast.success("Événement enregistré avec succès.")
       setData(json)
-      await load()
+      await load(json.id)
       router.refresh()
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Échec de l'enregistrement.")
     } finally {
       setSaving(false)
+      setConfirmDeactivateOpen(false)
     }
   }
 
@@ -231,7 +270,7 @@ export default function EventAdminPage() {
             ))}
             <button
               type="button"
-              onClick={() => setData(null) || load()}
+              onClick={startNewEdition}
               className="rounded-xl border-2 border-dashed border-muted-foreground/30 p-4 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
             >
               <Plus className="w-5 h-5" />
@@ -607,6 +646,30 @@ export default function EventAdminPage() {
           )}
         </Button>
       </div>
+
+      <AlertDialog open={confirmDeactivateOpen} onOpenChange={setConfirmDeactivateOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Désactiver la seule édition active ?</AlertDialogTitle>
+            <AlertDialogDescription className="flex items-start gap-2 pt-2">
+              <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+              <span>
+                Aucune autre édition n&apos;est active. Le site public n&apos;affichera plus aucun
+                événement sur ses 10 pages tant qu&apos;une édition ne sera pas réactivée.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={save}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Désactiver quand même
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   )
 }

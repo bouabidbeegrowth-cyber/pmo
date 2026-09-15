@@ -24,6 +24,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const existing = await db.pass.findUnique({ where: { id } })
   if (!existing) return fail("Pass not found", 404)
 
+  if (typeof body.nameFr === "string" && !body.nameFr.trim()) {
+    return fail("nameFr cannot be empty", 400)
+  }
+  if (body.price !== undefined && (typeof body.price !== "number" || body.price < 0)) {
+    return fail("Invalid price", 400)
+  }
+
   // Validate payment URL if provided
   const paymentUrl = safeUrl(body.paymentUrl)
   if (body.paymentUrl && !paymentUrl) {

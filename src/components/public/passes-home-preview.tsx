@@ -25,6 +25,7 @@ interface Pass {
 interface Props {
   passes: Pass[]
   locale: Locale
+  labels: { recommended: string; priceHt: string; vat: string; ttc: string; viewDetails: string }
 }
 
 const SLUG_TO_HREF: Record<string, string> = {
@@ -35,7 +36,7 @@ const SLUG_TO_HREF: Record<string, string> = {
   "pass-equipe": "/pass-evenement",
 }
 
-export function PassesHomePreview({ passes, locale }: Props) {
+export function PassesHomePreview({ passes, locale, labels }: Props) {
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
       {passes.map((pass) => {
@@ -60,12 +61,12 @@ export function PassesHomePreview({ passes, locale }: Props) {
             )}
           >
             {pass.isFeatured && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-pmo-gold-gradient text-pmo-navy text-[10px] font-bold uppercase tracking-wider px-4 py-1 shadow-premium">
-                ★ {locale === "fr" ? "Recommandé" : "Recommended"}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-pmo-gold-gradient text-white text-[10px] font-bold uppercase tracking-wider px-4 py-1 shadow-premium">
+                ★ {labels.recommended}
               </div>
             )}
 
-            <h3 className={cn("font-display text-xl font-bold mb-1", !pass.isFeatured && "text-white")}>
+            <h3 className={cn("font-display text-xl font-bold mb-1", pass.isFeatured ? "text-foreground" : "text-white")}>
               {name}
             </h3>
             {description && (
@@ -76,15 +77,15 @@ export function PassesHomePreview({ passes, locale }: Props) {
 
             <div className="mb-6">
               <div className="flex items-baseline gap-1">
-                <span className={cn("font-display text-4xl font-bold", !pass.isFeatured && "text-white")}>
+                <span className={cn("font-display text-4xl font-bold", pass.isFeatured ? "text-foreground" : "text-white")}>
                   {formatPrice(pass.price, pass.currency, locale)}
                 </span>
                 <span className={cn("text-xs", pass.isFeatured ? "text-muted-foreground" : "text-white/50")}>
-                  HT
+                  {labels.priceHt}
                 </span>
               </div>
               <div className={cn("text-xs mt-1", pass.isFeatured ? "text-muted-foreground" : "text-white/50")}>
-                {Math.round(pass.vatRate * 100)}% TVA · TTC : {formatPrice(priceTtc, pass.currency, locale)}
+                {Math.round(pass.vatRate * 100)}% {labels.vat} · {labels.ttc} : {formatPrice(priceTtc, pass.currency, locale)}
               </div>
             </div>
 
@@ -112,10 +113,10 @@ export function PassesHomePreview({ passes, locale }: Props) {
                 "inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold transition-all hover:scale-[1.02]",
                 pass.isFeatured
                   ? "bg-pmo-violet-gradient text-white shadow-premium"
-                  : "bg-pmo-gold-gradient text-pmo-navy",
+                  : "bg-pmo-gold-gradient text-white",
               )}
             >
-              {locale === "fr" ? "Voir les détails" : "View details"}
+              {labels.viewDetails}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

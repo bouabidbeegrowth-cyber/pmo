@@ -9,10 +9,26 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 
 interface ContactFormProps {
-  locale: "fr" | "en"
+  labels: {
+    successToast: string
+    successTitle: string
+    successBody: string
+    sendAnother: string
+    nameLabel: string
+    namePlaceholder: string
+    emailPlaceholder: string
+    phoneLabel: string
+    phonePlaceholder: string
+    subjectLabel: string
+    messageLabel: string
+    messagePlaceholder: string
+    sending: string
+    send: string
+    errorFallback: string
+  }
 }
 
-export function ContactForm({ locale }: ContactFormProps) {
+export function ContactForm({ labels: t }: ContactFormProps) {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [form, setForm] = useState({
@@ -37,9 +53,9 @@ export function ContactForm({ locale }: ContactFormProps) {
       if (!res.ok) throw new Error(json.error || "Failed")
       setSuccess(true)
       setForm({ name: "", email: "", phone: "", subject: "", message: "" })
-      toast.success(locale === "fr" ? "Message envoyé !" : "Message sent!")
+      toast.success(t.successToast)
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Échec de l'envoi.")
+      toast.error(e instanceof Error ? e.message : t.errorFallback)
     } finally {
       setLoading(false)
     }
@@ -50,19 +66,17 @@ export function ContactForm({ locale }: ContactFormProps) {
       <div className="rounded-2xl border-2 border-emerald-500/30 bg-emerald-500/5 p-8 text-center">
         <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
         <h3 className="font-display text-xl font-bold text-emerald-700">
-          {locale === "fr" ? "Message envoyé !" : "Message sent!"}
+          {t.successTitle}
         </h3>
         <p className="text-muted-foreground mt-2">
-          {locale === "fr"
-            ? "Nous vous répondrons dans les plus brefs délais."
-            : "We'll get back to you as soon as possible."}
+          {t.successBody}
         </p>
         <Button
           variant="outline"
           className="mt-4"
           onClick={() => setSuccess(false)}
         >
-          {locale === "fr" ? "Envoyer un autre message" : "Send another message"}
+          {t.sendAnother}
         </Button>
       </div>
     )
@@ -73,14 +87,14 @@ export function ContactForm({ locale }: ContactFormProps) {
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name" className="text-sm font-medium">
-            {locale === "fr" ? "Nom complet" : "Full name"} <span className="text-destructive">*</span>
+            {t.nameLabel} <span className="text-destructive">*</span>
           </Label>
           <Input
             id="name"
             required
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            placeholder={locale === "fr" ? "Votre nom" : "Your name"}
+            placeholder={t.namePlaceholder}
           />
         </div>
         <div className="space-y-2">
@@ -93,25 +107,25 @@ export function ContactForm({ locale }: ContactFormProps) {
             required
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            placeholder="vous@exemple.com"
+            placeholder={t.emailPlaceholder}
           />
         </div>
       </div>
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="phone" className="text-sm font-medium">
-            {locale === "fr" ? "Téléphone" : "Phone"}
+            {t.phoneLabel}
           </Label>
           <Input
             id="phone"
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            placeholder="+216 …"
+            placeholder={t.phonePlaceholder}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="subject" className="text-sm font-medium">
-            {locale === "fr" ? "Sujet" : "Subject"}
+            {t.subjectLabel}
           </Label>
           <Input
             id="subject"
@@ -122,7 +136,7 @@ export function ContactForm({ locale }: ContactFormProps) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="message" className="text-sm font-medium">
-          {locale === "fr" ? "Message" : "Message"} <span className="text-destructive">*</span>
+          {t.messageLabel} <span className="text-destructive">*</span>
         </Label>
         <Textarea
           id="message"
@@ -130,7 +144,7 @@ export function ContactForm({ locale }: ContactFormProps) {
           rows={5}
           value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}
-          placeholder={locale === "fr" ? "Votre message…" : "Your message…"}
+          placeholder={t.messagePlaceholder}
         />
       </div>
       <Button
@@ -141,12 +155,12 @@ export function ContactForm({ locale }: ContactFormProps) {
         {loading ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            {locale === "fr" ? "Envoi…" : "Sending…"}
+            {t.sending}
           </>
         ) : (
           <>
             <Send className="w-4 h-4 mr-2" />
-            {locale === "fr" ? "Envoyer le message" : "Send message"}
+            {t.send}
           </>
         )}
       </Button>
