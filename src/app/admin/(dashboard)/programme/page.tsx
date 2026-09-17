@@ -87,6 +87,7 @@ interface Session {
   language?: string | null
   room?: string | null
   topic?: string | null
+  isHeader?: boolean
   displayOrder: number
   isActive: boolean
   speakers: { speaker: SpeakerLite }[]
@@ -209,6 +210,33 @@ export default function ProgrammePage() {
       })
       if (!res.ok) throw new Error("Failed")
       toast.success("Session créée.")
+      await load()
+    } catch {
+      toast.error("Échec de la création.")
+    }
+  }
+
+  async function createHeader(dayId: string) {
+    const day = days.find((d) => d.id === dayId)
+    if (!day) return
+    const order = day.sessions.length
+    try {
+      const res = await fetch("/api/admin/programme", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "session",
+          programmeDayId: dayId,
+          startTime: "",
+          titleFr: "Titre de section",
+          sessionType: "SESSION",
+          isHeader: true,
+          displayOrder: order,
+          isActive: true,
+        }),
+      })
+      if (!res.ok) throw new Error("Failed")
+      toast.success("Titre de section créé.")
       await load()
     } catch {
       toast.error("Échec de la création.")
@@ -353,6 +381,10 @@ export default function ProgrammePage() {
                   <Button onClick={() => createSession(day.id)} variant="outline" size="sm">
                     <Plus className="w-4 h-4 mr-1" />
                     Session
+                  </Button>
+                  <Button onClick={() => createHeader(day.id)} variant="outline" size="sm">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Titre de section
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -509,6 +541,45 @@ function SortableSession({
   }
   const typeMeta = SESSION_TYPES[session.sessionType] ?? SESSION_TYPES.SESSION
 
+  if (session.isHeader) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={cn(
+          "bg-muted/60 border border-dashed border-border rounded-xl px-4 py-3 flex items-center gap-4 group",
+          isDragging && "opacity-50 shadow-premium-lg ring-2 ring-primary",
+          !session.isActive && "opacity-60",
+        )}
+      >
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="w-5 h-5" />
+        </button>
+        <Badge variant="outline" className="text-xs shrink-0">Titre de section</Badge>
+        <div className="flex-1 min-w-0 font-display font-semibold truncate">{session.titleFr}</div>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={onEdit}
+            className="p-2 rounded-md text-muted-foreground hover:bg-muted hover:text-primary"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+          <button
+            onClick={onDelete}
+            className="p-2 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -639,28 +710,30 @@ function SessionEditor({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Modifier la session</DialogTitle>
+          <DialogTitle>{data.isHeader ? "Modifier le titre de section" : "Modifier la session"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-sm">Heure de début</Label>
-              <Input
-                type="time"
-                value={data.startTime}
-                onChange={(e) => update("startTime", e.target.value)}
-              />
+          {!data.isHeader && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-sm">Heure de début</Label>
+                <Input
+                  type="time"
+                  value={data.startTime}
+                  onChange={(e) => update("startTime", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Heure de fin</Label>
+                <Input
+                  type="time"
+                  value={data.endTime ?? ""}
+                  onChange={(e) => update("endTime", e.target.value || null)}
+                />
+              </div>
             </div>
-            <div>
-              <Label className="text-sm">Heure de fin</Label>
-              <Input
-                type="time"
-                value={data.endTime ?? ""}
-                onChange={(e) => update("endTime", e.target.value || null)}
-              />
-            </div>
-          </div>
+          )}
 
           <div>
             <Label className="text-sm">Titre (FR)</Label>
@@ -675,125 +748,129 @@ function SessionEditor({
             />
           </div>
 
-          <div>
-            <Label className="text-sm">Description (FR)</Label>
-            <Textarea
-              value={data.descriptionFr ?? ""}
-              onChange={(e) => update("descriptionFr", e.target.value || null)}
-              rows={3}
-            />
-          </div>
+          {!data.isHeader && (
+            <>
+              <div>
+                <Label className="text-sm">Description (FR)</Label>
+                <Textarea
+                  value={data.descriptionFr ?? ""}
+                  onChange={(e) => update("descriptionFr", e.target.value || null)}
+                  rows={3}
+                />
+              </div>
 
-          <div>
-            <Label className="text-sm">Description (EN)</Label>
-            <Textarea
-              value={data.descriptionEn ?? ""}
-              onChange={(e) => update("descriptionEn", e.target.value || null)}
-              rows={3}
-            />
-          </div>
+              <div>
+                <Label className="text-sm">Description (EN)</Label>
+                <Textarea
+                  value={data.descriptionEn ?? ""}
+                  onChange={(e) => update("descriptionEn", e.target.value || null)}
+                  rows={3}
+                />
+              </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-sm">Type de session</Label>
-              <Select
-                value={data.sessionType}
-                onValueChange={(v) => update("sessionType", v)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(SESSION_TYPES).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>
-                      {v.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-sm">Langue</Label>
-              <Select
-                value={data.language ?? ""}
-                onValueChange={(v) => update("language", v || null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="—" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="FR">Français</SelectItem>
-                  <SelectItem value="EN">English</SelectItem>
-                  <SelectItem value="AR">العربية</SelectItem>
-                  <SelectItem value="MIXED">Mixte</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div>
-            <Label className="text-sm">Salle / Lieu</Label>
-            <Input
-              value={data.room ?? ""}
-              onChange={(e) => update("room", e.target.value || null)}
-            />
-          </div>
-
-          <div>
-            <Label className="text-sm">Modérateur</Label>
-            <Select
-              value={moderatorId ?? ""}
-              onValueChange={(v) => setModeratorId(v || null)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Aucun" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Aucun</SelectItem>
-                {speakers.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.firstName} {s.lastName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label className="text-sm">Intervenants</Label>
-            <div className="max-h-48 overflow-y-auto border rounded-lg p-2 space-y-1">
-              {speakers.length === 0 ? (
-                <div className="text-sm text-muted-foreground text-center py-4">
-                  Aucun speaker. Ajoutez-en d'abord.
-                </div>
-              ) : (
-                speakers.map((s) => (
-                  <label
-                    key={s.id}
-                    className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 cursor-pointer"
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-sm">Type de session</Label>
+                  <Select
+                    value={data.sessionType}
+                    onValueChange={(v) => update("sessionType", v)}
                   >
-                    <input
-                      type="checkbox"
-                      checked={speakerIds.includes(s.id)}
-                      onChange={() => toggleSpeaker(s.id)}
-                      className="w-4 h-4"
-                    />
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(SESSION_TYPES).map(([k, v]) => (
+                        <SelectItem key={k} value={k}>
+                          {v.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-sm">Langue</Label>
+                  <Select
+                    value={data.language ?? ""}
+                    onValueChange={(v) => update("language", v || null)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="FR">Français</SelectItem>
+                      <SelectItem value="EN">English</SelectItem>
+                      <SelectItem value="AR">العربية</SelectItem>
+                      <SelectItem value="MIXED">Mixte</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm">Salle / Lieu</Label>
+                <Input
+                  value={data.room ?? ""}
+                  onChange={(e) => update("room", e.target.value || null)}
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm">Modérateur</Label>
+                <Select
+                  value={moderatorId ?? ""}
+                  onValueChange={(v) => setModeratorId(v || null)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Aucun" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Aucun</SelectItem>
+                    {speakers.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
                         {s.firstName} {s.lastName}
-                      </div>
-                      {s.positionFr && (
-                        <div className="text-xs text-muted-foreground">{s.positionFr}</div>
-                      )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-sm">Intervenants</Label>
+                <div className="max-h-48 overflow-y-auto border rounded-lg p-2 space-y-1">
+                  {speakers.length === 0 ? (
+                    <div className="text-sm text-muted-foreground text-center py-4">
+                      Aucun speaker. Ajoutez-en d'abord.
                     </div>
-                  </label>
-                ))
-              )}
-            </div>
-          </div>
+                  ) : (
+                    speakers.map((s) => (
+                      <label
+                        key={s.id}
+                        className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={speakerIds.includes(s.id)}
+                          onChange={() => toggleSpeaker(s.id)}
+                          className="w-4 h-4"
+                        />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">
+                            {s.firstName} {s.lastName}
+                          </div>
+                          {s.positionFr && (
+                            <div className="text-xs text-muted-foreground">{s.positionFr}</div>
+                          )}
+                        </div>
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="flex items-center justify-between p-3 rounded-lg border">
-            <Label className="text-sm">Session active</Label>
+            <Label className="text-sm">{data.isHeader ? "Titre actif" : "Session active"}</Label>
             <Switch
               checked={data.isActive}
               onCheckedChange={(v) => update("isActive", v)}

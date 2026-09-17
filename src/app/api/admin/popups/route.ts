@@ -36,6 +36,12 @@ export async function POST(req: NextRequest) {
   if (!body.name) return fail("name is required", 400)
   if (!body.messageFr) return fail("messageFr is required", 400)
   try {
+    let displayOrder = body.displayOrder
+    if (typeof displayOrder !== "number" || displayOrder <= 0) {
+      const max = await db.popup.aggregate({ where: { eventId }, _max: { displayOrder: true } })
+      displayOrder = (max._max.displayOrder ?? -1) + 1
+    }
+
     const data: Prisma.PopupCreateInput = {
       event: { connect: { id: eventId } },
       name: body.name,
@@ -44,7 +50,7 @@ export async function POST(req: NextRequest) {
       messageEn: body.messageEn ?? null,
       ctaUrl: safeUrl(body.ctaUrl),
       isActive: body.isActive ?? true,
-      displayOrder: body.displayOrder ?? 0,
+      displayOrder,
     }
     const popup = await db.popup.create({ data })
     return ok(popup, 201)

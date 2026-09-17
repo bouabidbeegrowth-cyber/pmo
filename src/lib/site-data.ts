@@ -89,6 +89,32 @@ export async function getEditionsWithGallery() {
   return events
 }
 
+/**
+ * Gallery items flagged to appear on the homepage, across all editions —
+ * not scoped to the currently active event. Lets the homepage preview stay
+ * stable even when the active edition changes.
+ */
+export async function getHomepageGallery() {
+  return db.galleryItem.findMany({
+    where: { isActive: true, showOnHomepage: true },
+    orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }],
+  })
+}
+
+/**
+ * The single autoplaying background video for the Gallery page hero, if one
+ * has been uploaded and enabled for the active event.
+ */
+export async function getGalleryHeroVideo() {
+  const active = await db.event.findFirst({ where: { isActive: true } })
+  if (!active) return null
+  const section = await db.websiteSection.findUnique({
+    where: { eventId_sectionKey: { eventId: active.id, sectionKey: "GALLERY_HERO" } },
+  })
+  if (!section || section.isActive === false) return null
+  return section.backgroundImage ?? null
+}
+
 /** Helper to pick the right localized string. */
 export function pick<T>(fr: T | null | undefined, en: T | null | undefined, locale: Locale): T | null | undefined {
   return locale === "en" ? (en ?? fr) : fr

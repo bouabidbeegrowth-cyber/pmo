@@ -18,13 +18,12 @@ interface Speaker {
   country?: string | null
   linkedinUrl?: string | null
   websiteUrl?: string | null
-  isFeatured: boolean
 }
 
 interface Props {
   speakers: Speaker[]
   locale: Locale
-  labels: { viewProfile: string; biography: string; featuredBadge: string }
+  labels: { viewProfile: string; biography: string }
 }
 
 export function SpeakersHomePreview({ speakers, locale, labels }: Props) {
@@ -56,11 +55,6 @@ export function SpeakersHomePreview({ speakers, locale, labels }: Props) {
                       {sp.firstName.charAt(0)}
                       {sp.lastName.charAt(0)}
                     </span>
-                  </div>
-                )}
-                {sp.isFeatured && (
-                  <div className="absolute top-2 right-2 rounded-full bg-pmo-gold text-pmo-navy text-[10px] font-bold uppercase tracking-wider px-2 py-0.5">
-                    ★
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

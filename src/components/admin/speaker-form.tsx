@@ -131,17 +131,13 @@ export function SpeakerForm({ initial }: { initial?: SpeakerForm }) {
               onChange={(url) => update("photo", url)}
               aspectRatio="portrait"
             />
+            <p className="text-xs text-muted-foreground mt-2">
+              Format portrait 3:4 recommandé (ex. 900×1200px, min. 1200×1600px pour la meilleure qualité). Gardez le visage — et tout logo — bien centré, sans rien coller aux bords : la photo est aussi recadrée en carré et en cercle ailleurs sur le site.
+            </p>
           </FormCard>
 
           <FormCard title="Visibilité">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm">Speaker vedette</Label>
-                <Switch
-                  checked={data.isFeatured}
-                  onCheckedChange={(v) => update("isFeatured", v)}
-                />
-              </div>
               <div className="flex items-center justify-between">
                 <Label className="text-sm">Actif (visible publiquement)</Label>
                 <Switch

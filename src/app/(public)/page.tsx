@@ -14,8 +14,9 @@ import {
   Images,
 } from "lucide-react"
 import type { Metadata } from "next"
-import { getLocale, getActiveEvent, getUiText, pick } from "@/lib/site-data"
+import { getLocale, getActiveEvent, getHomepageGallery, getUiText, pick } from "@/lib/site-data"
 import { buildPageMetadata } from "@/lib/seo"
+import { renderBoldText, renderTriColorTagline } from "@/lib/text-format"
 import { HeroSection } from "@/components/public/hero-section"
 import { SpeakersHomePreview } from "@/components/public/speakers-home-preview"
 import { ProgrammeHomePreview } from "@/components/public/programme-home-preview"
@@ -54,6 +55,7 @@ export default async function HomePage() {
   const dateLocale = locale === "fr" ? fr : enUS
   const event = await getActiveEvent()
   const ui = await getUiText(locale)
+  const homepageGalleryItems = await getHomepageGallery()
 
   if (!event) {
     return (
@@ -113,7 +115,6 @@ export default async function HomePage() {
   const speakerLabels = {
     viewProfile: ui("common.speaker.viewProfile", "Voir le profil"),
     biography: ui("speakers.modal.biography", "Biographie"),
-    featuredBadge: ui("speakers.modal.featuredBadge", "Speaker vedette"),
   }
 
   const sessionTypeLabels = Object.fromEntries(
@@ -132,9 +133,10 @@ export default async function HomePage() {
   const whySection = event.websiteSections.find((s) => s.sectionKey === "WHY_PARTICIPATE")
   const aboutSection = event.websiteSections.find((s) => s.sectionKey === "ABOUT")
   const countdownSection = event.websiteSections.find((s) => s.sectionKey === "COUNTDOWN")
+  const chairmanSection = event.websiteSections.find((s) => s.sectionKey === "CHAIRMAN_MESSAGE")
   const showCountdown = countdownSection?.isActive !== false
 
-  const heroTitle = pick(heroSection?.titleFr, heroSection?.titleEn, locale) ?? event.titleFr
+  const heroTitle = pick(heroSection?.titleFr, heroSection?.titleEn, locale) ?? pick(event.titleFr, event.titleEn, locale) ?? event.titleFr
   const heroSubtitle = pick(heroSection?.subtitleFr, heroSection?.subtitleEn, locale) ?? ""
   const heroBg = heroSection?.backgroundImage ?? event.heroImageDesktop ?? null
   const heroCtaUrl = heroSection?.ctaUrl ?? "/pass-duo"
@@ -148,12 +150,17 @@ export default async function HomePage() {
   const aboutDesc = pick(aboutSection?.descriptionFr, aboutSection?.descriptionEn, locale) ?? ""
   const aboutBg = aboutSection?.backgroundImage ?? null
 
-  const featuredSpeakers = event.speakers.filter((s) => s.isFeatured).slice(0, 4)
-  const speakersPreview = featuredSpeakers.length > 0 ? featuredSpeakers : event.speakers.slice(0, 4)
+  const chairmanTitle = pick(chairmanSection?.titleFr, chairmanSection?.titleEn, locale) ?? ""
+  const chairmanDesc = pick(chairmanSection?.descriptionFr, chairmanSection?.descriptionEn, locale) ?? ""
+  const chairmanName = pick(chairmanSection?.subtitleFr, chairmanSection?.subtitleEn, locale) ?? ""
+  const chairmanRole = pick(chairmanSection?.ctaTextFr, chairmanSection?.ctaTextEn, locale) ?? ""
+  const chairmanPhoto = chairmanSection?.backgroundImage ?? null
+
+  const speakersPreview = event.speakers.slice(0, 4)
   const programmePreviewDays = event.programmeDays.slice(0, 1) // first day preview
   const featuredPasses = event.passes.slice(0, 3)
   const featuredPartners = event.partners.slice(0, 7)
-  const galleryPreview = event.galleryItems.slice(0, 6).map((item) => ({
+  const galleryPreview = homepageGalleryItems.map((item) => ({
     id: item.id,
     type: item.type as "IMAGE" | "VIDEO",
     imageUrl: item.imageUrl,
@@ -240,7 +247,7 @@ export default async function HomePage() {
         <section className="py-20 sm:py-28 bg-background relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
+              <div className="flex flex-col items-start justify-center">
                 <div className="inline-flex items-center gap-2 rounded-full bg-pmo-gold/10 border border-pmo-gold/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-gold mb-4">
                   <Award className="w-3.5 h-3.5" />
                   {t.aboutTitle}
@@ -251,7 +258,7 @@ export default async function HomePage() {
                     .split("\n")
                     .filter((p) => p.trim().length > 0)
                     .map((paragraph, i) => (
-                      <p key={i} className="leading-relaxed mb-4">{paragraph}</p>
+                      <p key={i} className="leading-relaxed mb-4">{renderBoldText(paragraph)}</p>
                     ))}
                 </div>
                 <div className="mt-6 flex flex-wrap gap-3">
@@ -266,9 +273,9 @@ export default async function HomePage() {
               </div>
 
               {/* Event meta card */}
-              <div className="relative">
+              <div className="relative h-[320px]">
                 <div className="absolute -inset-4 bg-gradient-to-br from-pmo-violet/20 to-pmo-gold/10 rounded-3xl blur-2xl" />
-                <div className="relative rounded-3xl bg-pmo-navy-gradient text-white p-8 shadow-premium-lg overflow-hidden">
+                <div className="relative h-full rounded-3xl bg-pmo-navy-gradient text-white p-8 shadow-premium-lg overflow-hidden flex flex-col justify-center">
                   {aboutBg && (
                     <>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -285,8 +292,8 @@ export default async function HomePage() {
                       </span>
                     </div>
                     <h3 className="font-display text-2xl font-bold mb-1">{event.editionName}</h3>
-                    <p className="text-pmo-gold text-sm mb-6">
-                      {pick(event.themeTaglineFr, event.themeTaglineEn, locale)}
+                    <p className="text-sm font-semibold mb-6">
+                      {renderTriColorTagline(pick(event.themeTaglineFr, event.themeTaglineEn, locale) ?? "")}
                     </p>
 
                     <div className="space-y-4">
@@ -363,10 +370,15 @@ export default async function HomePage() {
 
       {/* ====================== PROGRAMME PREVIEW ====================== */}
       {event.programmeDays.length > 0 && (
-        <section className="py-20 sm:py-28 bg-background relative">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-20 sm:py-28 bg-background relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-dark opacity-40" />
+          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-pmo-blue/10 blur-3xl" />
+          <div className="absolute top-1/3 -right-24 w-96 h-96 rounded-full bg-pmo-pink/10 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 w-96 h-96 rounded-full bg-pmo-bright-orange/10 blur-3xl" />
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 rounded-full bg-pmo-violet/10 border border-pmo-violet/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-violet mb-4">
+              <div className="inline-flex items-center gap-2 rounded-full bg-pmo-pink/10 border border-pmo-pink/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-pink mb-4">
                 <Clock3 className="w-3.5 h-3.5" />
                 {t.programmeTitle}
               </div>
@@ -416,6 +428,50 @@ export default async function HomePage() {
                 {t.passesCta}
                 <ArrowRight className="w-4 h-4" />
               </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ===================== CHAIRMAN MESSAGE ===================== */}
+      {chairmanSection?.isActive !== false && chairmanDesc && (
+        <section className="py-20 sm:py-28 bg-pmo-navy relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid opacity-20" />
+          <div className="absolute -top-32 -left-24 w-96 h-96 rounded-full bg-pmo-blue/20 blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-pmo-pink/10 blur-3xl" />
+
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-[340px_1fr] gap-10 lg:gap-16 items-center">
+              {chairmanPhoto && (
+                <div className="relative rounded-3xl overflow-hidden shadow-premium-lg aspect-[3/4] mx-auto w-full max-w-[340px]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={chairmanPhoto} alt={chairmanName} className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              <div>
+                {chairmanTitle && (
+                  <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6 text-balance">
+                    {chairmanTitle}
+                  </h2>
+                )}
+                <div className="text-white/75 text-[15px] sm:text-base leading-[1.8] mb-8 text-pretty">
+                  {chairmanDesc.split("\n").filter((p) => p.trim().length > 0).map((paragraph, i) => (
+                    <p key={i} className="mb-4">{renderBoldText(paragraph)}</p>
+                  ))}
+                </div>
+
+                {(chairmanName || chairmanRole) && (
+                  <div className="rounded-2xl border border-white/15 bg-white/5 px-6 py-5">
+                    {chairmanName && (
+                      <div className="font-display text-lg font-bold text-white">{chairmanName}</div>
+                    )}
+                    {chairmanRole && (
+                      <div className="text-sm text-white/60 mt-1">{chairmanRole}</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>

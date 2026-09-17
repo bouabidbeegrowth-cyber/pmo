@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Images } from "lucide-react"
-import { getLocale, getUiText, getEditionsWithGallery, pick } from "@/lib/site-data"
+import { getLocale, getUiText, getEditionsWithGallery, getGalleryHeroVideo, pick } from "@/lib/site-data"
 import { buildPageMetadata } from "@/lib/seo"
 import { PageHero } from "@/components/public/page-hero"
 import { GalleryGrid } from "@/components/public/gallery-grid"
@@ -17,8 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
     path: "/galerie",
     locale,
     defaults: {
-      titleFr: "Galerie",
-      titleEn: "Gallery",
+      titleFr: "Moments",
+      titleEn: "Highlights",
       descriptionFr: "Photos et vidéos des éditions de PMO Mastery.",
       descriptionEn: "Photos and videos from PMO Mastery editions.",
     },
@@ -42,13 +42,14 @@ export default async function GaleriePage({
   }
 
   const editions = await getEditionsWithGallery()
+  const heroVideo = await getGalleryHeroVideo()
   const breadcrumbs = [{ href: "/", label: ui("common.breadcrumb.home", "Accueil") }, { label: t.title }]
 
   if (editions.length === 0) {
     return (
       <>
         <BreadcrumbStructuredData items={breadcrumbs} />
-        <PageHero eyebrow={t.eyebrow} title={t.title} subtitle={t.subtitle} breadcrumbs={breadcrumbs} />
+        <PageHero eyebrow={t.eyebrow} title={t.title} subtitle={t.subtitle} breadcrumbs={breadcrumbs} backgroundVideo={heroVideo} />
         <section className="py-16 sm:py-20 bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-16">
             <Images className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
@@ -72,7 +73,7 @@ export default async function GaleriePage({
   return (
     <>
       <BreadcrumbStructuredData items={breadcrumbs} />
-      <PageHero eyebrow={t.eyebrow} title={t.title} subtitle={t.subtitle} breadcrumbs={breadcrumbs} />
+      <PageHero eyebrow={t.eyebrow} title={t.title} subtitle={t.subtitle} breadcrumbs={breadcrumbs} backgroundVideo={heroVideo} />
 
       <section className="py-16 sm:py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -61,6 +61,12 @@ export async function POST(req: NextRequest) {
     if (!body.nameFr) return fail("nameFr is required", 400)
     if (!body.date) return fail("date is required", 400)
     try {
+      let displayOrder = body.displayOrder
+      if (typeof displayOrder !== "number" || displayOrder <= 0) {
+        const max = await db.programmeDay.aggregate({ where: { eventId }, _max: { displayOrder: true } })
+        displayOrder = (max._max.displayOrder ?? -1) + 1
+      }
+
       const day = await db.programmeDay.create({
         data: {
           event: { connect: { id: eventId } },
@@ -68,7 +74,7 @@ export async function POST(req: NextRequest) {
           nameEn: body.nameEn ?? null,
           date: new Date(body.date),
           isActive: body.isActive ?? true,
-          displayOrder: body.displayOrder ?? 0,
+          displayOrder,
         },
       })
       return ok(day, 201)
@@ -80,9 +86,19 @@ export async function POST(req: NextRequest) {
   if (body.kind === "session") {
     if (!body.programmeDayId) return fail("programmeDayId is required", 400)
     if (!body.titleFr) return fail("titleFr is required", 400)
-    if (!body.startTime) return fail("startTime is required", 400)
+    if (!body.isHeader && !body.startTime) return fail("startTime is required", 400)
     try {
       const { speakerIds = [], moderatorId = null, ...rest } = body
+
+      let displayOrder = body.displayOrder
+      if (typeof displayOrder !== "number" || displayOrder <= 0) {
+        const max = await db.programmeSession.aggregate({
+          where: { programmeDayId: body.programmeDayId },
+          _max: { displayOrder: true },
+        })
+        displayOrder = (max._max.displayOrder ?? -1) + 1
+      }
+
       const sessionData: Prisma.ProgrammeSessionCreateInput = {
         programmeDay: { connect: { id: body.programmeDayId } },
         startTime: body.startTime,
@@ -96,7 +112,8 @@ export async function POST(req: NextRequest) {
         language: body.language ?? null,
         room: body.room ?? null,
         topic: body.topic ?? null,
-        displayOrder: body.displayOrder ?? 0,
+        isHeader: body.isHeader ?? false,
+        displayOrder,
         isActive: body.isActive ?? true,
         ...(moderatorId ? { moderator: { connect: { id: moderatorId } } } : {}),
       }

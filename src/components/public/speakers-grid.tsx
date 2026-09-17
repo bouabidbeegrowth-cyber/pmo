@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { ArrowRight, Search, Star } from "lucide-react"
+import { ArrowRight, Search } from "lucide-react"
 import { SpeakerModal } from "@/components/public/speaker-modal"
 import { Input } from "@/components/ui/input"
 import type { Locale } from "@/lib/site-data"
@@ -19,7 +19,6 @@ interface Speaker {
   country?: string | null
   linkedinUrl?: string | null
   websiteUrl?: string | null
-  isFeatured: boolean
 }
 
 interface Props {
@@ -27,25 +26,19 @@ interface Props {
   locale: Locale
   labels: {
     searchPlaceholder: string
-    filterAll: string
-    filterFeatured: string
     noResults: string
-    badgeFeatured: string
     viewProfile: string
     biography: string
-    featuredBadge: string
   }
 }
 
 export function SpeakersGrid({ speakers, locale, labels }: Props) {
   const [selected, setSelected] = useState<Speaker | null>(null)
   const [query, setQuery] = useState("")
-  const [filter, setFilter] = useState<"all" | "featured">("all")
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return speakers.filter((s) => {
-      if (filter === "featured" && !s.isFeatured) return false
       if (!q) return true
       const pos = (locale === "en" ? s.positionEn ?? s.positionFr : s.positionFr) ?? ""
       return (
@@ -55,15 +48,15 @@ export function SpeakersGrid({ speakers, locale, labels }: Props) {
         (s.country ?? "").toLowerCase().includes(q)
       )
     })
-  }, [speakers, query, filter, locale])
+  }, [speakers, query, locale])
 
   return (
     <section className="py-12 sm:py-16 bg-pmo-light-bg relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-dark opacity-50" />
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Search + filter */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-8 max-w-2xl mx-auto">
-          <div className="relative flex-1">
+        {/* Search */}
+        <div className="mb-8 max-w-md mx-auto">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               value={query}
@@ -71,25 +64,6 @@ export function SpeakersGrid({ speakers, locale, labels }: Props) {
               placeholder={labels.searchPlaceholder}
               className="pl-9 bg-white"
             />
-          </div>
-          <div className="flex gap-1 bg-white rounded-lg border border-border p-1">
-            <button
-              onClick={() => setFilter("all")}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                filter === "all" ? "bg-pmo-violet text-white" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {labels.filterAll}
-            </button>
-            <button
-              onClick={() => setFilter("featured")}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-1.5 ${
-                filter === "featured" ? "bg-pmo-gold text-pmo-navy" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Star className="w-3.5 h-3.5" />
-              {labels.filterFeatured}
-            </button>
           </div>
         </div>
 
@@ -121,12 +95,6 @@ export function SpeakersGrid({ speakers, locale, labels }: Props) {
                           {sp.firstName.charAt(0)}
                           {sp.lastName.charAt(0)}
                         </span>
-                      </div>
-                    )}
-                    {sp.isFeatured && (
-                      <div className="absolute top-2 right-2 rounded-full bg-pmo-gold text-pmo-navy text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 flex items-center gap-0.5">
-                        <Star className="w-2.5 h-2.5 fill-current" />
-                        {labels.badgeFeatured}
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from "@/components/ui/dialog"
 
 interface Speaker {
@@ -22,7 +23,6 @@ interface Speaker {
   country?: string | null
   linkedinUrl?: string | null
   websiteUrl?: string | null
-  isFeatured: boolean
 }
 
 export function SpeakerModal({
@@ -36,7 +36,7 @@ export function SpeakerModal({
   locale: "fr" | "en"
   open: boolean
   onOpenChange: (open: boolean) => void
-  labels: { biography: string; featuredBadge: string }
+  labels: { biography: string }
 }) {
   if (!speaker) return null
   const position = locale === "en" ? speaker.positionEn ?? speaker.positionFr : speaker.positionFr
@@ -44,15 +44,19 @@ export function SpeakerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent showCloseButton={false} className="sm:max-w-3xl max-h-[90vh] overflow-y-auto sm:overflow-hidden p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>
             {speaker.firstName} {speaker.lastName}
           </DialogTitle>
         </DialogHeader>
-        <div className="grid sm:grid-cols-[280px_1fr] gap-0">
-          {/* Photo side */}
-          <div className="relative bg-pmo-navy-gradient p-6 sm:p-8 flex flex-col">
+        <DialogClose className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-colors">
+          <X className="w-4 h-4" />
+          <span className="sr-only">Close</span>
+        </DialogClose>
+        <div className="grid sm:grid-cols-[280px_1fr] gap-0 sm:max-h-[90vh]">
+          {/* Photo side — stays fixed in place; only the bio column scrolls */}
+          <div className="relative bg-pmo-navy-gradient p-6 sm:p-8 flex flex-col sm:overflow-y-auto">
             <div className="absolute inset-0 bg-grid opacity-20" />
             <div className="relative">
               <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden bg-white/10 shadow-premium-lg mx-auto">
@@ -111,8 +115,8 @@ export function SpeakerModal({
               </div>
             </div>
           </div>
-          {/* Bio side */}
-          <div className="p-6 sm:p-8">
+          {/* Bio side — the only part that scrolls internally on desktop */}
+          <div className="p-6 sm:p-8 sm:overflow-y-auto sm:max-h-[90vh]">
             <h4 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-3">
               {labels.biography}
             </h4>
@@ -126,11 +130,6 @@ export function SpeakerModal({
                   </p>
                 ))}
             </div>
-            {speaker.isFeatured && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-pmo-gold/10 border border-pmo-gold/30 px-3 py-1 text-xs text-pmo-gold font-semibold">
-                ★ {labels.featuredBadge}
-              </div>
-            )}
           </div>
         </div>
       </DialogContent>

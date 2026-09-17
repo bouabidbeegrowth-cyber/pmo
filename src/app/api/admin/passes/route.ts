@@ -50,6 +50,12 @@ export async function POST(req: NextRequest) {
   const slug = body.slug || slugify(body.nameFr)
 
   try {
+    let displayOrder = body.displayOrder
+    if (typeof displayOrder !== "number" || displayOrder <= 0) {
+      const max = await db.pass.aggregate({ where: { eventId }, _max: { displayOrder: true } })
+      displayOrder = (max._max.displayOrder ?? -1) + 1
+    }
+
     const data: Prisma.PassCreateInput = {
       event: { connect: { id: eventId } },
       slug,
@@ -66,7 +72,7 @@ export async function POST(req: NextRequest) {
       minQuantity: body.minQuantity ?? 1,
       isFeatured: body.isFeatured ?? false,
       isActive: body.isActive ?? true,
-      displayOrder: body.displayOrder ?? 0,
+      displayOrder,
     }
     const pass = await db.pass.create({ data })
     return ok(pass, 201)

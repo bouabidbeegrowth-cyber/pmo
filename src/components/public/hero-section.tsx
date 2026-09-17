@@ -61,7 +61,7 @@ export function HeroSection({
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-10 lg:gap-10">
           {/* LEFT — Text content */}
-          <div className="max-w-xl lg:max-w-2xl flex-shrink-0">
+          <div className="max-w-xl lg:max-w-2xl flex-shrink-0 mt-4 lg:mt-16">
             <motion.div
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
@@ -73,12 +73,17 @@ export function HeroSection({
               <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-[1.05] tracking-tight mb-5 text-balance">
                 {title}
               </h1>
+              <div className="hero-divider mb-5" />
               {subtitle && (
                 <p className="text-lg sm:text-xl md:text-2xl text-white/90 font-normal mb-4 text-pretty">
                   {subtitle}
                 </p>
               )}
-              <div className="hero-divider mb-8" />
+              <p className="font-display text-sm sm:text-base font-bold uppercase tracking-[0.15em] mb-8">
+                <span className="text-white">Build.</span>{" "}
+                <span className="text-pmo-blue">Lead.</span>{" "}
+                <span className="text-pmo-bright-orange">Sustain.</span>
+              </p>
 
               {showCountdown && (
                 <div className="mb-8">

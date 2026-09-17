@@ -131,10 +131,10 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group shrink-0">
+        <Link href="/" className="flex items-center gap-3 group shrink-0 h-12 sm:h-14">
           {logo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logo} alt="PMO Mastery" className="h-14 sm:h-26 w-auto" />
+            <img src={logo} alt="PMO Mastery" className="h-full w-auto max-w-[220px] object-contain" />
           ) : (
             <div className="flex items-center gap-2.5">
               <div className="w-12 h-12 rounded-xl bg-pmo-violet-gradient flex items-center justify-center font-display font-bold text-white text-xl shadow-premium group-hover:scale-105 transition-transform">

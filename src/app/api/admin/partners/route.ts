@@ -35,6 +35,12 @@ export async function POST(req: NextRequest) {
   }
   if (!body.name) return fail("name is required", 400)
   try {
+    let displayOrder = body.displayOrder
+    if (typeof displayOrder !== "number" || displayOrder <= 0) {
+      const max = await db.partner.aggregate({ where: { eventId }, _max: { displayOrder: true } })
+      displayOrder = (max._max.displayOrder ?? -1) + 1
+    }
+
     const data: Prisma.PartnerCreateInput = {
       event: { connect: { id: eventId } },
       name: body.name,
@@ -44,7 +50,7 @@ export async function POST(req: NextRequest) {
       descriptionFr: body.descriptionFr ?? null,
       descriptionEn: body.descriptionEn ?? null,
       isActive: body.isActive ?? true,
-      displayOrder: body.displayOrder ?? 0,
+      displayOrder,
     }
     const partner = await db.partner.create({ data })
     return ok(partner, 201)

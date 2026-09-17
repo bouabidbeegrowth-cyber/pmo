@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { requireAdmin, ok, fail, safeUrl } from "@/lib/api"
-import { parseVideoUrl } from "@/lib/video"
 import { Prisma } from "@prisma/client"
 
 export const dynamic = "force-dynamic"
@@ -36,30 +35,25 @@ export async function POST(req: NextRequest) {
     eventId = active.id
   }
 
-  const type = body.type === "VIDEO" ? "VIDEO" : "IMAGE"
   const imageUrl = safeUrl(body.imageUrl)
-  if (type === "IMAGE" && !imageUrl) return fail("imageUrl is required for an image item", 400)
-
-  let videoUrl: string | null = null
-  let thumbnail: string | null = null
-  if (type === "VIDEO") {
-    const parsed = typeof body.videoUrl === "string" ? parseVideoUrl(body.videoUrl.trim()) : null
-    if (!parsed) return fail("Invalid video URL. Must be a YouTube or Vimeo link.", 400)
-    videoUrl = body.videoUrl.trim()
-    thumbnail = safeUrl(body.thumbnail)
-  }
+  if (!imageUrl) return fail("imageUrl is required", 400)
 
   try {
+    let displayOrder = body.displayOrder
+    if (typeof displayOrder !== "number" || displayOrder <= 0) {
+      const max = await db.galleryItem.aggregate({ where: { eventId }, _max: { displayOrder: true } })
+      displayOrder = (max._max.displayOrder ?? -1) + 1
+    }
+
     const data: Prisma.GalleryItemCreateInput = {
       event: { connect: { id: eventId } },
-      type,
-      imageUrl: type === "IMAGE" ? imageUrl : null,
-      videoUrl,
-      thumbnail,
+      type: "IMAGE",
+      imageUrl,
       captionFr: body.captionFr ?? null,
       captionEn: body.captionEn ?? null,
       isActive: body.isActive ?? true,
-      displayOrder: typeof body.displayOrder === "number" ? body.displayOrder : 0,
+      showOnHomepage: body.showOnHomepage ?? false,
+      displayOrder,
     }
     const item = await db.galleryItem.create({ data })
     return ok(item, 201)

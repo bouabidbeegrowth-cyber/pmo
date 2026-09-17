@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { ok, fail } from "@/lib/api"
+import { sendMail } from "@/lib/mailer"
 import { z } from "zod"
 
 export const dynamic = "force-dynamic"
@@ -32,6 +33,23 @@ export async function POST(req: NextRequest) {
       message: parsed.data.message,
     },
   })
+
+  const notifyTo = process.env.CONTACT_NOTIFY_EMAIL
+  if (notifyTo) {
+    sendMail({
+      to: notifyTo,
+      replyTo: parsed.data.email,
+      subject: `[Contact] ${parsed.data.subject || "Nouveau message"} — ${parsed.data.name}`,
+      html: `
+        <p><strong>Nom:</strong> ${parsed.data.name}</p>
+        <p><strong>Email:</strong> ${parsed.data.email}</p>
+        ${parsed.data.phone ? `<p><strong>Téléphone:</strong> ${parsed.data.phone}</p>` : ""}
+        ${parsed.data.subject ? `<p><strong>Sujet:</strong> ${parsed.data.subject}</p>` : ""}
+        <p><strong>Message:</strong></p>
+        <p>${parsed.data.message.replace(/\n/g, "<br>")}</p>
+      `,
+    }).catch((e) => console.error("Failed to send contact notification email", e))
+  }
 
   return ok({ success: true, id: msg.id }, 201)
 }

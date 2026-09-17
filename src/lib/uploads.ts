@@ -14,7 +14,10 @@ const ALLOWED_MIME = new Set([
   "image/avif",
 ])
 
+const ALLOWED_VIDEO_MIME = new Set(["video/mp4", "video/webm"])
+
 const MAX_BYTES = 8 * 1024 * 1024 // 8 MB
+const MAX_VIDEO_BYTES = 40 * 1024 * 1024 // 40 MB
 
 export interface UploadedFile {
   filename: string
@@ -33,6 +36,10 @@ export interface UploadedFile {
  * Throws on invalid input.
  */
 export async function saveUpload(file: File): Promise<UploadedFile> {
+  if (ALLOWED_VIDEO_MIME.has(file.type)) {
+    return saveVideoUpload(file)
+  }
+
   if (!ALLOWED_MIME.has(file.type)) {
     throw new Error(`Unsupported file type: ${file.type}`)
   }
@@ -95,6 +102,29 @@ export async function saveUpload(file: File): Promise<UploadedFile> {
     url: `/uploads/${basename}`,
     width,
     height,
+  })
+}
+
+async function saveVideoUpload(file: File): Promise<UploadedFile> {
+  if (file.size > MAX_VIDEO_BYTES) {
+    throw new Error(`File too large (max ${MAX_VIDEO_BYTES / 1024 / 1024} MB)`)
+  }
+
+  await fs.mkdir(UPLOAD_DIR, { recursive: true })
+
+  const ext = file.type.split("/")[1] || "mp4"
+  const basename = `${randomUUID()}.${ext}`
+  const filepath = path.join(UPLOAD_DIR, basename)
+
+  const buffer = Buffer.from(await file.arrayBuffer())
+  await fs.writeFile(filepath, buffer)
+
+  return persistRecord({
+    filename: basename,
+    originalName: file.name,
+    mimeType: file.type,
+    size: buffer.length,
+    url: `/uploads/${basename}`,
   })
 }
 

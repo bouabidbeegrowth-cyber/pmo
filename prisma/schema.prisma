@@ -98,6 +98,7 @@ model GalleryItem {
   captionFr    String?
   captionEn    String?
   isActive     Boolean  @default(true)
+  showOnHomepage Boolean @default(false)
   displayOrder Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -274,6 +275,7 @@ model ProgrammeSession {
   language        String?  // FR | EN | AR | MIXED
   room            String?
   topic           String?
+  isHeader        Boolean  @default(false) // plain-text section divider (e.g. "Plenary Session 1: ...") — no time/speakers/CTA
   displayOrder    Int      @default(0)
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { PageHeader } from "@/components/admin/page-header"
 import { ImageUploader } from "@/components/admin/image-uploader"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
@@ -44,9 +43,8 @@ import {
   Images,
   AlertTriangle,
   GripVertical,
-  Video,
   ImageIcon,
-  Play,
+  Home,
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -67,18 +65,16 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { cn } from "@/lib/utils"
-import { parseVideoUrl } from "@/lib/video"
 
 interface GalleryItem {
   id: string
   eventId: string
-  type: "IMAGE" | "VIDEO"
+  type: "IMAGE"
   imageUrl?: string | null
-  videoUrl?: string | null
-  thumbnail?: string | null
   captionFr?: string | null
   captionEn?: string | null
   isActive: boolean
+  showOnHomepage: boolean
   displayOrder: number
 }
 
@@ -95,11 +91,10 @@ function emptyItem(eventId: string): Omit<GalleryItem, "id"> {
     eventId,
     type: "IMAGE",
     imageUrl: null,
-    videoUrl: "",
-    thumbnail: null,
     captionFr: "",
     captionEn: "",
     isActive: true,
+    showOnHomepage: false,
     displayOrder: 0,
   }
 }
@@ -163,12 +158,8 @@ export default function GalleryAdminPage() {
 
   async function save() {
     if (!editing) return
-    if (editing.type === "IMAGE" && !editing.imageUrl) {
+    if (!editing.imageUrl) {
       toast.error("Ajoutez une image.")
-      return
-    }
-    if (editing.type === "VIDEO" && !editing.videoUrl?.trim()) {
-      toast.error("Le lien vidéo est obligatoire.")
       return
     }
     setSaving(true)
@@ -241,7 +232,7 @@ export default function GalleryAdminPage() {
     <div className="space-y-6 max-w-6xl mx-auto">
       <PageHeader
         title="Galerie"
-        description="Photos et vidéos par édition de l'événement."
+        description="Photos par édition de l'événement."
         actions={
           <Button onClick={startNew} disabled={!eventId} className="bg-pmo-violet-gradient text-white">
             <Plus className="w-4 h-4 mr-2" />
@@ -277,7 +268,7 @@ export default function GalleryAdminPage() {
           <Images className="w-12 h-12 text-muted-foreground/50 mb-3" />
           <h3 className="font-display text-lg font-semibold">Aucun média</h3>
           <p className="text-muted-foreground text-sm mt-1 mb-4">
-            Ajoutez la première photo ou vidéo de cette édition.
+            Ajoutez la première photo de cette édition.
           </p>
           <Button onClick={startNew} className="bg-pmo-violet-gradient text-white">
             <Plus className="w-4 h-4 mr-2" />
@@ -311,44 +302,12 @@ export default function GalleryAdminPage() {
           </DialogHeader>
           {editing && (
             <div className="space-y-4">
-              <Tabs
-                value={editing.type}
-                onValueChange={(v) => setEditing({ ...editing, type: v as "IMAGE" | "VIDEO" })}
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="IMAGE">
-                    <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                    Image
-                  </TabsTrigger>
-                  <TabsTrigger value="VIDEO">
-                    <Video className="w-3.5 h-3.5 mr-1.5" />
-                    Vidéo
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="IMAGE" className="pt-2">
-                  <ImageUploader
-                    label="Photo"
-                    value={editing.imageUrl}
-                    onChange={(url) => setEditing({ ...editing, imageUrl: url })}
-                    aspectRatio="wide"
-                  />
-                </TabsContent>
-                <TabsContent value="VIDEO" className="pt-2 space-y-4">
-                  <Field label="Lien YouTube ou Vimeo" required>
-                    <Input
-                      value={editing.videoUrl ?? ""}
-                      onChange={(e) => setEditing({ ...editing, videoUrl: e.target.value })}
-                      placeholder="https://www.youtube.com/watch?v=..."
-                    />
-                  </Field>
-                  <ImageUploader
-                    label="Vignette personnalisée (optionnel)"
-                    value={editing.thumbnail}
-                    onChange={(url) => setEditing({ ...editing, thumbnail: url })}
-                    aspectRatio="wide"
-                  />
-                </TabsContent>
-              </Tabs>
+              <ImageUploader
+                label="Photo"
+                value={editing.imageUrl}
+                onChange={(url) => setEditing({ ...editing, imageUrl: url })}
+                aspectRatio="wide"
+              />
 
               <Tabs defaultValue="fr">
                 <TabsList className="grid w-full grid-cols-2">
@@ -382,6 +341,19 @@ export default function GalleryAdminPage() {
                 <Switch
                   checked={editing.isActive}
                   onCheckedChange={(v) => setEditing({ ...editing, isActive: v })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <div>
+                  <Label className="text-sm">Afficher sur la page d'accueil</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Indépendant de l'édition active — reste affiché même après changement d'événement.
+                  </p>
+                </div>
+                <Switch
+                  checked={editing.showOnHomepage}
+                  onCheckedChange={(v) => setEditing({ ...editing, showOnHomepage: v })}
                 />
               </div>
             </div>
@@ -442,9 +414,6 @@ function SortableGalleryCard({
     transition,
   }
 
-  const autoThumb = item.type === "VIDEO" && item.videoUrl ? parseVideoUrl(item.videoUrl)?.thumbnailUrl : null
-  const thumb = item.type === "IMAGE" ? item.imageUrl : item.thumbnail ?? autoThumb
-
   return (
     <div
       ref={setNodeRef}
@@ -455,23 +424,12 @@ function SortableGalleryCard({
       )}
     >
       <div className="relative aspect-video bg-muted">
-        {thumb ? (
+        {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={thumb} alt="" className="w-full h-full object-cover" />
+          <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            {item.type === "VIDEO" ? (
-              <Video className="w-8 h-8 text-muted-foreground/40" />
-            ) : (
-              <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
-            )}
-          </div>
-        )}
-        {item.type === "VIDEO" && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-            <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center">
-              <Play className="w-4 h-4 text-pmo-navy fill-pmo-navy ml-0.5" />
-            </div>
+            <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
           </div>
         )}
         <button
@@ -482,16 +440,22 @@ function SortableGalleryCard({
         >
           <GripVertical className="w-3.5 h-3.5" />
         </button>
-        {!item.isActive && (
-          <Badge variant="secondary" className="absolute top-2 right-2 bg-white/90 text-muted-foreground">
-            Inactif
-          </Badge>
-        )}
+        <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+          {!item.isActive && (
+            <Badge variant="secondary" className="bg-white/90 text-muted-foreground">
+              Inactif
+            </Badge>
+          )}
+          {item.showOnHomepage && (
+            <Badge variant="secondary" className="bg-primary/90 text-primary-foreground">
+              <Home className="w-3 h-3 mr-1" />
+              Accueil
+            </Badge>
+          )}
+        </div>
       </div>
       <div className="p-3 flex items-center justify-between gap-2">
-        <p className="text-xs text-muted-foreground truncate flex-1">
-          {item.captionFr || (item.type === "VIDEO" ? "Vidéo" : "Photo")}
-        </p>
+        <p className="text-xs text-muted-foreground truncate flex-1">{item.captionFr || "Photo"}</p>
         <div className="flex gap-1 shrink-0">
           <button
             onClick={onEdit}
@@ -510,10 +474,7 @@ function SortableGalleryCard({
                 <AlertDialogTitle>Supprimer ce média ?</AlertDialogTitle>
                 <AlertDialogDescription className="flex items-start gap-2 pt-2">
                   <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-                  <span>
-                    Ce {item.type === "VIDEO" ? "lien vidéo" : "média"} sera définitivement supprimé.
-                    Cette action est irréversible.
-                  </span>
+                  <span>Ce média sera définitivement supprimé. Cette action est irréversible.</span>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

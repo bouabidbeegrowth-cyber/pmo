@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   if (!eventId) return ok([])
   const organizers = await db.organizer.findMany({
     where: { eventId },
-    orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
+    orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }],
   })
   return ok(organizers)
 }
@@ -35,6 +35,12 @@ export async function POST(req: NextRequest) {
   }
   if (!body.name) return fail("name is required", 400)
   try {
+    let displayOrder = body.displayOrder
+    if (typeof displayOrder !== "number" || displayOrder <= 0) {
+      const max = await db.organizer.aggregate({ where: { eventId }, _max: { displayOrder: true } })
+      displayOrder = (max._max.displayOrder ?? -1) + 1
+    }
+
     const data: Prisma.OrganizerCreateInput = {
       event: { connect: { id: eventId } },
       name: body.name,
@@ -50,7 +56,7 @@ export async function POST(req: NextRequest) {
       founderPhoto: safeUrl(body.founderPhoto),
       founderCredentials: body.founderCredentials ?? null,
       isActive: body.isActive ?? true,
-      displayOrder: body.displayOrder ?? 0,
+      displayOrder,
     }
     const org = await db.organizer.create({ data })
     return ok(org, 201)

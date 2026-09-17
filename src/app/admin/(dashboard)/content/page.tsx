@@ -5,6 +5,7 @@ import Link from "next/link"
 import { PageHeader } from "@/components/admin/page-header"
 import { FormCard } from "@/components/admin/form-card"
 import { ImageUploader } from "@/components/admin/image-uploader"
+import { VideoUploader } from "@/components/admin/video-uploader"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -94,6 +95,8 @@ const SECTION_LABELS: Record<string, string> = {
   HERO: "Hero",
   WHY_PARTICIPATE: "Pourquoi y participer",
   ABOUT: "À propos",
+  CHAIRMAN_MESSAGE: "Message du/de la Président(e)",
+  GALLERY_HERO: "Hero Galerie",
   COUNTDOWN: "Compte à rebours",
   FOOTER: "Footer",
 }
@@ -117,7 +120,7 @@ export default function ContentPage() {
         map[s.sectionKey] = s
       }
       // Ensure all sections exist locally (even if not in DB yet)
-      for (const k of ["HERO", "WHY_PARTICIPATE", "ABOUT", "COUNTDOWN", "FOOTER"]) {
+      for (const k of ["HERO", "WHY_PARTICIPATE", "ABOUT", "CHAIRMAN_MESSAGE", "GALLERY_HERO", "COUNTDOWN", "FOOTER"]) {
         if (!map[k]) {
           map[k] = {
             id: "",
@@ -252,10 +255,12 @@ export default function ContentPage() {
       />
 
       <Tabs defaultValue="HERO">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 mb-6">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-8 mb-6">
           <TabsTrigger value="HERO">Hero</TabsTrigger>
           <TabsTrigger value="WHY_PARTICIPATE">Pourquoi</TabsTrigger>
           <TabsTrigger value="ABOUT">À propos</TabsTrigger>
+          <TabsTrigger value="CHAIRMAN_MESSAGE">Message</TabsTrigger>
+          <TabsTrigger value="GALLERY_HERO">Hero Galerie</TabsTrigger>
           <TabsTrigger value="COUNTDOWN">Compte à rebours</TabsTrigger>
           <TabsTrigger value="FOOTER">Footer</TabsTrigger>
           <TabsTrigger value="CONTACT">Contact</TabsTrigger>
@@ -523,6 +528,121 @@ export default function ContentPage() {
               />
             </div>
             <SaveButton onClick={() => saveSection("ABOUT")} saving={savingKey === "ABOUT"} />
+          </FormCard>
+        </TabsContent>
+
+        {/* CHAIRMAN MESSAGE */}
+        <TabsContent value="CHAIRMAN_MESSAGE">
+          <FormCard
+            title="Message du/de la Président(e)"
+            description="Message personnel avec photo, affiché sur la page d'accueil."
+          >
+            <div className="space-y-5">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Titre (FR)">
+                  <Input
+                    value={sections.CHAIRMAN_MESSAGE?.titleFr ?? ""}
+                    onChange={(e) => updateSection("CHAIRMAN_MESSAGE", { titleFr: e.target.value })}
+                    placeholder="Mon message, ma vision"
+                  />
+                </Field>
+                <Field label="Title (EN)">
+                  <Input
+                    value={sections.CHAIRMAN_MESSAGE?.titleEn ?? ""}
+                    onChange={(e) => updateSection("CHAIRMAN_MESSAGE", { titleEn: e.target.value })}
+                  />
+                </Field>
+              </div>
+              <Field label="Message (FR)">
+                <Textarea
+                  value={sections.CHAIRMAN_MESSAGE?.descriptionFr ?? ""}
+                  onChange={(e) => updateSection("CHAIRMAN_MESSAGE", { descriptionFr: e.target.value })}
+                  rows={8}
+                />
+              </Field>
+              <Field label="Message (EN)">
+                <Textarea
+                  value={sections.CHAIRMAN_MESSAGE?.descriptionEn ?? ""}
+                  onChange={(e) => updateSection("CHAIRMAN_MESSAGE", { descriptionEn: e.target.value })}
+                  rows={8}
+                />
+              </Field>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Nom (FR)">
+                  <Input
+                    value={sections.CHAIRMAN_MESSAGE?.subtitleFr ?? ""}
+                    onChange={(e) => updateSection("CHAIRMAN_MESSAGE", { subtitleFr: e.target.value })}
+                    placeholder="Yosra Torjmen"
+                  />
+                </Field>
+                <Field label="Nom (EN)">
+                  <Input
+                    value={sections.CHAIRMAN_MESSAGE?.subtitleEn ?? ""}
+                    onChange={(e) => updateSection("CHAIRMAN_MESSAGE", { subtitleEn: e.target.value })}
+                  />
+                </Field>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Fonction (FR)">
+                  <Input
+                    value={sections.CHAIRMAN_MESSAGE?.ctaTextFr ?? ""}
+                    onChange={(e) => updateSection("CHAIRMAN_MESSAGE", { ctaTextFr: e.target.value })}
+                    placeholder="Managing Director, Fondatrice de PMO Mastery"
+                  />
+                </Field>
+                <Field label="Fonction (EN)">
+                  <Input
+                    value={sections.CHAIRMAN_MESSAGE?.ctaTextEn ?? ""}
+                    onChange={(e) => updateSection("CHAIRMAN_MESSAGE", { ctaTextEn: e.target.value })}
+                  />
+                </Field>
+              </div>
+              <ImageUploader
+                label="Photo"
+                value={sections.CHAIRMAN_MESSAGE?.backgroundImage}
+                onChange={(url) => updateSection("CHAIRMAN_MESSAGE", { backgroundImage: url })}
+                aspectRatio="portrait"
+              />
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <div>
+                  <Label className="text-sm">Afficher sur la page d'accueil</Label>
+                </div>
+                <Switch
+                  checked={sections.CHAIRMAN_MESSAGE?.isActive ?? true}
+                  onCheckedChange={(v) => updateSection("CHAIRMAN_MESSAGE", { isActive: v })}
+                />
+              </div>
+            </div>
+            <SaveButton onClick={() => saveSection("CHAIRMAN_MESSAGE")} saving={savingKey === "CHAIRMAN_MESSAGE"} />
+          </FormCard>
+        </TabsContent>
+
+        {/* GALLERY HERO */}
+        <TabsContent value="GALLERY_HERO">
+          <FormCard
+            title="Hero de la page Galerie"
+            description="Une seule vidéo en fond, en lecture automatique, derrière le titre « Moments / Highlights »."
+          >
+            <div className="space-y-5">
+              <VideoUploader
+                label="Vidéo de fond (MP4/WebM, muette, en boucle)"
+                value={sections.GALLERY_HERO?.backgroundImage}
+                onChange={(url) => updateSection("GALLERY_HERO", { backgroundImage: url })}
+              />
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <div>
+                  <Label className="text-sm">Activer la vidéo de fond</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Désactivez pour revenir au fond dégradé statique.
+                  </p>
+                </div>
+                <Switch
+                  checked={sections.GALLERY_HERO?.isActive ?? true}
+                  onCheckedChange={(v) => updateSection("GALLERY_HERO", { isActive: v })}
+                />
+              </div>
+            </div>
+            <SaveButton onClick={() => saveSection("GALLERY_HERO")} saving={savingKey === "GALLERY_HERO"} />
           </FormCard>
         </TabsContent>
 

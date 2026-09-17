@@ -18,7 +18,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (typeof body.titleFr === "string" && !body.titleFr.trim()) {
     return fail("titleFr cannot be empty", 400)
   }
-  if (typeof body.startTime === "string" && !body.startTime.trim()) {
+  const isHeader = typeof body.isHeader === "boolean" ? body.isHeader : existing.isHeader
+  if (!isHeader && typeof body.startTime === "string" && !body.startTime.trim()) {
     return fail("startTime cannot be empty", 400)
   }
 
@@ -36,6 +37,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       language: body.language ?? null,
       room: body.room ?? null,
       topic: body.topic ?? null,
+      isHeader,
       displayOrder: typeof body.displayOrder === "number" ? body.displayOrder : undefined,
       isActive: body.isActive,
       ...(moderatorId === null

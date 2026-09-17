@@ -1,9 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Play, ImageIcon, Video } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { parseVideoUrl } from "@/lib/video"
+import { useEffect, useRef, useState } from "react"
+import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
 
 export interface GalleryItem {
   id: string
@@ -14,10 +12,28 @@ export interface GalleryItem {
   caption?: string | null
 }
 
-export function GalleryGrid({ items, emptyLabel }: { items: GalleryItem[]; emptyLabel: string }) {
-  const [active, setActive] = useState<GalleryItem | null>(null)
+function Card({ item, className }: { item: GalleryItem; className?: string }) {
+  return (
+    <div className={`shrink-0 aspect-[4/3] rounded-2xl overflow-hidden bg-muted shadow-premium ${className ?? ""}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={item.imageUrl!} alt={item.caption ?? ""} className="w-full h-full object-cover" />
+    </div>
+  )
+}
 
-  if (items.length === 0) {
+const CARD_WIDTH = "w-[84%] sm:w-[70%] lg:w-[52%] xl:w-[46%]"
+
+export function GalleryGrid({ items, emptyLabel }: { items: GalleryItem[]; emptyLabel: string }) {
+  const images = items.filter((item) => item.type === "IMAGE" && item.imageUrl)
+  const [index, setIndex] = useState(0)
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    cardRefs.current[0]?.scrollIntoView({ inline: "center", block: "nearest" })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  if (images.length === 0) {
     return (
       <div className="text-center py-16">
         <ImageIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
@@ -26,78 +42,58 @@ export function GalleryGrid({ items, emptyLabel }: { items: GalleryItem[]; empty
     )
   }
 
-  return (
-    <>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {items.map((item) => {
-          const parsed = item.type === "VIDEO" && item.videoUrl ? parseVideoUrl(item.videoUrl) : null
-          const thumb = item.type === "IMAGE" ? item.imageUrl : item.thumbnail ?? parsed?.thumbnailUrl
+  function goTo(newIndex: number, smooth = true) {
+    const wrapped = (newIndex + images.length) % images.length
+    setIndex(wrapped)
+    cardRefs.current[wrapped]?.scrollIntoView({
+      inline: "center",
+      block: "nearest",
+      behavior: smooth ? "smooth" : "auto",
+    })
+  }
 
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActive(item)}
-              className="group relative aspect-video rounded-2xl overflow-hidden bg-muted shadow-premium hover:shadow-premium-lg transition-all hover:-translate-y-1 text-left"
-            >
-              {thumb ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={thumb}
-                  alt={item.caption ?? ""}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-pmo-navy-gradient">
-                  <Video className="w-8 h-8 text-white/40" />
-                </div>
-              )}
-              {item.type === "VIDEO" && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/35 transition-colors">
-                  <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-premium group-hover:scale-110 transition-transform">
-                    <Play className="w-5 h-5 text-pmo-navy fill-pmo-navy ml-0.5" />
-                  </div>
-                </div>
-              )}
-              {item.caption && (
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3">
-                  <p className="text-white text-sm font-medium line-clamp-1">{item.caption}</p>
-                </div>
-              )}
-            </button>
-          )
-        })}
+  return (
+    <div className="relative group/carousel">
+      <div className="-mx-4 px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {/* Clone of the last image, peeking before the first — makes the loop feel continuous. */}
+        {images.length > 1 && (
+          <Card item={images[images.length - 1]} className={`${CARD_WIDTH} snap-center opacity-70`} />
+        )}
+
+        {images.map((item, i) => (
+          <div
+            key={item.id}
+            ref={(el) => {
+              cardRefs.current[i] = el
+            }}
+            className={`${CARD_WIDTH} snap-center shrink-0`}
+          >
+            <Card item={item} className="w-full" />
+          </div>
+        ))}
+
+        {/* Clone of the first image, peeking after the last. */}
+        {images.length > 1 && <Card item={images[0]} className={`${CARD_WIDTH} snap-center opacity-70`} />}
       </div>
 
-      <Dialog open={!!active} onOpenChange={(o) => !o && setActive(null)}>
-        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl lg:max-w-5xl p-0 overflow-hidden bg-black border-0">
-          <DialogHeader className="sr-only">
-            <DialogTitle>{active?.caption ?? "Média"}</DialogTitle>
-          </DialogHeader>
-          {active && (
-            <div className="aspect-video w-full">
-              {active.type === "IMAGE" && active.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={active.imageUrl} alt={active.caption ?? ""} className="w-full h-full object-contain" />
-              ) : active.type === "VIDEO" && active.videoUrl ? (
-                (() => {
-                  const parsed = parseVideoUrl(active.videoUrl)
-                  return parsed ? (
-                    <iframe
-                      src={parsed.embedUrl}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  ) : null
-                })()
-              ) : null}
-            </div>
-          )}
-          {active?.caption && (
-            <p className="text-white/80 text-sm px-4 py-3">{active.caption}</p>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={() => goTo(index - 1)}
+            aria-label="Image précédente"
+            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white shadow-premium-lg items-center justify-center text-foreground opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:scale-105"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => goTo(index + 1)}
+            aria-label="Image suivante"
+            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white shadow-premium-lg items-center justify-center text-foreground opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:scale-105"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
+    </div>
   )
 }

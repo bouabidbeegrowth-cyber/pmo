@@ -12,7 +12,6 @@ import {
   Search,
   Pencil,
   Trash2,
-  Star,
   Loader2,
   Users,
   ArrowUp,
@@ -49,7 +48,7 @@ export default function SpeakersListPage() {
   const [loading, setLoading] = useState(true)
   const [speakers, setSpeakers] = useState<Speaker[]>([])
   const [search, setSearch] = useState("")
-  const [filter, setFilter] = useState<"all" | "active" | "hidden" | "featured">("all")
+  const [filter, setFilter] = useState<"all" | "active" | "hidden">("all")
   const [toDelete, setToDelete] = useState<Speaker | null>(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -85,22 +84,6 @@ export default function SpeakersListPage() {
     } catch {
       toast.error("Échec de la mise à jour.")
       setSpeakers((prev) => prev.map((s) => (s.id === sp.id ? { ...s, isActive: !next } : s)))
-    }
-  }
-
-  async function toggleFeatured(sp: Speaker) {
-    const next = !sp.isFeatured
-    setSpeakers((prev) =>
-      prev.map((s) => (s.id === sp.id ? { ...s, isFeatured: next } : s)),
-    )
-    try {
-      await fetch(`/api/admin/speakers/${sp.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...sp, isFeatured: next }),
-      })
-    } catch {
-      toast.error("Échec de la mise à jour.")
     }
   }
 
@@ -147,7 +130,6 @@ export default function SpeakersListPage() {
       .filter((s) => {
         if (filter === "active" && !s.isActive) return false
         if (filter === "hidden" && s.isActive) return false
-        if (filter === "featured" && !s.isFeatured) return false
         if (!q) return true
         const full = `${s.firstName} ${s.lastName} ${s.positionFr ?? ""} ${s.company ?? ""}`.toLowerCase()
         return full.includes(q)
@@ -186,7 +168,6 @@ export default function SpeakersListPage() {
             ["all", "Tous"],
             ["active", "Actifs"],
             ["hidden", "Masqués"],
-            ["featured", "Vedettes"],
           ] as const).map(([k, label]) => (
             <button
               key={k}
@@ -232,7 +213,6 @@ export default function SpeakersListPage() {
                   <th className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground px-4 py-3">Speaker</th>
                   <th className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground px-4 py-3 hidden md:table-cell">Position</th>
                   <th className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground px-4 py-3 hidden lg:table-cell">Entreprise</th>
-                  <th className="text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground px-4 py-3">Vedette</th>
                   <th className="text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground px-4 py-3">Actif</th>
                   <th className="text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground px-4 py-3">Actions</th>
                 </tr>
@@ -293,19 +273,6 @@ export default function SpeakersListPage() {
                       <div className="text-sm text-muted-foreground truncate max-w-[160px]">
                         {sp.company ?? "—"}
                       </div>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => toggleFeatured(sp)}
-                        className={`p-1.5 rounded-md transition-colors ${
-                          sp.isFeatured
-                            ? "text-pmo-gold bg-pmo-gold/10"
-                            : "text-muted-foreground hover:bg-muted"
-                        }`}
-                        aria-label="Toggle featured"
-                      >
-                        <Star className={`w-4 h-4 ${sp.isFeatured ? "fill-current" : ""}`} />
-                      </button>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <Switch checked={sp.isActive} onCheckedChange={() => toggleActive(sp)} />

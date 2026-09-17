@@ -35,23 +35,17 @@ export default async function IntervenantsPage() {
     title: ui("speakers.hero.title", "Intervenants"),
     subtitle: ui("speakers.hero.subtitle", "Des experts reconnus, des leaders inspirants et des praticiens de renom partagent leur vision du PMO du futur."),
     statSpeakers: ui("speakers.stat.speakers", "intervenants"),
-    statFeatured: ui("speakers.stat.featured", "en vedette"),
     emptyState: ui("speakers.emptyState", "Les intervenants seront bientôt annoncés."),
   }
 
   const gridLabels = {
     searchPlaceholder: ui("speakers.search.placeholder", "Rechercher un intervenant…"),
-    filterAll: ui("speakers.filter.all", "Tous"),
-    filterFeatured: ui("speakers.filter.featured", "Vedettes"),
     noResults: ui("speakers.noResults", "Aucun intervenant trouvé."),
-    badgeFeatured: ui("speakers.badge.featured", "Vedette"),
     viewProfile: ui("common.speaker.viewProfile", "Voir le profil"),
     biography: ui("speakers.modal.biography", "Biographie"),
-    featuredBadge: ui("speakers.modal.featuredBadge", "Speaker vedette"),
   }
 
   const speakers = event?.speakers ?? []
-  const featuredCount = speakers.filter((s) => s.isFeatured).length
   const breadcrumbs = [{ href: "/", label: ui("common.breadcrumb.home", "Accueil") }, { label: t.title }]
 
   return (
@@ -71,12 +65,6 @@ export default async function IntervenantsPage() {
             <Users className="w-4 h-4 text-pmo-violet" />
             <span className="font-medium">{speakers.length} {t.statSpeakers}</span>
           </div>
-          {featuredCount > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-pmo-gold" />
-              <span className="text-muted-foreground">{featuredCount} {t.statFeatured}</span>
-            </div>
-          )}
         </div>
       </section>
 

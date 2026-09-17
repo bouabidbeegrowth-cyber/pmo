@@ -33,23 +33,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   try {
-    const photo = safeUrl(body.photo)
+    const photo = body.photo !== undefined ? safeUrl(body.photo) : existing.photo
     const data: Prisma.SpeakerUpdateInput = {
-      slug: body.slug,
-      firstName: body.firstName,
-      lastName: body.lastName,
+      slug: body.slug ?? existing.slug,
+      firstName: body.firstName ?? existing.firstName,
+      lastName: body.lastName ?? existing.lastName,
       photo,
-      positionFr: body.positionFr ?? null,
-      positionEn: body.positionEn ?? null,
-      company: body.company ?? null,
-      biographyFr: body.biographyFr ?? null,
-      biographyEn: body.biographyEn ?? null,
-      country: body.country ?? null,
-      linkedinUrl: safeUrl(body.linkedinUrl),
-      websiteUrl: safeUrl(body.websiteUrl),
-      twitterUrl: safeUrl(body.twitterUrl),
-      isFeatured: body.isFeatured,
-      isActive: body.isActive,
+      positionFr: body.positionFr !== undefined ? body.positionFr : existing.positionFr,
+      positionEn: body.positionEn !== undefined ? body.positionEn : existing.positionEn,
+      company: body.company !== undefined ? body.company : existing.company,
+      biographyFr: body.biographyFr !== undefined ? body.biographyFr : existing.biographyFr,
+      biographyEn: body.biographyEn !== undefined ? body.biographyEn : existing.biographyEn,
+      country: body.country !== undefined ? body.country : existing.country,
+      linkedinUrl: body.linkedinUrl !== undefined ? safeUrl(body.linkedinUrl) : existing.linkedinUrl,
+      websiteUrl: body.websiteUrl !== undefined ? safeUrl(body.websiteUrl) : existing.websiteUrl,
+      twitterUrl: body.twitterUrl !== undefined ? safeUrl(body.twitterUrl) : existing.twitterUrl,
+      isFeatured: body.isFeatured !== undefined ? body.isFeatured : existing.isFeatured,
+      isActive: body.isActive !== undefined ? body.isActive : existing.isActive,
       displayOrder: typeof body.displayOrder === "number" ? body.displayOrder : undefined,
     }
     const speaker = await db.speaker.update({ where: { id }, data })

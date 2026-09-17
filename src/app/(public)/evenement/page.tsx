@@ -25,6 +25,7 @@ import {
 import type { Metadata } from "next"
 import { getLocale, getActiveEvent, getUiText, pick } from "@/lib/site-data"
 import { buildPageMetadata } from "@/lib/seo"
+import { renderBoldText, renderTriColorTagline } from "@/lib/text-format"
 import { PageHero } from "@/components/public/page-hero"
 import { Countdown } from "@/components/public/countdown"
 import { EventStructuredData, BreadcrumbStructuredData } from "@/components/public/structured-data"
@@ -87,6 +88,7 @@ export default async function EvenementPage() {
     cityLabel: ui("event.cityLabel", "Ville"),
     ctaProgramme: ui("event.ctaProgramme", "Voir le programme"),
     ctaRegister: ui("common.cta.register", "Je m'inscris"),
+    venueLink: ui("home.venueLink", "Voir le lieu"),
   }
 
   const countdownLabels = {
@@ -101,7 +103,9 @@ export default async function EvenementPage() {
   const whySection = event.websiteSections.find((s) => s.sectionKey === "WHY_PARTICIPATE")
   const aboutSection = event.websiteSections.find((s) => s.sectionKey === "ABOUT")
   const whyBenefits = whySection?.benefits ?? []
+  const aboutTitle = pick(aboutSection?.titleFr, aboutSection?.titleEn, locale) ?? t.aboutTitle
   const aboutDesc = pick(aboutSection?.descriptionFr, aboutSection?.descriptionEn, locale) ?? ""
+  const aboutBg = aboutSection?.backgroundImage ?? null
 
   const eventDateStr = event.endDate
     ? `${format(event.startDate, "dd", { locale: dateLocale })} – ${format(event.endDate, "dd MMMM yyyy", { locale: dateLocale })}`
@@ -131,7 +135,7 @@ export default async function EvenementPage() {
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">{t.countdownLabel}</p>
-              <Countdown target={countdownTarget.toISOString()} labels={countdownLabels} />
+              <Countdown target={countdownTarget.toISOString()} labels={countdownLabels} variant="light" />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               {[
@@ -167,27 +171,89 @@ export default async function EvenementPage() {
         </div>
       </section>
 
-      {/* About */}
+      {/* About — matches the homepage's two-column text + event card layout */}
       {aboutSection?.isActive !== false && (
-        <section className="py-20 sm:py-24 bg-pmo-light-bg relative overflow-hidden">
-          <div className="absolute inset-0 bg-grid-dark opacity-50" />
-          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 rounded-full bg-pmo-gold/10 border border-pmo-gold/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-gold mb-4">
-                <Award className="w-3.5 h-3.5" />
-                {t.aboutTitle}
+        <section className="py-20 sm:py-24 bg-background relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <div className="flex flex-col items-start justify-center">
+                <div className="inline-flex items-center gap-2 rounded-full bg-pmo-gold/10 border border-pmo-gold/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-gold mb-4">
+                  <Award className="w-3.5 h-3.5" />
+                  {t.aboutTitle}
+                </div>
+                <h2 className="font-display text-3xl sm:text-4xl font-bold mb-5 text-balance">{aboutTitle}</h2>
+                <div className="prose prose-lg max-w-none text-muted-foreground">
+                  {(aboutDesc ?? "")
+                    .split("\n")
+                    .filter((p) => p.trim().length > 0)
+                    .map((paragraph, i) => (
+                      <p key={i} className="leading-relaxed mb-4">{renderBoldText(paragraph)}</p>
+                    ))}
+                </div>
               </div>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold">
-                {pick(aboutSection?.titleFr, aboutSection?.titleEn, locale) ?? t.aboutTitle}
-              </h2>
-            </div>
-            <div className="prose prose-lg max-w-none text-muted-foreground text-center">
-              {(aboutDesc ?? "")
-                .split("\n")
-                .filter((p) => p.trim().length > 0)
-                .map((paragraph, i) => (
-                  <p key={i} className="leading-relaxed mb-4 text-lg">{paragraph}</p>
-                ))}
+
+              {/* Event meta card */}
+              <div className="relative h-[320px]">
+                <div className="absolute -inset-4 bg-gradient-to-br from-pmo-violet/20 to-pmo-gold/10 rounded-3xl blur-2xl" />
+                <div className="relative h-full rounded-3xl bg-pmo-navy-gradient text-white p-8 shadow-premium-lg overflow-hidden flex flex-col justify-center">
+                  {aboutBg && (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={aboutBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-pmo-navy via-pmo-navy/85 to-pmo-navy/60" />
+                    </>
+                  )}
+                  <div className="absolute inset-0 bg-grid opacity-20" />
+                  <div className="relative">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Calendar className="w-5 h-5 text-pmo-gold" />
+                      <span className="text-sm uppercase tracking-widest text-white/60">
+                        {t.editionLabel}
+                      </span>
+                    </div>
+                    <h3 className="font-display text-2xl font-bold mb-1">{event.editionName}</h3>
+                    <p className="text-sm font-semibold mb-6">
+                      {renderTriColorTagline(pick(event.themeTaglineFr, event.themeTaglineEn, locale) ?? "")}
+                    </p>
+
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <Calendar className="w-5 h-5 text-pmo-gold shrink-0 mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium">{eventDateStr}</div>
+                          {event.startTime && (
+                            <div className="text-xs text-white/60">
+                              {event.startTime}{event.endTime ? ` – ${event.endTime}` : ""}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <MapPin className="w-5 h-5 text-pmo-gold shrink-0 mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium">{event.venue ?? event.city ?? ""}</div>
+                          {(event.address || event.city) && (
+                            <div className="text-xs text-white/60">
+                              {[event.address, event.city, event.country].filter(Boolean).join(", ")}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {event.mapUrl && (
+                      <Link
+                        href="/evenement#venue"
+                        className="mt-6 inline-flex items-center gap-2 text-sm text-pmo-gold hover:underline"
+                      >
+                        <MapPin className="w-4 h-4" />
+                        {t.venueLink}
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -235,7 +301,7 @@ export default async function EvenementPage() {
 
       {/* Venue */}
       {(event.venue || event.mapUrl) && (
-        <section className="py-20 sm:py-24 bg-pmo-navy-gradient text-white relative overflow-hidden">
+        <section id="venue" className="py-20 sm:py-24 bg-pmo-navy-gradient text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-grid opacity-20" />
           <div className="absolute -top-32 right-1/4 w-96 h-96 rounded-full bg-pmo-violet/20 blur-3xl" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
   const speakers = await db.speaker.findMany({
     where: { eventId: activeEventId },
-    orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
+    orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }],
   })
   return ok(speakers)
 }
@@ -52,6 +52,15 @@ export async function POST(req: NextRequest) {
   const slug = body.slug || slugify(`${body.firstName}-${body.lastName}`)
 
   try {
+    let displayOrder = body.displayOrder
+    if (typeof displayOrder !== "number" || displayOrder <= 0) {
+      const max = await db.speaker.aggregate({
+        where: { eventId },
+        _max: { displayOrder: true },
+      })
+      displayOrder = (max._max.displayOrder ?? -1) + 1
+    }
+
     const data: Prisma.SpeakerCreateInput = {
       event: { connect: { id: eventId } },
       slug,
@@ -69,7 +78,7 @@ export async function POST(req: NextRequest) {
       twitterUrl: safeUrl(body.twitterUrl),
       isFeatured: body.isFeatured ?? false,
       isActive: body.isActive ?? true,
-      displayOrder: body.displayOrder ?? 0,
+      displayOrder,
     }
     const speaker = await db.speaker.create({ data })
     return ok(speaker, 201)
