@@ -75,7 +75,10 @@ export default async function OrganisateursPage() {
               {organizers.map((org) => {
                 const desc = pick(org.descriptionFr, org.descriptionEn, locale) ?? ""
                 return (
-                  <div key={org.id} className="grid lg:grid-cols-[320px_1fr] gap-8 lg:gap-12 items-start">
+                  <div
+                    key={org.id}
+                    className={org.founderName ? "grid lg:grid-cols-[320px_1fr] gap-8 lg:gap-12 items-start" : ""}
+                  >
                     {/* Founder card */}
                     {org.founderName && (
                       <div className="lg:sticky lg:top-24">

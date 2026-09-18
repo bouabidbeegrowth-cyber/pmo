@@ -98,7 +98,7 @@ export default async function ProgrammePage() {
             </div>
           </div>
           {event.registrationEnabled && (
-            <Link href="/pass-duo" className="inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-white px-5 py-2.5 font-semibold text-sm shadow-premium hover:scale-[1.02] transition-transform">
+            <Link href="/passes" className="inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-white px-5 py-2.5 font-semibold text-sm shadow-premium hover:scale-[1.02] transition-transform">
               {t.registerCta}
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -123,7 +123,7 @@ export default async function ProgrammePage() {
         sessionTypeLabels={sessionTypeLabels}
         showCta={event.registrationEnabled}
         ctaLabel={t.registerCta}
-        ctaHref="/pass-duo"
+        ctaHref="/passes"
       />
     </>
   )

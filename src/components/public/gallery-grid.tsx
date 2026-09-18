@@ -23,14 +23,23 @@ function Card({ item, className }: { item: GalleryItem; className?: string }) {
 
 const CARD_WIDTH = "w-[84%] sm:w-[70%] lg:w-[52%] xl:w-[46%]"
 
+// Centers a card within its horizontal scroll track only — unlike
+// Element.scrollIntoView(), this never touches the page's own vertical
+// scroll position, even though the track sits inside a scrollable page.
+function centerCardInTrack(card: HTMLElement | null, track: HTMLElement | null, behavior: ScrollBehavior) {
+  if (!card || !track) return
+  const left = card.offsetLeft - (track.clientWidth - card.clientWidth) / 2
+  track.scrollTo({ left, behavior })
+}
+
 export function GalleryGrid({ items, emptyLabel }: { items: GalleryItem[]; emptyLabel: string }) {
   const images = items.filter((item) => item.type === "IMAGE" && item.imageUrl)
   const [index, setIndex] = useState(0)
+  const trackRef = useRef<HTMLDivElement | null>(null)
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
-    cardRefs.current[0]?.scrollIntoView({ inline: "center", block: "nearest" })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    centerCardInTrack(cardRefs.current[0], trackRef.current, "auto")
   }, [])
 
   if (images.length === 0) {
@@ -45,16 +54,15 @@ export function GalleryGrid({ items, emptyLabel }: { items: GalleryItem[]; empty
   function goTo(newIndex: number, smooth = true) {
     const wrapped = (newIndex + images.length) % images.length
     setIndex(wrapped)
-    cardRefs.current[wrapped]?.scrollIntoView({
-      inline: "center",
-      block: "nearest",
-      behavior: smooth ? "smooth" : "auto",
-    })
+    centerCardInTrack(cardRefs.current[wrapped], trackRef.current, smooth ? "smooth" : "auto")
   }
 
   return (
     <div className="relative group/carousel">
-      <div className="-mx-4 px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div
+        ref={trackRef}
+        className="-mx-4 px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+      >
         {/* Clone of the last image, peeking before the first — makes the loop feel continuous. */}
         {images.length > 1 && (
           <Card item={images[images.length - 1]} className={`${CARD_WIDTH} snap-center opacity-70`} />

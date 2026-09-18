@@ -521,7 +521,16 @@ export default function EventAdminPage() {
                   placeholder="Tunisie"
                 />
               </Field>
-              <Field label="Latitude">
+              <div className="sm:col-span-2">
+                <Field label="Lien Google Maps" hint="Collez un lien de partage Google Maps (le bouton « Partager » sur la fiche du lieu). La carte et les coordonnées ci-dessous se mettent à jour automatiquement à partir de ce lien dès l'enregistrement.">
+                  <Input
+                    value={data?.mapUrl ?? ""}
+                    onChange={(e) => update("mapUrl", e.target.value)}
+                    placeholder="https://maps.app.goo.gl/…"
+                  />
+                </Field>
+              </div>
+              <Field label="Latitude" hint="Remplie automatiquement depuis le lien ci-dessus. À ajuster seulement si le lien ne se résout pas.">
                 <Input
                   type="number"
                   step="any"
@@ -530,7 +539,7 @@ export default function EventAdminPage() {
                   placeholder="36.8381"
                 />
               </Field>
-              <Field label="Longitude">
+              <Field label="Longitude" hint="Remplie automatiquement depuis le lien ci-dessus.">
                 <Input
                   type="number"
                   step="any"
@@ -539,15 +548,6 @@ export default function EventAdminPage() {
                   placeholder="10.2497"
                 />
               </Field>
-              <div className="sm:col-span-2">
-                <Field label="URL Google Maps (embed)">
-                  <Input
-                    value={data?.mapUrl ?? ""}
-                    onChange={(e) => update("mapUrl", e.target.value)}
-                    placeholder="https://www.google.com/maps/embed?pb=…"
-                  />
-                </Field>
-              </div>
             </div>
           </FormCard>
         </TabsContent>

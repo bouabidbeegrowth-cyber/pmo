@@ -97,6 +97,7 @@ const SECTION_LABELS: Record<string, string> = {
   ABOUT: "À propos",
   CHAIRMAN_MESSAGE: "Message du/de la Président(e)",
   GALLERY_HERO: "Hero Galerie",
+  PASSES_HERO: "Hero Pass",
   COUNTDOWN: "Compte à rebours",
   FOOTER: "Footer",
 }
@@ -120,7 +121,7 @@ export default function ContentPage() {
         map[s.sectionKey] = s
       }
       // Ensure all sections exist locally (even if not in DB yet)
-      for (const k of ["HERO", "WHY_PARTICIPATE", "ABOUT", "CHAIRMAN_MESSAGE", "GALLERY_HERO", "COUNTDOWN", "FOOTER"]) {
+      for (const k of ["HERO", "WHY_PARTICIPATE", "ABOUT", "CHAIRMAN_MESSAGE", "GALLERY_HERO", "PASSES_HERO", "COUNTDOWN", "FOOTER"]) {
         if (!map[k]) {
           map[k] = {
             id: "",
@@ -255,12 +256,13 @@ export default function ContentPage() {
       />
 
       <Tabs defaultValue="HERO">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-8 mb-6">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-9 mb-6">
           <TabsTrigger value="HERO">Hero</TabsTrigger>
           <TabsTrigger value="WHY_PARTICIPATE">Pourquoi</TabsTrigger>
           <TabsTrigger value="ABOUT">À propos</TabsTrigger>
           <TabsTrigger value="CHAIRMAN_MESSAGE">Message</TabsTrigger>
           <TabsTrigger value="GALLERY_HERO">Hero Galerie</TabsTrigger>
+          <TabsTrigger value="PASSES_HERO">Hero Pass</TabsTrigger>
           <TabsTrigger value="COUNTDOWN">Compte à rebours</TabsTrigger>
           <TabsTrigger value="FOOTER">Footer</TabsTrigger>
           <TabsTrigger value="CONTACT">Contact</TabsTrigger>
@@ -643,6 +645,24 @@ export default function ContentPage() {
               </div>
             </div>
             <SaveButton onClick={() => saveSection("GALLERY_HERO")} saving={savingKey === "GALLERY_HERO"} />
+          </FormCard>
+        </TabsContent>
+
+        {/* PASSES HERO */}
+        <TabsContent value="PASSES_HERO">
+          <FormCard
+            title="Hero de la page Pass"
+            description="Image de fond derrière le titre de la page des pass/billets."
+          >
+            <div className="space-y-5">
+              <ImageUploader
+                label="Image de fond"
+                value={sections.PASSES_HERO?.backgroundImage}
+                onChange={(url) => updateSection("PASSES_HERO", { backgroundImage: url })}
+                aspectRatio="wide"
+              />
+            </div>
+            <SaveButton onClick={() => saveSection("PASSES_HERO")} saving={savingKey === "PASSES_HERO"} />
           </FormCard>
         </TabsContent>
 

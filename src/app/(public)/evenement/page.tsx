@@ -20,7 +20,6 @@ import {
   Globe,
   ArrowRight,
   Building2,
-  Navigation,
 } from "lucide-react"
 import type { Metadata } from "next"
 import { getLocale, getActiveEvent, getUiText, pick } from "@/lib/site-data"
@@ -28,6 +27,7 @@ import { buildPageMetadata } from "@/lib/seo"
 import { renderBoldText, renderTriColorTagline } from "@/lib/text-format"
 import { PageHero } from "@/components/public/page-hero"
 import { Countdown } from "@/components/public/countdown"
+import { SmartMapButton } from "@/components/public/smart-map-button"
 import { EventStructuredData, BreadcrumbStructuredData } from "@/components/public/structured-data"
 
 export const dynamic = "force-dynamic"
@@ -100,6 +100,14 @@ export default async function EvenementPage() {
     ended: ui("countdown.ended", "Événement terminé"),
   }
 
+  const venueAddressQuery = [event.venue, event.address, event.city, event.country].filter(Boolean).join(", ")
+  const venueLabel = event.venue || event.city || "Venue"
+  const venueMapQuery = event.latitude != null && event.longitude != null
+    ? `${event.latitude},${event.longitude}(${venueLabel})`
+    : venueAddressQuery
+  const venueMapZoom = event.latitude != null && event.longitude != null ? "&z=16" : ""
+  const showVenue = venueAddressQuery.length > 0
+
   const whySection = event.websiteSections.find((s) => s.sectionKey === "WHY_PARTICIPATE")
   const aboutSection = event.websiteSections.find((s) => s.sectionKey === "ABOUT")
   const whyBenefits = whySection?.benefits ?? []
@@ -163,7 +171,7 @@ export default async function EvenementPage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             {event.registrationEnabled && (
-              <Link href="/pass-duo" className="inline-flex items-center gap-2 rounded-xl border-2 border-primary/20 hover:border-primary hover:bg-primary/5 px-6 py-3 font-semibold text-primary transition-all">
+              <Link href="/passes" className="inline-flex items-center gap-2 rounded-xl border-2 border-primary/20 hover:border-primary hover:bg-primary/5 px-6 py-3 font-semibold text-primary transition-all">
                 {t.ctaRegister}
               </Link>
             )}
@@ -300,7 +308,7 @@ export default async function EvenementPage() {
       )}
 
       {/* Venue */}
-      {(event.venue || event.mapUrl) && (
+      {showVenue && (
         <section id="venue" className="py-20 sm:py-24 bg-pmo-navy-gradient text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-grid opacity-20" />
           <div className="absolute -top-32 right-1/4 w-96 h-96 rounded-full bg-pmo-violet/20 blur-3xl" />
@@ -311,7 +319,7 @@ export default async function EvenementPage() {
                   <MapPin className="w-3.5 h-3.5" />
                   {t.venueTitle}
                 </div>
-                <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{event.venue}</h2>
+                <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{venueLabel}</h2>
                 {event.address && (
                   <p className="text-white/70 text-lg leading-relaxed mb-2">{event.address}</p>
                 )}
@@ -319,34 +327,32 @@ export default async function EvenementPage() {
                   {[event.city, event.country].filter(Boolean).join(", ")}
                 </p>
 
-                {event.mapUrl && (
-                  <a
-                    href={event.mapUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-white px-6 py-3 font-semibold shadow-premium hover:scale-[1.02] transition-transform"
-                  >
-                    <Navigation className="w-4 h-4" />
-                    {t.venueMap}
-                  </a>
-                )}
+                <SmartMapButton
+                  label={t.venueMap}
+                  googleMapsUrl={event.mapUrl}
+                  latitude={event.latitude}
+                  longitude={event.longitude}
+                  addressQuery={venueAddressQuery}
+                  className="mt-6 inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-white px-6 py-3 font-semibold shadow-premium hover:scale-[1.02] transition-transform"
+                />
               </div>
 
               {/* Map embed */}
-              {event.mapUrl && (
-                <div className="rounded-3xl overflow-hidden shadow-premium-lg border-4 border-white/10">
+              <div className="relative">
+                <div className="absolute -inset-3 bg-gradient-to-br from-pmo-gold/20 to-pmo-violet/10 rounded-[2rem] blur-2xl" />
+                <div className="relative rounded-3xl overflow-hidden shadow-premium-lg border-4 border-white/10">
                   <iframe
-                    src={event.mapUrl.replace("/maps?", "/maps/embed?")}
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(venueMapQuery)}${venueMapZoom}&output=embed`}
                     width="100%"
-                    height="360"
+                    height="380"
                     style={{ border: 0 }}
                     allowFullScreen
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
-                    title={event.venue ?? "Venue"}
+                    title={venueLabel}
                   />
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </section>

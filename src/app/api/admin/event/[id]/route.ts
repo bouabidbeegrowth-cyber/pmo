@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { requireAdmin, ok, fail, safeUrl } from "@/lib/api"
 import { deleteUploadedImage } from "@/lib/uploads"
+import { extractCoordsFromMapsUrl } from "@/lib/maps"
 import { Prisma } from "@prisma/client"
 
 export const dynamic = "force-dynamic"
@@ -23,6 +24,21 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   try {
+    const newMapUrl = safeUrl(body.mapUrl)
+    let latitude = typeof body.latitude === "number" ? body.latitude : null
+    let longitude = typeof body.longitude === "number" ? body.longitude : null
+
+    // The map link changed — re-derive the pin from it so the embedded map
+    // and the "open in maps" button always agree, instead of silently
+    // drifting apart whenever only one of the two gets updated.
+    if (newMapUrl && newMapUrl !== existing.mapUrl) {
+      const coords = await extractCoordsFromMapsUrl(newMapUrl)
+      if (coords) {
+        latitude = coords.lat
+        longitude = coords.lng
+      }
+    }
+
     const data: Prisma.EventUpdateInput = {
       slug: body.slug,
       editionName: body.editionName,
@@ -44,9 +60,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       address: body.address ?? null,
       city: body.city ?? null,
       country: body.country ?? null,
-      latitude: typeof body.latitude === "number" ? body.latitude : null,
-      longitude: typeof body.longitude === "number" ? body.longitude : null,
-      mapUrl: safeUrl(body.mapUrl),
+      latitude,
+      longitude,
+      mapUrl: newMapUrl,
       heroImageDesktop: safeUrl(body.heroImageDesktop),
       heroImageMobile: safeUrl(body.heroImageMobile),
       heroLogo: safeUrl(body.heroLogo),

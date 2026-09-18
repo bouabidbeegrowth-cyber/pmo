@@ -22,9 +22,7 @@ interface FooterLabels {
   event: string
   programme: string
   passesHeading: string
-  passEvenement: string
-  passFormation: string
-  passDuo: string
+  passesLink: string
   speakers: string
   organizers: string
   partners: string
@@ -130,18 +128,8 @@ export function SiteFooter({ contact, footerText, copyrightText, editionName, lo
             </h4>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <Link href="/pass-evenement" className="text-white/70 hover:text-white transition-colors">
-                  {t.passEvenement}
-                </Link>
-              </li>
-              <li>
-                <Link href="/pass-formation" className="text-white/70 hover:text-white transition-colors">
-                  {t.passFormation}
-                </Link>
-              </li>
-              <li>
-                <Link href="/pass-duo" className="text-white/70 hover:text-white transition-colors">
-                  {t.passDuo}
+                <Link href="/passes" className="text-white/70 hover:text-white transition-colors">
+                  {t.passesLink}
                 </Link>
               </li>
             </ul>

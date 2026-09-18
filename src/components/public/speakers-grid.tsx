@@ -4,6 +4,7 @@ import { useState, useMemo } from "react"
 import { ArrowRight, Search } from "lucide-react"
 import { SpeakerModal } from "@/components/public/speaker-modal"
 import { Input } from "@/components/ui/input"
+import { thumbUrl } from "@/lib/image"
 import type { Locale } from "@/lib/site-data"
 
 interface Speaker {
@@ -81,11 +82,14 @@ export function SpeakersGrid({ speakers, locale, labels }: Props) {
                   onClick={() => setSelected(sp)}
                   className="group text-left rounded-2xl bg-white border border-border overflow-hidden hover:shadow-premium-lg hover:border-primary/30 transition-all hover:-translate-y-1"
                 >
-                  <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-t-2xl bg-muted">
                     {sp.photo ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={sp.photo}
+                        src={thumbUrl(sp.photo) ?? sp.photo}
+                        onError={(e) => {
+                          if (e.currentTarget.src !== sp.photo) e.currentTarget.src = sp.photo!
+                        }}
                         alt={`${sp.firstName} ${sp.lastName}`}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />

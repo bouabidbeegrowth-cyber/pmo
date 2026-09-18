@@ -120,7 +120,7 @@ export function OrganizationStructuredData({ org }: { org: OrgForSchema }) {
     "@type": "Organization",
     name: "PMO Mastery",
     url: SITE_URL,
-    logo: absolute(org.logo) ?? `${SITE_URL}/logo.svg`,
+    logo: absolute(org.logo) ?? `${SITE_URL}/favicon-512.png`,
     ...(sameAs.length > 0 ? { sameAs } : {}),
   }
 

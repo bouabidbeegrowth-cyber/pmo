@@ -3,6 +3,9 @@ import path from "path"
 import sharp from "sharp"
 import { randomUUID } from "crypto"
 import { db } from "@/lib/db"
+import { thumbFilename } from "@/lib/image"
+
+export { thumbUrl } from "@/lib/image"
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads")
 
@@ -79,10 +82,17 @@ export async function saveUpload(file: File): Promise<UploadedFile> {
     finalBuffer = finalBuffer as Buffer
     const finalName = basename.replace(/\.[^.]+$/, ".webp")
     await fs.writeFile(path.join(UPLOAD_DIR, finalName), finalBuffer)
-    // Remove the original-ext placeholder file if we renamed.
-    if (finalName !== basename) {
-      // We wrote to finalName directly, so the original `basename` path is unused.
-    }
+
+    // Small thumbnail for card/grid contexts — avoids shipping the full-res
+    // image just to shrink it down client-side, which is what made photos
+    // appear to load with a "gap" (still-loading placeholder) on slow
+    // connections.
+    await sharp(buffer, { failOn: "none" })
+      .rotate()
+      .resize({ width: 400, withoutEnlargement: true })
+      .webp({ quality: 78 })
+      .toFile(path.join(UPLOAD_DIR, thumbFilename(finalName)))
+
     return persistRecord({
       filename: finalName,
       originalName: file.name,
@@ -149,6 +159,11 @@ export async function deleteUploadedImage(url: string | null | undefined): Promi
     await fs.unlink(filepath)
   } catch {
     // already gone — ignore
+  }
+  try {
+    await fs.unlink(path.join(UPLOAD_DIR, thumbFilename(filename)))
+  } catch {
+    // no thumbnail (video, gif, or pre-thumbnail upload) — ignore
   }
   await db.mediaAsset.deleteMany({ where: { filename } })
 }

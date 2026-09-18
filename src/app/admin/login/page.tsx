@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -10,6 +10,14 @@ import { Label } from "@/components/ui/label"
 import { Loader2, Lock, Mail, ArrowRight, ShieldCheck } from "lucide-react"
 
 export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginForm() {
   const router = useRouter()
   const search = useSearchParams()
   const callbackUrl = search.get("callbackUrl") ?? "/admin"

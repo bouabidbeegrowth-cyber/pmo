@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { PageHeader } from "@/components/admin/page-header"
 import { FormCard } from "@/components/admin/form-card"
+import { ImageUploader } from "@/components/admin/image-uploader"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,6 +27,7 @@ interface PassForm {
   slug: string
   nameFr: string
   nameEn?: string | null
+  image?: string | null
   descriptionFr?: string | null
   descriptionEn?: string | null
   price: number
@@ -48,6 +50,7 @@ export function PassForm({ initial }: { initial?: PassForm }) {
       slug: "",
       nameFr: "",
       nameEn: "",
+      image: null,
       descriptionFr: "",
       descriptionEn: "",
       price: 0,
@@ -131,6 +134,17 @@ export function PassForm({ initial }: { initial?: PassForm }) {
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          <FormCard title="Image">
+            <ImageUploader
+              value={data.image}
+              onChange={(url) => update("image", url)}
+              aspectRatio="wide"
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              Format paysage 16:9 recommandé (ex. 1200×675px, min. 800×450px). Gardez le sujet centré, sans rien coller aux bords : l'image est recadrée en bandeau au-dessus de chaque carte.
+            </p>
+          </FormCard>
+
           <FormCard>
             <Tabs defaultValue="fr">
               <TabsList className="grid w-full grid-cols-2 mb-6">

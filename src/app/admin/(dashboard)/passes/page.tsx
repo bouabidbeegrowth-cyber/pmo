@@ -35,6 +35,7 @@ interface Pass {
   slug: string
   nameFr: string
   nameEn?: string | null
+  image?: string | null
   price: number
   currency: string
   vatRate: number
@@ -170,8 +171,14 @@ export default function PassesListPage() {
               className="bg-white rounded-2xl shadow-premium p-5 flex flex-col relative overflow-hidden"
             >
               {p.isFeatured && (
-                <div className="absolute top-0 right-0 bg-pmo-gold-gradient text-pmo-navy text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
+                <div className="absolute top-0 right-0 bg-pmo-gold-gradient text-pmo-navy text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg z-10">
                   Recommandé
+                </div>
+              )}
+              {p.image && (
+                <div className="-m-5 mb-3 aspect-video overflow-hidden bg-muted">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.image} alt="" className="w-full h-full object-cover" />
                 </div>
               )}
               <div className="flex items-start justify-between mb-3">

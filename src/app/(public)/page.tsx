@@ -22,6 +22,7 @@ import { SpeakersHomePreview } from "@/components/public/speakers-home-preview"
 import { ProgrammeHomePreview } from "@/components/public/programme-home-preview"
 import { PassesHomePreview } from "@/components/public/passes-home-preview"
 import { GalleryGrid } from "@/components/public/gallery-grid"
+import { SmartMapButton } from "@/components/public/smart-map-button"
 import { EventStructuredData } from "@/components/public/structured-data"
 
 export const dynamic = "force-dynamic"
@@ -97,6 +98,9 @@ export default async function HomePage() {
     countdownLabel: ui("home.countdownLabel", "Plus que"),
     editionLabel: ui("home.editionLabel", "Édition"),
     venueLink: ui("home.venueLink", "Voir le lieu"),
+    venueTitle: ui("event.venueTitle", "Le lieu"),
+    venueAddress: ui("event.venueAddress", "Adresse"),
+    venueMap: ui("event.venueMap", "Voir sur la carte"),
     statSpeakers: ui("home.stat.speakers", "Intervenants"),
     statDays: ui("home.stat.days", "Jours"),
     statPasses: ui("home.stat.passes", "Pass disponibles"),
@@ -139,7 +143,7 @@ export default async function HomePage() {
   const heroTitle = pick(heroSection?.titleFr, heroSection?.titleEn, locale) ?? pick(event.titleFr, event.titleEn, locale) ?? event.titleFr
   const heroSubtitle = pick(heroSection?.subtitleFr, heroSection?.subtitleEn, locale) ?? ""
   const heroBg = heroSection?.backgroundImage ?? event.heroImageDesktop ?? null
-  const heroCtaUrl = heroSection?.ctaUrl ?? "/pass-duo"
+  const heroCtaUrl = heroSection?.ctaUrl ?? "/passes"
 
   const whyTitle = pick(whySection?.titleFr, whySection?.titleEn, locale) ?? t.whyTitle
   const whyDesc = pick(whySection?.descriptionFr, whySection?.descriptionEn, locale) ?? ""
@@ -155,6 +159,14 @@ export default async function HomePage() {
   const chairmanName = pick(chairmanSection?.subtitleFr, chairmanSection?.subtitleEn, locale) ?? ""
   const chairmanRole = pick(chairmanSection?.ctaTextFr, chairmanSection?.ctaTextEn, locale) ?? ""
   const chairmanPhoto = chairmanSection?.backgroundImage ?? null
+
+  const venueAddressQuery = [event.venue, event.address, event.city, event.country].filter(Boolean).join(", ")
+  const showVenue = venueAddressQuery.length > 0
+  const venueLabel = event.venue || event.city || "Venue"
+  const venueMapQuery = event.latitude != null && event.longitude != null
+    ? `${event.latitude},${event.longitude}(${venueLabel})`
+    : venueAddressQuery
+  const venueMapZoom = event.latitude != null && event.longitude != null ? "&z=16" : ""
 
   const speakersPreview = event.speakers.slice(0, 4)
   const programmePreviewDays = event.programmeDays.slice(0, 1) // first day preview
@@ -188,7 +200,7 @@ export default async function HomePage() {
         title={heroTitle}
         subtitle={heroSubtitle || undefined}
         ctaLabel={t.heroCta}
-        ctaHref={heroCtaUrl.startsWith("#") ? "/pass-duo" : heroCtaUrl}
+        ctaHref={heroCtaUrl.startsWith("#") ? "/passes" : heroCtaUrl}
         showCta={event.registrationEnabled}
         ctaSecondaryLabel={t.heroCtaSecondary}
         ctaSecondaryHref="/programme"
@@ -339,6 +351,56 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* ========================= VENUE / MAP ========================= */}
+      {showVenue && (
+        <section className="py-20 sm:py-24 bg-pmo-navy-gradient text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid opacity-20" />
+          <div className="absolute -top-32 right-1/4 w-96 h-96 rounded-full bg-pmo-violet/20 blur-3xl" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-10 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-gold mb-4">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {t.venueTitle}
+                </div>
+                <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{venueLabel}</h2>
+                {event.address && (
+                  <p className="text-white/70 text-lg leading-relaxed mb-2">{event.address}</p>
+                )}
+                <p className="text-white/60">
+                  {[event.city, event.country].filter(Boolean).join(", ")}
+                </p>
+
+                <SmartMapButton
+                  label={t.venueMap}
+                  googleMapsUrl={event.mapUrl}
+                  latitude={event.latitude}
+                  longitude={event.longitude}
+                  addressQuery={venueAddressQuery}
+                  className="mt-6 inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-white px-6 py-3 font-semibold shadow-premium hover:scale-[1.02] transition-transform"
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute -inset-3 bg-gradient-to-br from-pmo-gold/20 to-pmo-violet/10 rounded-[2rem] blur-2xl" />
+                <div className="relative rounded-3xl overflow-hidden shadow-premium-lg border-4 border-white/10">
+                  <iframe
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(venueMapQuery)}${venueMapZoom}&output=embed`}
+                    width="100%"
+                    height="380"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title={venueLabel}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ====================== SPEAKERS PREVIEW ====================== */}
       {speakersPreview.length > 0 && (
         <section className="py-20 sm:py-28 bg-pmo-light-bg relative overflow-hidden">
@@ -422,7 +484,7 @@ export default async function HomePage() {
 
             <div className="text-center mt-10">
               <Link
-                href="/pass-duo"
+                href="/passes"
                 className="inline-flex items-center gap-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/15 px-6 py-3 font-semibold transition-all"
               >
                 {t.passesCta}
@@ -477,6 +539,35 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* ====================== GALLERY PREVIEW ====================== */}
+      {galleryPreview.length > 0 && (
+        <section className="py-20 sm:py-28 bg-pmo-light-bg relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-dark opacity-50" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 rounded-full bg-pmo-violet/10 border border-pmo-violet/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-violet mb-4">
+                <Images className="w-3.5 h-3.5" />
+                {t.galleryTitle}
+              </div>
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">{t.galleryTitle}</h2>
+              <p className="text-muted-foreground text-lg">{t.gallerySubtitle}</p>
+            </div>
+
+            <GalleryGrid items={galleryPreview} emptyLabel="" />
+
+            <div className="text-center mt-10">
+              <Link
+                href="/galerie"
+                className="inline-flex items-center gap-2 rounded-xl border-2 border-primary/20 hover:border-primary hover:bg-primary/5 px-6 py-3 font-semibold text-primary transition-all"
+              >
+                {t.galleryCta}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ====================== PARTNERS PREVIEW ====================== */}
       {featuredPartners.length > 0 && (
         <section className="py-16 sm:py-20 bg-background border-t border-border">
@@ -517,35 +608,6 @@ export default async function HomePage() {
               >
                 {t.partnersViewAll}
                 <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ====================== GALLERY PREVIEW ====================== */}
-      {galleryPreview.length > 0 && (
-        <section className="py-20 sm:py-28 bg-pmo-light-bg relative overflow-hidden">
-          <div className="absolute inset-0 bg-grid-dark opacity-50" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 rounded-full bg-pmo-violet/10 border border-pmo-violet/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-violet mb-4">
-                <Images className="w-3.5 h-3.5" />
-                {t.galleryTitle}
-              </div>
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">{t.galleryTitle}</h2>
-              <p className="text-muted-foreground text-lg">{t.gallerySubtitle}</p>
-            </div>
-
-            <GalleryGrid items={galleryPreview} emptyLabel="" />
-
-            <div className="text-center mt-10">
-              <Link
-                href="/galerie"
-                className="inline-flex items-center gap-2 rounded-xl border-2 border-primary/20 hover:border-primary hover:bg-primary/5 px-6 py-3 font-semibold text-primary transition-all"
-              >
-                {t.galleryCta}
-                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>

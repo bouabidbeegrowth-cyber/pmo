@@ -1,31 +1,27 @@
 /**
  * PMO Mastery — Database seed script
  *
- * Populates the database with:
- *   - Default admin user (admin@pmomastery.tn / PMOmaster2025!)
- *   - PMO Mastery 2025 event (11–12 October 2025, Tunis)
- *   - 21 speakers with bios (from the audit)
- *   - 2 programme days + 19 sessions
- *   - 9 passes with their businessroom.io payment URLs
- *   - 7 partners (Strategic / Diamond / Media / General)
- *   - 1 organizer (Empowerment Paths + Yosra Torjmen)
- *   - Contact info + CMS sections (Hero, Why Participate, About, Footer)
+ * Auto-generated from a live snapshot of the production database on
+ * 2026-09-18. Recreates both event editions
+ * (2025 archive + 2027 active) with all their real content — speakers,
+ * programme, passes, partners, organizers, CMS sections, gallery — plus the
+ * global UI text / SEO catalogs, admin user, and media asset records.
  *
- * Run with:  bun run db:seed
+ * Run with:  bun run db:seed   (or: npx tsx prisma/seed.ts)
  *
- * Safe to re-run — uses upsert pattern (deletes existing active event first).
+ * DESTRUCTIVE for event data: deletes ALL events (and everything that
+ * cascades from them) before recreating them. Safe to re-run — fully
+ * idempotent. Does NOT touch ContactMessage (real visitor submissions).
  */
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
 
 const db = new PrismaClient()
 
-const REMOTE = "https://www.pmomastery.tn"
-
 async function main() {
   console.log("🌱 Seeding PMO Mastery database…")
 
-  // 1. Admin user ----------------------------------------------------------
+  // Admin user --------------------------------------------------------------
   const adminEmail = (process.env.ADMIN_SEED_EMAIL ?? "admin@pmomastery.tn").toLowerCase().trim()
   const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? "PMOmaster2025!"
   const passwordHash = await bcrypt.hash(adminPassword, 10)
@@ -42,13 +38,16 @@ async function main() {
   })
   console.log(`  ✓ Admin user: ${adminEmail}`)
 
-  // Clean previous active event (idempotent re-seed)
+  // Clean previous events (cascades to everything event-scoped)
   await db.event.deleteMany({})
   console.log("  ✓ Cleared previous events")
 
-  // 2. Event ---------------------------------------------------------------
-  const event = await db.event.create({
+  // ==========================================================================
+  // Event: PMO Mastery 2025
+  // ==========================================================================
+  await db.event.create({
     data: {
+      id: "cmsvxyfck00017vycwelfl2u3",
       slug: "pmo-mastery-2025",
       editionName: "PMO Mastery 2025",
       titleFr: "Événement international pour les leaders des PMOs",
@@ -57,876 +56,89 @@ async function main() {
       subtitleEn: "October 11–12, 2025 · Tunis, Tunisia",
       themeTaglineFr: "Le PMO du Futur : Stratégie, IA et Performance",
       themeTaglineEn: "The PMO of the Future: Strategy, AI and Performance",
-      descriptionFr:
-        "Pendant 2 jours intensifs, vivez une expérience immersive au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership. Un véritable parcours d'inspiration, d'apprentissage et d'échanges pour accélérer votre impact professionnel et personnel.",
-      descriptionEn:
-        "Two intensive days of immersive experiences at the heart of best practices in project management, PMO, change management, AI and leadership. A true journey of inspiration, learning and exchange to accelerate your professional and personal impact.",
-      startDate: new Date("2025-10-11T09:00:00+01:00"),
-      endDate: new Date("2025-10-12T18:00:00+01:00"),
+      descriptionFr: "Pendant 2 jours intensifs, vivez une expérience immersive au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership. Un véritable parcours d'inspiration, d'apprentissage et d'échanges pour accélérer votre impact professionnel et personnel.",
+      descriptionEn: "Two intensive days of immersive experiences at the heart of best practices in project management, PMO, change management, AI and leadership. A true journey of inspiration, learning and exchange to accelerate your professional and personal impact.",
+      startDate: new Date("2025-10-11T08:00:00.000Z"),
+      endDate: new Date("2025-10-12T17:00:00.000Z"),
       startTime: "09:00",
       endTime: "18:00",
       timezone: "Africa/Tunis",
-      countdownTarget: new Date("2025-10-11T09:56:00+01:00"),
+      countdownTarget: new Date("2025-10-11T08:56:00.000Z"),
       venue: "Royal Tulip Taj Sultan",
       address: "Les Berges du Lac, Tunis",
       city: "Tunis",
       country: "Tunisie",
       latitude: 36.8381,
       longitude: 10.2497,
-      mapUrl:
-        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3191.2776632747516!2d10.2475!3d36.8381!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzbCsDUwJzE3LjIiTiAxMMKwMTQnNTEuMCJF!5e0!3m2!1sfr!2stn!4v1234567890",
-      heroImageDesktop: `${REMOTE}/assets/img/hero/test1.gif`,
-      heroImageMobile: `${REMOTE}/assets/img/hero/test2.gif`,
-      heroLogo: `${REMOTE}/assets/img/logo/logo.png`,
-      ogImage: `${REMOTE}/img/og-image.jpg`,
+      mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3191.2776632747516!2d10.2475!3d36.8381!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzbCsDUwJzE3LjIiTiAxMMKwMTQnNTEuMCJF!5e0!3m2!1sfr!2stn!4v1234567890",
+      heroImageDesktop: null,
+      heroImageMobile: null,
+      heroLogo: "/uploads/763da107-2ff3-4a8d-b953-c22013fd1cb7.webp",
+      ogImage: null,
       registrationEnabled: true,
-      status: "UPCOMING",
-      isActive: true,
+      status: "ENDED",
+      isActive: false,
     },
   })
-  console.log(`  ✓ Event: ${event.editionName}`)
+  console.log("  ✓ Event: PMO Mastery 2025")
 
-  // 3. Contact info --------------------------------------------------------
   await db.contactInfo.create({
     data: {
-      eventId: event.id,
+      id: "cmsvxyfcq00037vycg7k40cit",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
       email: "contact@pmomastery.tn",
       phone: "+216 94 108 023",
       address: "Tunis",
       city: "Tunis",
       country: "Tunisie",
+      mapUrl: null,
       linkedinUrl: "https://www.linkedin.com/company/pmo-mastery-tun/about/",
       facebookUrl: "https://www.facebook.com/pmomastery",
       instagramUrl: "https://www.instagram.com/pmomastery/",
-      websiteUrl: "https://www.pmomastery.tn",
-    },
-  })
-  console.log("  ✓ Contact info")
-
-  // 4. Speakers ------------------------------------------------------------
-  const speakers = [
-    {
-      slug: "lee-lambert",
-      firstName: "Lee R.",
-      lastName: "Lambert",
-      photo: `${REMOTE}/assets/img/team/lambertt.png`,
-      positionFr: "CEO, Lambert Consulting Group",
-      positionEn: "CEO, Lambert Consulting Group",
-      biographyFr:
-        "Lee R. Lambert est l'un des pionniers mondiaux de la profession PMO. Avec plus de 40 ans d'expérience, il a accompagné des centaines d'organisations dans leur transformation projective.\n\nReconnu comme l'un des 5 pionniers du Project Management Institute (PMI), il a contribué à la création du standard PMP.\n\nAuteur de plusieurs ouvrages de référence, il partage sa vision stratégique du PMO comme moteur de création de valeur.",
-      biographyEn:
-        "Lee R. Lambert is one of the world's pioneers of the PMO profession. With over 40 years of experience, he has guided hundreds of organizations in their project transformation.\n\nRecognized as one of the 5 founders of the Project Management Institute (PMI), he contributed to creating the PMP standard.\n\nAuthor of several reference books, he shares his strategic vision of PMO as a value creation engine.",
-      country: "USA",
-      linkedinUrl: "https://www.linkedin.com/in/lelambert/",
-      isFeatured: true,
-      displayOrder: 1,
-    },
-    {
-      slug: "mohamed-khalifa",
-      firstName: "Mohamed",
-      lastName: "Khalifa",
-      photo: `${REMOTE}/assets/img/team/medd.png`,
-      positionFr: "Consultant & Formateur — Top 8 PMO Influencers",
-      positionEn: "Consultant & Trainer — Top 8 PMO Influencers",
-      biographyFr:
-        "Mohamed Khalifa figure parmi les Top 8 influenceurs PMO au niveau mondial. Consultant international et formateur certifié, il accompagne les organisations dans leur maturation PMO.\n\nExpert reconnu en création de bureaux de projets performants, il a formé des milliers de professionnels à travers le monde arabe et francophone.",
-      biographyEn:
-        "Mohamed Khalifa is among the Top 8 PMO influencers worldwide. International consultant and certified trainer, he supports organizations in their PMO maturation.\n\nRecognized expert in creating high-performing project offices, he has trained thousands of professionals across the Arab and Francophone world.",
-      country: "Égypte",
-      linkedinUrl: "https://www.linkedin.com/in/mkhalifa/",
-      isFeatured: true,
-      displayOrder: 2,
-    },
-    {
-      slug: "heba-bilal",
-      firstName: "Heba Bilal",
-      lastName: "AlShehhi",
-      photo: `${REMOTE}/assets/img/team/heba.png`,
-      positionFr: "PMO Influencer & Auteure de Elements of Leadership",
-      positionEn: "PMO Influencer & Author of Elements of Leadership",
-      biographyFr:
-        "Heba Bilal AlShehhi est une leader reconnue dans le domaine du PMO et du leadership. Auteure de l'ouvrage « Elements of Leadership », elle accompagne les organisations dans leur transformation digitale.\n\nSon expertise couvre la stratégie PMO, le leadership transformationnel et l'innovation managériale.",
-      biographyEn:
-        "Heba Bilal AlShehhi is a recognized leader in the PMO and leadership field. Author of \"Elements of Leadership\", she supports organizations in their digital transformation.\n\nHer expertise covers PMO strategy, transformational leadership and managerial innovation.",
-      country: "Émirats Arabes Unis",
-      isFeatured: true,
-      displayOrder: 3,
-    },
-    {
-      slug: "khemaies-bahri",
-      firstName: "Khemaies",
-      lastName: "Bahri",
-      photo: `${REMOTE}/assets/img/team/km.png`,
-      positionFr: "CEO, Bahri Group",
-      positionEn: "CEO, Bahri Group",
-      biographyFr:
-        "Khemaies Bahri est un leader d'affaires reconnu en Tunisie. CEO de Bahri Group, il apporte une vision entrepreneuriale unique au monde du management de projets.\n\nSon expérience couvre de multiples secteurs, du transport à la logistique en passant par l'immobilier.",
-      biographyEn:
-        "Khemaies Bahri is a recognized business leader in Tunisia. CEO of Bahri Group, he brings a unique entrepreneurial vision to the project management world.\n\nHis experience covers multiple sectors, from transport to logistics to real estate.",
-      country: "Tunisie",
-      displayOrder: 4,
-    },
-    {
-      slug: "imen-fakhfekh",
-      firstName: "Imen",
-      lastName: "Fakhfekh",
-      photo: `${REMOTE}/assets/img/team/im.png`,
-      positionFr: "Présidente PMITC",
-      positionEn: "President of PMITC",
-      biographyFr:
-        "Imen Fakhfekh est présidente de PMITC (PMI Tunisia Chapter). Experte en gestion de projets et en transformation stratégique, elle accompagne les organisations tunisiennes dans leur montée en maturité PMO.\n\nElle est également formatatrice et mentor pour la nouvelle génération de chefs de projet.",
-      biographyEn:
-        "Imen Fakhfekh is President of PMITC (PMI Tunisia Chapter). Expert in project management and strategic transformation, she supports Tunisian organizations in their PMO maturity journey.\n\nShe is also a trainer and mentor for the new generation of project managers.",
-      country: "Tunisie",
-      linkedinUrl: "https://www.linkedin.com/in/imen-fakhfekh/",
-      isFeatured: true,
-      displayOrder: 5,
-    },
-    {
-      slug: "eman-deabil",
-      firstName: "Eman",
-      lastName: "Deabil",
-      photo: `${REMOTE}/assets/img/team/eman.png`,
-      positionFr: "Experte en transformation, auteure et conférencière",
-      positionEn: "Transformation expert, author and speaker",
-      biographyFr:
-        "Eman Deabil est une experte reconnue en transformation organisationnelle. Auteure et conférencière internationale, elle aide les organisations à intégrer l'IA dans leurs pratiques de management de projet.\n\nSon approche combine stratégie, technologie et conduite du changement.",
-      biographyEn:
-        "Eman Deabil is a recognized expert in organizational transformation. Author and international speaker, she helps organizations integrate AI into their project management practices.\n\nHer approach combines strategy, technology and change management.",
-      country: "Émirats Arabes Unis",
-      displayOrder: 6,
-    },
-    {
-      slug: "slim-masmoudi",
-      firstName: "Slim",
-      lastName: "Masmoudi",
-      photo: `${REMOTE}/assets/img/team/Slim.jpg`,
-      positionFr: "Professeur en psychologie cognitive et conseiller stratégique",
-      positionEn: "Professor of cognitive psychology and strategic advisor",
-      biographyFr:
-        "Slim Masmoudi est professeur en psychologie cognitive et conseiller stratégique. Son expertise unique combine neuroscience, psychologie et leadership.\n\nIl accompagne les dirigeants dans le développement de leur intelligence émotionnelle et stratégique.",
-      biographyEn:
-        "Slim Masmoudi is a professor of cognitive psychology and strategic advisor. His unique expertise combines neuroscience, psychology and leadership.\n\nHe supports leaders in developing their emotional and strategic intelligence.",
-      country: "Tunisie",
-      displayOrder: 7,
-    },
-    {
-      slug: "nazir-lajdel",
-      firstName: "Nazir",
-      lastName: "Lajdel",
-      photo: `${REMOTE}/assets/img/team/Nizar.jpg`,
-      positionFr: "Director of PMO and Transformation, Zitouna Bank",
-      positionEn: "Director of PMO and Transformation, Zitouna Bank",
-      biographyFr:
-        "Nazir Lajdel est Director of PMO and Transformation chez Zitouna Bank. Il pilote les transformations stratégiques de l'institution bancaire avec une approche PMO orientée valeur.\n\nModérateur de panels reconnu, il anime les discussions sur l'avenir du PMO dans le secteur financier.",
-      biographyEn:
-        "Nazir Lajdel is Director of PMO and Transformation at Zitouna Bank. He leads the strategic transformations of the banking institution with a value-oriented PMO approach.\n\nRecognized panel moderator, he leads discussions on the future of PMO in the financial sector.",
-      country: "Tunisie",
-      displayOrder: 8,
-    },
-    {
-      slug: "henda-essafi-rekik",
-      firstName: "Henda",
-      lastName: "Essafi Rekik",
-      photo: `${REMOTE}/assets/img/team/hebarekik.png`,
-      positionFr: "CEO Excellia Leadership — Coach ICF — Manager de Transition",
-      positionEn: "CEO Excellia Leadership — ICF Coach — Transition Manager",
-      biographyFr:
-        "Henda Essafi Rekik est CEO d'Excellia Leadership, coach ICF certifiée et manager de transition. Elle accompagne les dirigeants dans leur développement personnel et professionnel.\n\nSon expertise couvre le leadership féminin, la transformation culturelle et le coaching exécutif.",
-      biographyEn:
-        "Henda Essafi Rekik is CEO of Excellia Leadership, ICF certified coach and transition manager. She supports leaders in their personal and professional development.\n\nHer expertise covers female leadership, cultural transformation and executive coaching.",
-      country: "Tunisie",
-      displayOrder: 9,
-    },
-    {
-      slug: "mouna-chaeib",
-      firstName: "Mouna",
-      lastName: "Chaeib",
-      photo: `${REMOTE}/assets/img/team/mouna1.png`,
-      positionFr: "CEO · Facilitator in Corporate Governance · Social Innovation",
-      positionEn: "CEO · Facilitator in Corporate Governance · Social Innovation",
-      biographyFr:
-        "Mouna Chaeib est CEO et facilitatrice en gouvernance corporative et innovation sociale. Elle accompagne les organisations dans leur démarche RSE et leur impact positif.\n\nSon approche combine gouvernance, innovation et responsabilité sociétale.",
-      biographyEn:
-        "Mouna Chaeib is CEO and facilitator in corporate governance and social innovation. She supports organizations in their CSR approach and positive impact.\n\nHer approach combines governance, innovation and societal responsibility.",
-      country: "Tunisie",
-      displayOrder: 10,
-    },
-    {
-      slug: "aicha-tamboura",
-      firstName: "Aïcha",
-      lastName: "Tamboura Diawara",
-      photo: `${REMOTE}/assets/img/team/aicha.png`,
-      positionFr: "Chercheure & Experte en Communication, Développement, Genre",
-      positionEn: "Researcher & Expert in Communication, Development, Gender",
-      biographyFr:
-        "Aïcha Tamboura Diawara est chercheure et experte en communication, développement et questions de genre. Elle apporte une dimension académique et humaine aux débats sur le leadership inclusif.\n\nSon travail de recherche porte sur la place des femmes dans le leadership et la transformation organisationnelle.",
-      biographyEn:
-        "Aïcha Tamboura Diawara is a researcher and expert in communication, development and gender issues. She brings an academic and human dimension to debates on inclusive leadership.\n\nHer research focuses on the place of women in leadership and organizational transformation.",
-      country: "Mali",
-      displayOrder: 11,
-    },
-    {
-      slug: "afef-belhadj",
-      firstName: "Afef",
-      lastName: "Belhadj",
-      photo: `${REMOTE}/assets/img/team/afef.png`,
-      positionFr: "Senior executive in the telecom industry",
-      positionEn: "Senior executive in the telecom industry",
-      biographyFr:
-        "Afef Belhadj est senior executive dans l'industrie des télécommunications. Elle pilote des transformations à grande échelle dans un secteur en constante évolution.\n\nSon expertise couvre la stratégie, la transformation digitale et le leadership d'équipes multidisciplinaires.",
-      biographyEn:
-        "Afef Belhadj is a senior executive in the telecommunications industry. She leads large-scale transformations in a constantly evolving sector.\n\nHer expertise covers strategy, digital transformation and leadership of multidisciplinary teams.",
-      country: "Tunisie",
-      displayOrder: 12,
-    },
-    {
-      slug: "imen-messadi",
-      firstName: "Imen",
-      lastName: "Messadi",
-      photo: `${REMOTE}/assets/img/team/x.png`,
-      positionFr: "Experte en Transformation Digitale & Stratégie",
-      positionEn: "Expert in Digital Transformation & Strategy",
-      biographyFr:
-        "Imen Messadi est experte en transformation digitale et stratégie. Elle accompagne les organisations dans leur mutation vers des modèles digitaux performants.\n\nSon approche combine vision stratégique, conduite du changement et innovation technologique.",
-      biographyEn:
-        "Imen Messadi is an expert in digital transformation and strategy. She supports organizations in their mutation towards high-performing digital models.\n\nHer approach combines strategic vision, change management and technological innovation.",
-      country: "Tunisie",
-      displayOrder: 13,
-    },
-    {
-      slug: "naouel-ben-zina",
-      firstName: "Naouel",
-      lastName: "Ben Zina",
-      photo: `${REMOTE}/assets/img/team/naouel.png`,
-      positionFr: "PMI Regional Mentor MENA",
-      positionEn: "PMI Regional Mentor MENA",
-      biographyFr:
-        "Naouel Ben Zina est PMI Regional Mentor pour la région MENA. Elle accompagne le développement de la communauté PMI au Moyen-Orient et Afrique du Nord.\n\nSon expertise couvre la certification, le mentorat et le développement de la profession PMO dans la région.",
-      biographyEn:
-        "Naouel Ben Zina is PMI Regional Mentor for the MENA region. She supports the development of the PMI community in the Middle East and North Africa.\n\nHer expertise covers certification, mentoring and the development of the PMO profession in the region.",
-      country: "Tunisie",
-      displayOrder: 14,
-    },
-    {
-      slug: "omrane-kammoun",
-      firstName: "Omrane",
-      lastName: "Kammoun",
-      photo: `${REMOTE}/assets/img/team/omrane.png`,
-      positionFr: "Telecom Engineer, E-MBA",
-      positionEn: "Telecom Engineer, E-MBA",
-      biographyFr:
-        "Omrane Kammoun est Telecom Engineer et E-MBA. Il combine expertise technique et vision managériale pour piloter des projets complexes dans le secteur des télécommunications.\n\nSon parcours illustre la convergence entre ingénierie et leadership stratégique.",
-      biographyEn:
-        "Omrane Kammoun is a Telecom Engineer and E-MBA. He combines technical expertise and managerial vision to lead complex projects in the telecommunications sector.\n\nHis career illustrates the convergence between engineering and strategic leadership.",
-      country: "Tunisie",
-      displayOrder: 15,
-    },
-    {
-      slug: "maha-chehata",
-      firstName: "Maha",
-      lastName: "Chehata",
-      photo: `${REMOTE}/assets/img/team/mahaC.png`,
-      positionFr: "Présidente MEDRH",
-      positionEn: "President of MEDRH",
-      biographyFr:
-        "Maha Chehata est présidente de MEDRH. Elle apporte une vision RH stratégique au monde du PMO et de la transformation organisationnelle.\n\nSon expertise couvre le capital humain, le leadership et le développement des talents.",
-      biographyEn:
-        "Maha Chehata is President of MEDRH. She brings a strategic HR vision to the world of PMO and organizational transformation.\n\nHer expertise covers human capital, leadership and talent development.",
-      country: "Tunisie",
-      displayOrder: 16,
-    },
-    {
-      slug: "moez-kamoun",
-      firstName: "Moez",
-      lastName: "Kamoun",
-      photo: `${REMOTE}/assets/img/team/moezK.png`,
-      positionFr: "Consulting Partner",
-      positionEn: "Consulting Partner",
-      biographyFr:
-        "Moez Kamoun est Consulting Partner. Il accompagne les organisations dans leurs transformations stratégiques avec une approche orientée valeur et impact.\n\nSon expertise couvre le conseil en stratégie, la transformation et le management de projets complexes.",
-      biographyEn:
-        "Moez Kamoun is a Consulting Partner. He supports organizations in their strategic transformations with a value and impact-oriented approach.\n\nHis expertise covers strategy consulting, transformation and complex project management.",
-      country: "Tunisie",
-      displayOrder: 17,
-    },
-    {
-      slug: "ahmed-chabchoub",
-      firstName: "Ahmed",
-      lastName: "Chabchoub",
-      photo: `${REMOTE}/assets/img/team/ahmedC.png`,
-      positionFr: "Founder & CEO, DefensyLab",
-      positionEn: "Founder & CEO, DefensyLab",
-      biographyFr:
-        "Ahmed Chabchoub est fondateur et CEO de DefensyLab. Expert en cybersécurité et transformation digitale, il accompagne les organisations dans leur sécurisation face aux enjeux technologiques.\n\nSon approche combine innovation, sécurité et performance opérationnelle.",
-      biographyEn:
-        "Ahmed Chabchoub is founder and CEO of DefensyLab. Expert in cybersecurity and digital transformation, he supports organizations in securing against technological challenges.\n\nHis approach combines innovation, security and operational performance.",
-      country: "Tunisie",
-      displayOrder: 18,
-    },
-    {
-      slug: "rym-akremi",
-      firstName: "Rym",
-      lastName: "Ben Dhief Akremi",
-      photo: `${REMOTE}/assets/img/team/rymA.png`,
-      positionFr: "Entrepreneure · Consultante en Stratégie RSE & ESG",
-      positionEn: "Entrepreneur · CSR & ESG Strategy Consultant",
-      biographyFr:
-        "Rym Ben Dhief Akremi est entrepreneure et consultante en stratégie RSE et ESG. Elle accompagne les organisations dans leur démarche de responsabilité sociétale et environnementale.\n\nSon expertise combine vision durable, innovation et performance business.",
-      biographyEn:
-        "Rym Ben Dhief Akremi is an entrepreneur and CSR & ESG strategy consultant. She supports organizations in their corporate social and environmental responsibility approach.\n\nHer expertise combines sustainable vision, innovation and business performance.",
-      country: "Tunisie",
-      displayOrder: 19,
-    },
-    {
-      slug: "sarah-lamine",
-      firstName: "Sarah",
-      lastName: "Lamine",
-      photo: `${REMOTE}/assets/img/team/sarraL.png`,
-      positionFr: "CEO at Convergen Agency",
-      positionEn: "CEO at Convergen Agency",
-      biographyFr:
-        "Sarah Lamine est CEO de Convergen Agency. Elle apporte une vision marketing et communicationnelle au monde du PMO.\n\nSon expertise couvre la stratégie de marque, la communication digitale et l'innovation marketing.",
-      biographyEn:
-        "Sarah Lamine is CEO of Convergen Agency. She brings a marketing and communication vision to the PMO world.\n\nHer expertise covers brand strategy, digital communication and marketing innovation.",
-      country: "Tunisie",
-      displayOrder: 20,
-    },
-    {
-      slug: "aimen-ktari",
-      firstName: "Aimen",
-      lastName: "Ktari",
-      photo: `${REMOTE}/assets/img/team/team-2/aimen.png`,
-      positionFr: "Directeur, Plateforme ESG & Développement Durable, PwC France & Maghreb",
-      positionEn: "Director, ESG & Sustainable Development Platform, PwC France & Maghreb",
-      biographyFr:
-        "Aimen Ktari est directeur de la plateforme ESG & Développement Durable chez PwC France & Maghreb. Il accompagne les organisations dans leur transition durable et leur reporting ESG.\n\nSon expertise couvre les standards ESG, la finance durable et la transformation responsable.",
-      biographyEn:
-        "Aimen Ktari is Director of the ESG & Sustainable Development platform at PwC France & Maghreb. He supports organizations in their sustainable transition and ESG reporting.\n\nHis expertise covers ESG standards, sustainable finance and responsible transformation.",
-      country: "France",
-      displayOrder: 21,
-    },
-  ]
-
-  for (const sp of speakers) {
-    await db.speaker.create({
-      data: {
-        eventId: event.id,
-        ...sp,
-        isActive: true,
-      },
-    })
-  }
-  console.log(`  ✓ ${speakers.length} speakers`)
-
-  // 5. Programme -----------------------------------------------------------
-  const day1 = await db.programmeDay.create({
-    data: {
-      eventId: event.id,
-      nameFr: "Jour 1 — Formation",
-      nameEn: "Day 1 — Training",
-      date: new Date("2025-10-11"),
-      displayOrder: 0,
-      isActive: true,
-    },
-  })
-  const day2 = await db.programmeDay.create({
-    data: {
-      eventId: event.id,
-      nameFr: "Jour 2 — Événement",
-      nameEn: "Day 2 — Main Event",
-      date: new Date("2025-10-12"),
-      displayOrder: 1,
-      isActive: true,
+      youtubeUrl: null,
+      websiteUrl: "https://www.pmomastery.tn/",
     },
   })
 
-  const sessions = [
-    // Day 1
-    {
-      dayId: day1.id,
-      startTime: "08:30",
-      endTime: "10:00",
-      titleFr: "Comment créer un bureau de gestion de projets réussi : outils et techniques essentiels",
-      titleEn: "How to create a successful project management office: essential tools and techniques",
-      sessionType: "WORKSHOP",
-      language: "AR",
-      displayOrder: 0,
-      speakerSlugs: ["mohamed-khalifa"],
-    },
-    {
-      dayId: day1.id,
-      startTime: "10:00",
-      endTime: "10:30",
-      titleFr: "Pause Café",
-      titleEn: "Coffee Break",
-      sessionType: "BREAK",
-      displayOrder: 1,
-      speakerSlugs: [],
-    },
-    {
-      dayId: day1.id,
-      startTime: "10:30",
-      endTime: "12:30",
-      titleFr: "PMO Hybride et Pilotage de performance : Intégrer Méthode agile, Traditionnel et KPI",
-      titleEn: "Hybrid PMO and Performance Management: Integrating Agile, Traditional Methods and KPIs",
-      sessionType: "WORKSHOP",
-      language: "FR",
-      displayOrder: 2,
-      speakerSlugs: [],
-    },
-    {
-      dayId: day1.id,
-      startTime: "12:30",
-      endTime: "13:30",
-      titleFr: "Déjeuner & Networking",
-      titleEn: "Lunch & Networking",
-      sessionType: "NETWORKING",
-      displayOrder: 3,
-      speakerSlugs: [],
-    },
-    {
-      dayId: day1.id,
-      startTime: "13:30",
-      endTime: "15:30",
-      titleFr: "De la Stratégie aux KPI jusqu'à l'Exécution Agile",
-      titleEn: "From Strategy to KPIs to Agile Execution",
-      sessionType: "WORKSHOP",
-      language: "FR",
-      displayOrder: 4,
-      speakerSlugs: ["imen-fakhfekh"],
-    },
-    {
-      dayId: day1.id,
-      startTime: "15:30",
-      endTime: "16:00",
-      titleFr: "Pause Café",
-      titleEn: "Coffee Break",
-      sessionType: "BREAK",
-      displayOrder: 5,
-      speakerSlugs: [],
-    },
-    {
-      dayId: day1.id,
-      startTime: "16:00",
-      endTime: "17:30",
-      titleFr: "Artificial Intelligence (AI) for Project Management",
-      titleEn: "Artificial Intelligence (AI) for Project Management",
-      sessionType: "WORKSHOP",
-      language: "EN",
-      displayOrder: 6,
-      speakerSlugs: [],
-    },
-    // Day 2
-    {
-      dayId: day2.id,
-      startTime: "08:30",
-      endTime: "09:00",
-      titleFr: "Accueil et petit-déjeuner de réseautage",
-      titleEn: "Welcome and networking breakfast",
-      sessionType: "NETWORKING",
-      displayOrder: 0,
-      speakerSlugs: ["lee-lambert"],
-    },
-    {
-      dayId: day2.id,
-      startTime: "09:00",
-      endTime: "09:30",
-      titleFr: "Mot de bienvenue et ouverture",
-      titleEn: "Welcome remarks and opening",
-      sessionType: "SESSION",
-      displayOrder: 1,
-      speakerSlugs: ["mohamed-khalifa"],
-    },
-    {
-      dayId: day2.id,
-      startTime: "09:30",
-      endTime: "10:15",
-      titleFr: "Keynote 1 : Excellence des bureaux des projets (PMOs)",
-      titleEn: "Keynote 1: Excellence of Project Management Offices (PMOs)",
-      sessionType: "KEYNOTE",
-      language: "FR",
-      displayOrder: 2,
-      speakerSlugs: ["aicha-tamboura"],
-    },
-    {
-      dayId: day2.id,
-      startTime: "10:15",
-      endTime: "11:15",
-      titleFr: "Panel 1 : PMO stratégiques — Passer de la gestion à la création de Valeur",
-      titleEn: "Panel 1: Strategic PMOs — From Management to Value Creation",
-      sessionType: "PANEL",
-      language: "FR",
-      displayOrder: 3,
-      speakerSlugs: ["eman-deabil"],
-    },
-    {
-      dayId: day2.id,
-      startTime: "11:15",
-      endTime: "11:45",
-      titleFr: "Pause Café & Networking",
-      titleEn: "Coffee Break & Networking",
-      sessionType: "BREAK",
-      displayOrder: 4,
-      speakerSlugs: [],
-    },
-    {
-      dayId: day2.id,
-      startTime: "11:45",
-      endTime: "12:30",
-      titleFr: "Keynote 2 : Succès de l'IA — Cas concrets et enseignements",
-      titleEn: "Keynote 2: AI Success — Concrete cases and lessons",
-      sessionType: "KEYNOTE",
-      language: "EN",
-      displayOrder: 5,
-      speakerSlugs: ["eman-deabil"],
-    },
-    {
-      dayId: day2.id,
-      startTime: "12:30",
-      endTime: "13:30",
-      titleFr: "Panel : IA & Automatisation",
-      titleEn: "Panel: AI & Automation",
-      sessionType: "PANEL",
-      language: "FR",
-      displayOrder: 6,
-      speakerSlugs: ["heba-bilal", "maha-chehata"],
-    },
-    {
-      dayId: day2.id,
-      startTime: "13:30",
-      endTime: "14:30",
-      titleFr: "Déjeuner & Networking",
-      titleEn: "Lunch & Networking",
-      sessionType: "NETWORKING",
-      displayOrder: 7,
-      speakerSlugs: [],
-    },
-    {
-      dayId: day2.id,
-      startTime: "14:30",
-      endTime: "15:15",
-      titleFr: "Keynote : Comment les leaders exceptionnels transforment la résistance en adhésion",
-      titleEn: "Keynote: How exceptional leaders turn resistance into engagement",
-      sessionType: "KEYNOTE",
-      language: "EN",
-      displayOrder: 8,
-      speakerSlugs: ["lee-lambert"],
-    },
-    {
-      dayId: day2.id,
-      startTime: "15:15",
-      endTime: "16:15",
-      titleFr: "Panel : Synergie Gagnante — Conduite du changement et IA au service des PMO",
-      titleEn: "Panel: Winning Synergy — Change management and AI serving PMOs",
-      sessionType: "PANEL",
-      language: "FR",
-      displayOrder: 9,
-      speakerSlugs: [],
-    },
-    {
-      dayId: day2.id,
-      startTime: "16:15",
-      endTime: "16:45",
-      titleFr: "Pause Café & Networking",
-      titleEn: "Coffee Break & Networking",
-      sessionType: "BREAK",
-      displayOrder: 10,
-      speakerSlugs: [],
-    },
-    {
-      dayId: day2.id,
-      startTime: "16:45",
-      endTime: "17:30",
-      titleFr: "Keynote de Clôture : Le PMO en 2030 — Quel avenir pour les bureaux de gestion de projets ?",
-      titleEn: "Closing Keynote: The PMO in 2030 — What future for project management offices?",
-      sessionType: "CLOSING",
-      language: "FR",
-      displayOrder: 11,
-      speakerSlugs: ["moez-kamoun"],
-    },
-    {
-      dayId: day2.id,
-      startTime: "17:30",
-      endTime: "18:00",
-      titleFr: "Clôture de l'évènement",
-      titleEn: "Event closing",
-      sessionType: "CLOSING",
-      displayOrder: 12,
-      speakerSlugs: [],
-    },
-  ]
-
-  // Build a slug -> speakerId map
-  const speakerMap = new Map<string, string>()
-  for (const sp of speakers) {
-    const created = await db.speaker.findFirst({ where: { eventId: event.id, slug: sp.slug } })
-    if (created) speakerMap.set(sp.slug, created.id)
-  }
-
-  for (const s of sessions) {
-    const session = await db.programmeSession.create({
-      data: {
-        programmeDayId: s.dayId,
-        startTime: s.startTime,
-        endTime: s.endTime,
-        titleFr: s.titleFr,
-        titleEn: s.titleEn,
-        sessionType: s.sessionType,
-        language: s.language ?? null,
-        displayOrder: s.displayOrder,
-        isActive: true,
-      },
-    })
-    if (s.speakerSlugs.length > 0) {
-      const ids = s.speakerSlugs.map((slug) => speakerMap.get(slug)).filter(Boolean) as string[]
-      if (ids.length > 0) {
-        await db.sessionSpeaker.createMany({
-          data: ids.map((speakerId) => ({ sessionId: session.id, speakerId })),
-        })
-      }
-    }
-  }
-  console.log(`  ✓ ${sessions.length} programme sessions`)
-
-  // 6. Passes --------------------------------------------------------------
-  const PAYMENT_BASE = "https://international-event-for-pmo-leaders.businessroom.io"
-  const passes = [
-    {
-      slug: "pass-evenement",
-      nameFr: "Pass Événement",
-      nameEn: "Event Pass",
-      descriptionFr: "Accès complet aux 2 jours de conférence et panels.",
-      descriptionEn: "Full access to the 2-day conference and panels.",
-      price: 500,
-      currency: "TND",
-      vatRate: 0.19,
-      paymentUrl: `${PAYMENT_BASE}/?ticket_id=154`,
-      featuresFr: "Accès aux 2 jours de conférence\nToutes les keynotes et panels\nPause café & déjeuners\nCoffret goodies PMO Mastery\nNetworking avec les intervenants",
-      featuresEn: "Access to 2 conference days\nAll keynotes and panels\nCoffee breaks & lunches\nPMO Mastery goodies kit\nNetworking with speakers",
-      isFeatured: false,
-      displayOrder: 1,
-    },
-    {
-      slug: "pass-formation",
-      nameFr: "Pass Formation",
-      nameEn: "Training Pass",
-      descriptionFr: "Accès au jour de formation (atelier pratique).",
-      descriptionEn: "Access to the training day (practical workshop).",
-      price: 400,
-      currency: "TND",
-      vatRate: 0.19,
-      paymentUrl: `${PAYMENT_BASE}/?ticket_id=153`,
-      featuresFr: "Accès au jour de formation\nAtelier pratique interactif\nSupports de formation\nPause café & déjeuner\nCertificat de participation",
-      featuresEn: "Access to training day\nInteractive practical workshop\nTraining materials\nCoffee break & lunch\nCertificate of participation",
-      isFeatured: false,
-      displayOrder: 2,
-    },
-    {
-      slug: "pass-duo",
-      nameFr: "Pass Duo",
-      nameEn: "Duo Pass",
-      descriptionFr: "Événement + 1 Formation — la formule complète.",
-      descriptionEn: "Event + 1 Training — the complete package.",
-      price: 900,
-      currency: "TND",
-      vatRate: 0.19,
-      paymentUrl: `${PAYMENT_BASE}/?ticket_id=155`,
-      featuresFr: "Tous les avantages Pass Événement\n+ 1 jour de formation au choix\nAtelier pratique interactif\nSupports de formation\nCertificat de participation",
-      featuresEn: "All Event Pass benefits\n+ 1 training day of your choice\nInteractive practical workshop\nTraining materials\nCertificate of participation",
-      isFeatured: true,
-      displayOrder: 3,
-    },
-    {
-      slug: "pass-etudiant",
-      nameFr: "Pass Étudiant",
-      nameEn: "Student Pass",
-      descriptionFr: "Tarif réduit pour les étudiants.",
-      descriptionEn: "Discounted rate for students.",
-      price: 200,
-      currency: "TND",
-      vatRate: 0.19,
-      paymentUrl: null,
-      featuresFr: "Accès aux 2 jours\nSur présentation carte étudiante\nPause café inclus",
-      featuresEn: "Access to both days\nStudent ID required\nCoffee break included",
-      isFeatured: false,
-      displayOrder: 4,
-    },
-    {
-      slug: "pass-equipe",
-      nameFr: "Pass Équipe",
-      nameEn: "Team Pass",
-      descriptionFr: "Tarif préférentiel pour inscription de 2 personnes ou plus.",
-      descriptionEn: "Discounted rate for 2+ registrations.",
-      price: 450,
-      currency: "TND",
-      vatRate: 0.19,
-      paymentUrl: null,
-      featuresFr: "Tarif par personne\nMinimum 2 inscrits\nTous les avantages Pass Événement",
-      featuresEn: "Per-person rate\nMinimum 2 registrations\nAll Event Pass benefits",
-      minQuantity: 2,
-      isFeatured: false,
-      displayOrder: 5,
-    },
-  ]
-
-  for (const p of passes) {
-    await db.pass.create({
-      data: {
-        eventId: event.id,
-        ...p,
-        minQuantity: p.minQuantity ?? 1,
-        currency: p.currency ?? "TND",
-        vatRate: p.vatRate ?? 0.19,
-        isActive: true,
-      },
-    })
-  }
-  console.log(`  ✓ ${passes.length} passes`)
-
-  // 7. Organizer -----------------------------------------------------------
-  await db.organizer.create({
-    data: {
-      eventId: event.id,
-      name: "Empowerment Paths",
-      logo: `${REMOTE}/assets/img/logo/logo.png`,
-      descriptionFr:
-        "Cabinet de conseil et de développement professionnel. Trois pôles : (1) Conseil — PMO, évaluation de maturité, modèles opérationnels, conduite du changement ; (2) Formation — gestion de projet (PMP®, PgMP®), excellence PMO, agilité, soft skills, leadership ; (3) Coaching exécutif & d'équipe.\n\nAmbition : positionner la Tunisie comme un hub régional d'excellence PMO.",
-      descriptionEn:
-        "Consulting and professional development firm. Three poles: (1) Consulting — PMO, maturity assessment, operational models, change management; (2) Training — project management (PMP®, PgMP®), PMO excellence, agility, soft skills, leadership; (3) Executive & team coaching.\n\nAmbition: position Tunisia as a regional hub of PMO excellence.",
-      websiteUrl: "https://www.pmomastery.tn",
-      linkedinUrl: "https://www.linkedin.com/company/pmo-mastery-tun/about/",
-      facebookUrl: "https://www.facebook.com/pmomastery",
-      instagramUrl: "https://www.instagram.com/pmomastery/",
-      founderName: "Yosra Torjmen",
-      founderTitle: "Managing Director, Fondatrice de PMO Mastery",
-      founderPhoto: `${REMOTE}/assets/img/team/yosra.png`,
-      founderCredentials: "PgMP®, PMP®, PMO-CP, Coach Professionnelle",
-      isActive: true,
-      displayOrder: 0,
-    },
-  })
-  console.log("  ✓ 1 organizer")
-
-  // 7b. Popups ---------------------------------------------------------------
-  await db.popup.create({
-    data: {
-      eventId: event.id,
-      name: "Yosra Torjmen",
-      photo: `${REMOTE}/assets/img/team/yosra.png`,
-      messageFr: "Ne manquez pas cet atelier PMO exclusif !",
-      messageEn: "Don't miss this exclusive PMO workshop!",
-      ctaUrl: "/pass-formation",
-      isActive: true,
-      displayOrder: 0,
-    },
-  })
-  console.log("  ✓ 1 popup")
-
-  // 8. Partners ------------------------------------------------------------
-  const partners = [
-    {
-      name: "Excellia Leadership",
-      logo: `${REMOTE}/assets/img/ex.jpg`,
-      category: "STRATEGIC",
-      websiteUrl: "https://excellialeadership.com/",
-      displayOrder: 0,
-    },
-    {
-      name: "Royal Tulip Taj Sultan",
-      logo: `${REMOTE}/assets/img/tt.png`,
-      category: "STRATEGIC",
-      websiteUrl: "https://royal-tulip-taj-sultan.goldentulip.com/fr-fr/",
-      displayOrder: 1,
-    },
-    {
-      name: "Tunisie Telecom",
-      logo: `${REMOTE}/assets/img/LogoTT.png`,
-      category: "DIAMOND",
-      websiteUrl: "https://www.tunisietelecom.tn/particulier/",
-      displayOrder: 2,
-    },
-    {
-      name: "Managers.tn",
-      logo: `${REMOTE}/assets/img/manager.png`,
-      category: "MEDIA",
-      websiteUrl: "https://managers.tn/",
-      displayOrder: 3,
-    },
-    {
-      name: "PMI — Project Management Institute",
-      logo: `${REMOTE}/assets/img/part.jpg`,
-      category: "STRATEGIC",
-      websiteUrl: "https://www.pmi.org/",
-      descriptionFr:
-        "Project Management Institute (PMI) est la principale association professionnelle mondiale dédiée au management de projet. PMI publie le PMBOK® Guide et administre les certifications PMP®, PgMP®, PMI-ACP® et autres.",
-      descriptionEn:
-        "Project Management Institute (PMI) is the world's leading professional association dedicated to project management. PMI publishes the PMBOK® Guide and administers the PMP®, PgMP®, PMI-ACP® and other certifications.",
-      displayOrder: 4,
-    },
-    {
-      name: "FlowUp",
-      logo: `${REMOTE}/assets/img/flow.jpg`,
-      category: "PARTNER",
-      websiteUrl: "http://flowup.tn/",
-      displayOrder: 5,
-    },
-    {
-      name: "Talys Digital",
-      logo: `${REMOTE}/assets/img/lt.jpg`,
-      category: "PARTNER",
-      websiteUrl: "https://www.talys.digital/",
-      displayOrder: 6,
-    },
-  ]
-  for (const p of partners) {
-    await db.partner.create({
-      data: {
-        eventId: event.id,
-        ...p,
-        descriptionFr: p.descriptionFr ?? null,
-        descriptionEn: p.descriptionEn ?? null,
-        isActive: true,
-      },
-    })
-  }
-  console.log(`  ✓ ${partners.length} partners`)
-
-  // 9. CMS sections --------------------------------------------------------
   await db.websiteSection.create({
     data: {
-      eventId: event.id,
+      id: "cmsvxyfjg00397vyct705kgry",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
       sectionKey: "HERO",
       titleFr: "Événement international pour les leaders des PMOs",
       titleEn: "International Event for PMO Leaders",
       subtitleFr: "11 – 12 octobre 2025 · Tunis, Tunisie",
       subtitleEn: "October 11–12, 2025 · Tunis, Tunisia",
-      descriptionFr:
-        "Pendant 2 jours intensifs, vivez une expérience immersive au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership.",
-      descriptionEn:
-        "For 2 intensive days, experience an immersive journey at the heart of best practices in project management, PMO, change management, AI and leadership.",
+      descriptionFr: "Pendant 2 jours intensifs, vivez une expérience immersive au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership.",
+      descriptionEn: "For 2 intensive days, experience an immersive journey at the heart of best practices in project management, PMO, change management, AI and leadership.",
       ctaTextFr: "Je m'inscris",
       ctaTextEn: "Register now",
-      ctaUrl: "#passes",
-      backgroundImage: `${REMOTE}/assets/img/hero/test1.gif`,
+      ctaUrl: null,
+      backgroundImage: "/uploads/b1fae852-0a1a-48ab-adf8-4534856c78c2.webp",
       isActive: true,
     },
   })
 
   await db.websiteSection.create({
     data: {
-      eventId: event.id,
+      id: "cmsvxyfjl003b7vycs7ckju4w",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
       sectionKey: "WHY_PARTICIPATE",
       titleFr: "Pourquoi y participer ?",
-      titleEn: "Why participate?",
-      descriptionFr:
-        "Pendant 2 jours intensifs, vous allez vivre une expérience immersive au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership. Un véritable parcours d'inspiration, d'apprentissage et d'échanges pour accélérer votre impact professionnel et personnel.",
-      descriptionEn:
-        "For 2 intensive days, you will live an immersive experience at the heart of best practices in project management, PMO, change management, AI and leadership. A true journey of inspiration, learning and exchange to accelerate your professional and personal impact.",
+      titleEn: null,
+      subtitleFr: null,
+      subtitleEn: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      ctaTextFr: null,
+      ctaTextEn: null,
+      ctaUrl: null,
+      backgroundImage: "/uploads/fd2e1ce3-eb90-4b68-a41f-56b07b46200b.webp",
       isActive: true,
       benefits: {
         create: [
           {
+            id: "cmt2ip2gd00127v7cylg29qf9",
             icon: "TrendingUp",
             titleFr: "Explorer les dernières tendances",
             titleEn: "Explore the latest trends",
@@ -936,6 +148,7 @@ async function main() {
             isActive: true,
           },
           {
+            id: "cmt2ip2gd00137v7cjo33p1gs",
             icon: "Users",
             titleFr: "Capitaliser sur les retours d'expérience",
             titleEn: "Leverage expert feedback",
@@ -945,6 +158,7 @@ async function main() {
             isActive: true,
           },
           {
+            id: "cmt2ip2gd00147v7cecugb1v2",
             icon: "Target",
             titleFr: "Anticiper les évolutions du marché",
             titleEn: "Anticipate market trends",
@@ -954,6 +168,7 @@ async function main() {
             isActive: true,
           },
           {
+            id: "cmt2ip2gd00157v7cp07cdk6x",
             icon: "Network",
             titleFr: "Échanger et réseauter",
             titleEn: "Exchange and network",
@@ -963,6 +178,7 @@ async function main() {
             isActive: true,
           },
           {
+            id: "cmt2ip2gd00167v7c4jrr0amu",
             icon: "Lightbulb",
             titleFr: "Repartir avec des solutions concrètes",
             titleEn: "Leave with concrete solutions",
@@ -978,32 +194,2802 @@ async function main() {
 
   await db.websiteSection.create({
     data: {
-      eventId: event.id,
+      id: "cmsvxyfju003i7vycp60b6cou",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
       sectionKey: "ABOUT",
-      titleFr: "À propos de PMO Mastery",
+      titleFr: null,
       titleEn: "About PMO Mastery",
-      descriptionFr:
-        "PMO Mastery 2025 se positionne comme un événement de référence qui accompagne la montée en compétences des professionnels, valorise les organisations partenaires et impulse une dynamique d'excellence dans la pratique du PMO en Tunisie et dans la région MENA.",
-      descriptionEn:
-        "PMO Mastery 2025 positions itself as a benchmark event that supports professionals' skills development, values partner organizations and drives a dynamic of excellence in PMO practice in Tunisia and the MENA region.",
+      subtitleFr: null,
+      subtitleEn: null,
+      descriptionFr: "Mastering PMO 2025 se positionne comme un événement de référence qui accompagne la montée en compétences des professionnels, valorise les organisations partenaires et impulse une dynamique d'excellence dans la pratique du PMO en Tunisie et dans la région MENA.",
+      descriptionEn: "PMO Mastery 2025 positions itself as a benchmark event that supports professionals' skills development, values partner organizations and drives a dynamic of excellence in PMO practice in Tunisia and the MENA region.",
+      ctaTextFr: null,
+      ctaTextEn: null,
+      ctaUrl: null,
+      backgroundImage: null,
       isActive: true,
     },
   })
 
   await db.websiteSection.create({
     data: {
-      eventId: event.id,
+      id: "cmsvxyfjx003k7vycyqitv86y",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
       sectionKey: "FOOTER",
-      titleFr: `© ${new Date().getFullYear()} PMO Mastery — Empowerment Paths. Tous droits réservés.`,
-      titleEn: `© ${new Date().getFullYear()} PMO Mastery — Empowerment Paths. All rights reserved.`,
-      descriptionFr:
-        "Mastering PMO 2025 se positionne comme un événement de référence qui accompagne la montée en compétences des professionnels, valorise les organisations partenaires et impulse une dynamique d'excellence dans la pratique du PMO en Tunisie et dans la région MENA.",
-      descriptionEn:
-        "Mastering PMO 2025 positions itself as a benchmark event that supports professionals' skills development, values partner organizations and drives a dynamic of excellence in PMO practice in Tunisia and the MENA region.",
+      titleFr: "© 2026 PMO Mastery — Empowerment Paths. Tous droits réservés.",
+      titleEn: "© 2026 PMO Mastery — Empowerment Paths. All rights reserved.",
+      subtitleFr: null,
+      subtitleEn: null,
+      descriptionFr: "Mastering PMO 2025 se positionne comme un événement de référence qui accompagne la montée en compétences des professionnels, valorise les organisations partenaires et impulse une dynamique d'excellence dans la pratique du PMO en Tunisie et dans la région MENA.",
+      descriptionEn: "Mastering PMO 2025 positions itself as a benchmark event that supports professionals' skills development, values partner organizations and drives a dynamic of excellence in PMO practice in Tunisia and the MENA region.",
+      ctaTextFr: null,
+      ctaTextEn: null,
+      ctaUrl: null,
+      backgroundImage: null,
       isActive: true,
     },
   })
-  console.log("  ✓ 4 CMS sections (Hero, Why, About, Footer)")
+
+  await db.websiteSection.create({
+    data: {
+      id: "cmt1y1h7600017vq0l1ff3ij9",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      sectionKey: "COUNTDOWN",
+      titleFr: null,
+      titleEn: null,
+      subtitleFr: null,
+      subtitleEn: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      ctaTextFr: null,
+      ctaTextEn: null,
+      ctaUrl: null,
+      backgroundImage: null,
+      isActive: true,
+    },
+  })
+  console.log("  ✓ 5 CMS sections")
+
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfcw00057vycglxcqf7r",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "lee-lambert",
+      firstName: "Lee R.",
+      lastName: "Lambert",
+      photo: "/uploads/9413a2d4-b0b0-4318-9485-203a02e8ebca.webp",
+      positionFr: "CEO, Lambert Consulting Group",
+      positionEn: "CEO, Lambert Consulting Group",
+      company: null,
+      biographyFr: "Lee R. Lambert est l'un des pionniers mondiaux de la profession PMO. Avec plus de 40 ans d'expérience, il a accompagné des centaines d'organisations dans leur transformation projective.\n\nReconnu comme l'un des 5 pionniers du Project Management Institute (PMI), il a contribué à la création du standard PMP.\n\nAuteur de plusieurs ouvrages de référence, il partage sa vision stratégique du PMO comme moteur de création de valeur.",
+      biographyEn: "Lee R. Lambert is one of the world's pioneers of the PMO profession. With over 40 years of experience, he has guided hundreds of organizations in their project transformation.\n\nRecognized as one of the 5 founders of the Project Management Institute (PMI), he contributed to creating the PMP standard.\n\nAuthor of several reference books, he shares his strategic vision of PMO as a value creation engine.",
+      country: "USA",
+      linkedinUrl: "https://www.linkedin.com/in/lelambert/",
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: true,
+      isActive: true,
+      displayOrder: 1,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfd200077vycchc7v59l",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "mohamed-khalifa",
+      firstName: "Mohamed",
+      lastName: "Khalifa",
+      photo: "https://www.pmomastery.tn/assets/img/team/medd.png",
+      positionFr: "Consultant & Formateur — Top 8 PMO Influencers",
+      positionEn: "Consultant & Trainer — Top 8 PMO Influencers",
+      company: null,
+      biographyFr: "Mohamed Khalifa figure parmi les Top 8 influenceurs PMO au niveau mondial. Consultant international et formateur certifié, il accompagne les organisations dans leur maturation PMO.\n\nExpert reconnu en création de bureaux de projets performants, il a formé des milliers de professionnels à travers le monde arabe et francophone.",
+      biographyEn: "Mohamed Khalifa is among the Top 8 PMO influencers worldwide. International consultant and certified trainer, he supports organizations in their PMO maturation.\n\nRecognized expert in creating high-performing project offices, he has trained thousands of professionals across the Arab and Francophone world.",
+      country: "Égypte",
+      linkedinUrl: "https://www.linkedin.com/in/mkhalifa/",
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: true,
+      isActive: false,
+      displayOrder: 2,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfd600097vycya1ogh63",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "heba-bilal",
+      firstName: "Heba Bilal",
+      lastName: "AlShehhi",
+      photo: "/uploads/7861498a-5e61-43e3-ba91-fbe9e87f4129.webp",
+      positionFr: "PMO Influencer & Auteure de Elements of Leadership",
+      positionEn: "PMO Influencer & Author of Elements of Leadership",
+      company: null,
+      biographyFr: "Heba Bilal AlShehhi est une leader reconnue dans le domaine du PMO et du leadership. Auteure de l'ouvrage « Elements of Leadership », elle accompagne les organisations dans leur transformation digitale.\n\nSon expertise couvre la stratégie PMO, le leadership transformationnel et l'innovation managériale.",
+      biographyEn: "Heba Bilal AlShehhi is a recognized leader in the PMO and leadership field. Author of \"Elements of Leadership\", she supports organizations in their digital transformation.\n\nHer expertise covers PMO strategy, transformational leadership and managerial innovation.",
+      country: "Émirats Arabes Unis",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: true,
+      isActive: true,
+      displayOrder: 3,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfd9000b7vycep1t3e2b",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "khemaies-bahri",
+      firstName: "Khemaies",
+      lastName: "Bahri",
+      photo: "/uploads/a57d7a06-e6a4-41eb-909c-f390da3bd60a.webp",
+      positionFr: "CEO, Bahri Group",
+      positionEn: "CEO, Bahri Group",
+      company: null,
+      biographyFr: "Khemaies Bahri est un leader d'affaires reconnu en Tunisie. CEO de Bahri Group, il apporte une vision entrepreneuriale unique au monde du management de projets.\n\nSon expérience couvre de multiples secteurs, du transport à la logistique en passant par l'immobilier.",
+      biographyEn: "Khemaies Bahri is a recognized business leader in Tunisia. CEO of Bahri Group, he brings a unique entrepreneurial vision to the project management world.\n\nHis experience covers multiple sectors, from transport to logistics to real estate.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 4,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfdd000d7vycgg6hmumu",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "imen-fakhfekh",
+      firstName: "Imen",
+      lastName: "Fakhfekh",
+      photo: "https://www.pmomastery.tn/assets/img/team/im.png",
+      positionFr: "Présidente PMITC",
+      positionEn: "President of PMITC",
+      company: null,
+      biographyFr: "Imen Fakhfekh est présidente de PMITC (PMI Tunisia Chapter). Experte en gestion de projets et en transformation stratégique, elle accompagne les organisations tunisiennes dans leur montée en maturité PMO.\n\nElle est également formatatrice et mentor pour la nouvelle génération de chefs de projet.",
+      biographyEn: "Imen Fakhfekh is President of PMITC (PMI Tunisia Chapter). Expert in project management and strategic transformation, she supports Tunisian organizations in their PMO maturity journey.\n\nShe is also a trainer and mentor for the new generation of project managers.",
+      country: "Tunisie",
+      linkedinUrl: "https://www.linkedin.com/in/imen-fakhfekh/",
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: true,
+      isActive: true,
+      displayOrder: 5,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfdg000f7vyc92lmhj6p",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "eman-deabil",
+      firstName: "Eman",
+      lastName: "Deabil",
+      photo: "https://www.pmomastery.tn/assets/img/team/eman.png",
+      positionFr: "Experte en transformation, auteure et conférencière",
+      positionEn: "Transformation expert, author and speaker",
+      company: null,
+      biographyFr: "Eman Deabil est une experte reconnue en transformation organisationnelle. Auteure et conférencière internationale, elle aide les organisations à intégrer l'IA dans leurs pratiques de management de projet.\n\nSon approche combine stratégie, technologie et conduite du changement.",
+      biographyEn: "Eman Deabil is a recognized expert in organizational transformation. Author and international speaker, she helps organizations integrate AI into their project management practices.\n\nHer approach combines strategy, technology and change management.",
+      country: "Émirats Arabes Unis",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 6,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfdk000h7vycztnkbvrw",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "slim-masmoudi",
+      firstName: "Slim",
+      lastName: "Masmoudi",
+      photo: "https://www.pmomastery.tn/assets/img/team/Slim.jpg",
+      positionFr: "Professeur en psychologie cognitive et conseiller stratégique",
+      positionEn: "Professor of cognitive psychology and strategic advisor",
+      company: null,
+      biographyFr: "Slim Masmoudi est professeur en psychologie cognitive et conseiller stratégique. Son expertise unique combine neuroscience, psychologie et leadership.\n\nIl accompagne les dirigeants dans le développement de leur intelligence émotionnelle et stratégique.",
+      biographyEn: "Slim Masmoudi is a professor of cognitive psychology and strategic advisor. His unique expertise combines neuroscience, psychology and leadership.\n\nHe supports leaders in developing their emotional and strategic intelligence.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 7,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfdm000j7vycrobchqjx",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "nazir-lajdel",
+      firstName: "Nazir",
+      lastName: "Lajdel",
+      photo: "https://www.pmomastery.tn/assets/img/team/Nizar.jpg",
+      positionFr: "Director of PMO and Transformation, Zitouna Bank",
+      positionEn: "Director of PMO and Transformation, Zitouna Bank",
+      company: null,
+      biographyFr: "Nazir Lajdel est Director of PMO and Transformation chez Zitouna Bank. Il pilote les transformations stratégiques de l'institution bancaire avec une approche PMO orientée valeur.\n\nModérateur de panels reconnu, il anime les discussions sur l'avenir du PMO dans le secteur financier.",
+      biographyEn: "Nazir Lajdel is Director of PMO and Transformation at Zitouna Bank. He leads the strategic transformations of the banking institution with a value-oriented PMO approach.\n\nRecognized panel moderator, he leads discussions on the future of PMO in the financial sector.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 8,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfdp000l7vyc7l0431ia",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "henda-essafi-rekik",
+      firstName: "Henda",
+      lastName: "Essafi Rekik",
+      photo: "https://www.pmomastery.tn/assets/img/team/hebarekik.png",
+      positionFr: "CEO Excellia Leadership — Coach ICF — Manager de Transition",
+      positionEn: "CEO Excellia Leadership — ICF Coach — Transition Manager",
+      company: null,
+      biographyFr: "Henda Essafi Rekik est CEO d'Excellia Leadership, coach ICF certifiée et manager de transition. Elle accompagne les dirigeants dans leur développement personnel et professionnel.\n\nSon expertise couvre le leadership féminin, la transformation culturelle et le coaching exécutif.",
+      biographyEn: "Henda Essafi Rekik is CEO of Excellia Leadership, ICF certified coach and transition manager. She supports leaders in their personal and professional development.\n\nHer expertise covers female leadership, cultural transformation and executive coaching.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 9,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfds000n7vych7a5iog5",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "mouna-chaeib",
+      firstName: "Mouna",
+      lastName: "Chaeib",
+      photo: "https://www.pmomastery.tn/assets/img/team/mouna1.png",
+      positionFr: "CEO · Facilitator in Corporate Governance · Social Innovation",
+      positionEn: "CEO · Facilitator in Corporate Governance · Social Innovation",
+      company: null,
+      biographyFr: "Mouna Chaeib est CEO et facilitatrice en gouvernance corporative et innovation sociale. Elle accompagne les organisations dans leur démarche RSE et leur impact positif.\n\nSon approche combine gouvernance, innovation et responsabilité sociétale.",
+      biographyEn: "Mouna Chaeib is CEO and facilitator in corporate governance and social innovation. She supports organizations in their CSR approach and positive impact.\n\nHer approach combines governance, innovation and societal responsibility.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 10,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfdx000p7vycofe6evt6",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "aicha-tamboura",
+      firstName: "Aïcha",
+      lastName: "Tamboura Diawara",
+      photo: "https://www.pmomastery.tn/assets/img/team/aicha.png",
+      positionFr: "Chercheure & Experte en Communication, Développement, Genre",
+      positionEn: "Researcher & Expert in Communication, Development, Gender",
+      company: null,
+      biographyFr: "Aïcha Tamboura Diawara est chercheure et experte en communication, développement et questions de genre. Elle apporte une dimension académique et humaine aux débats sur le leadership inclusif.\n\nSon travail de recherche porte sur la place des femmes dans le leadership et la transformation organisationnelle.",
+      biographyEn: "Aïcha Tamboura Diawara is a researcher and expert in communication, development and gender issues. She brings an academic and human dimension to debates on inclusive leadership.\n\nHer research focuses on the place of women in leadership and organizational transformation.",
+      country: "Mali",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 11,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfe0000r7vyca6ej5mnf",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "afef-belhadj",
+      firstName: "Afef",
+      lastName: "Belhadj",
+      photo: "https://www.pmomastery.tn/assets/img/team/afef.png",
+      positionFr: "Senior executive in the telecom industry",
+      positionEn: "Senior executive in the telecom industry",
+      company: null,
+      biographyFr: "Afef Belhadj est senior executive dans l'industrie des télécommunications. Elle pilote des transformations à grande échelle dans un secteur en constante évolution.\n\nSon expertise couvre la stratégie, la transformation digitale et le leadership d'équipes multidisciplinaires.",
+      biographyEn: "Afef Belhadj is a senior executive in the telecommunications industry. She leads large-scale transformations in a constantly evolving sector.\n\nHer expertise covers strategy, digital transformation and leadership of multidisciplinary teams.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 12,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfe3000t7vyc42luvb91",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "imen-messadi",
+      firstName: "Imen",
+      lastName: "Messadi",
+      photo: "https://www.pmomastery.tn/assets/img/team/x.png",
+      positionFr: "Experte en Transformation Digitale & Stratégie",
+      positionEn: "Expert in Digital Transformation & Strategy",
+      company: null,
+      biographyFr: "Imen Messadi est experte en transformation digitale et stratégie. Elle accompagne les organisations dans leur mutation vers des modèles digitaux performants.\n\nSon approche combine vision stratégique, conduite du changement et innovation technologique.",
+      biographyEn: "Imen Messadi is an expert in digital transformation and strategy. She supports organizations in their mutation towards high-performing digital models.\n\nHer approach combines strategic vision, change management and technological innovation.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 13,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfe6000v7vyc1i5jurlq",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "naouel-ben-zina",
+      firstName: "Naouel",
+      lastName: "Ben Zina",
+      photo: "https://www.pmomastery.tn/assets/img/team/naouel.png",
+      positionFr: "PMI Regional Mentor MENA",
+      positionEn: "PMI Regional Mentor MENA",
+      company: null,
+      biographyFr: "Naouel Ben Zina est PMI Regional Mentor pour la région MENA. Elle accompagne le développement de la communauté PMI au Moyen-Orient et Afrique du Nord.\n\nSon expertise couvre la certification, le mentorat et le développement de la profession PMO dans la région.",
+      biographyEn: "Naouel Ben Zina is PMI Regional Mentor for the MENA region. She supports the development of the PMI community in the Middle East and North Africa.\n\nHer expertise covers certification, mentoring and the development of the PMO profession in the region.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 14,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfe9000x7vycirzmwou9",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "omrane-kammoun",
+      firstName: "Omrane",
+      lastName: "Kammoun",
+      photo: "https://www.pmomastery.tn/assets/img/team/omrane.png",
+      positionFr: "Telecom Engineer, E-MBA",
+      positionEn: "Telecom Engineer, E-MBA",
+      company: null,
+      biographyFr: "Omrane Kammoun est Telecom Engineer et E-MBA. Il combine expertise technique et vision managériale pour piloter des projets complexes dans le secteur des télécommunications.\n\nSon parcours illustre la convergence entre ingénierie et leadership stratégique.",
+      biographyEn: "Omrane Kammoun is a Telecom Engineer and E-MBA. He combines technical expertise and managerial vision to lead complex projects in the telecommunications sector.\n\nHis career illustrates the convergence between engineering and strategic leadership.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 15,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfec000z7vycscu29xwr",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "maha-chehata",
+      firstName: "Maha",
+      lastName: "Chehata",
+      photo: "https://www.pmomastery.tn/assets/img/team/mahaC.png",
+      positionFr: "Présidente MEDRH",
+      positionEn: "President of MEDRH",
+      company: null,
+      biographyFr: "Maha Chehata est présidente de MEDRH. Elle apporte une vision RH stratégique au monde du PMO et de la transformation organisationnelle.\n\nSon expertise couvre le capital humain, le leadership et le développement des talents.",
+      biographyEn: "Maha Chehata is President of MEDRH. She brings a strategic HR vision to the world of PMO and organizational transformation.\n\nHer expertise covers human capital, leadership and talent development.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 16,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfee00117vyclcxjobkn",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "moez-kamoun",
+      firstName: "Moez",
+      lastName: "Kamoun",
+      photo: "https://www.pmomastery.tn/assets/img/team/moezK.png",
+      positionFr: "Consulting Partner",
+      positionEn: "Consulting Partner",
+      company: null,
+      biographyFr: "Moez Kamoun est Consulting Partner. Il accompagne les organisations dans leurs transformations stratégiques avec une approche orientée valeur et impact.\n\nSon expertise couvre le conseil en stratégie, la transformation et le management de projets complexes.",
+      biographyEn: "Moez Kamoun is a Consulting Partner. He supports organizations in their strategic transformations with a value and impact-oriented approach.\n\nHis expertise covers strategy consulting, transformation and complex project management.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 17,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfeh00137vychp0qkoct",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "ahmed-chabchoub",
+      firstName: "Ahmed",
+      lastName: "Chabchoub",
+      photo: "https://www.pmomastery.tn/assets/img/team/ahmedC.png",
+      positionFr: "Founder & CEO, DefensyLab",
+      positionEn: "Founder & CEO, DefensyLab",
+      company: null,
+      biographyFr: "Ahmed Chabchoub est fondateur et CEO de DefensyLab. Expert en cybersécurité et transformation digitale, il accompagne les organisations dans leur sécurisation face aux enjeux technologiques.\n\nSon approche combine innovation, sécurité et performance opérationnelle.",
+      biographyEn: "Ahmed Chabchoub is founder and CEO of DefensyLab. Expert in cybersecurity and digital transformation, he supports organizations in securing against technological challenges.\n\nHis approach combines innovation, security and operational performance.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 18,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfek00157vycis70yo6c",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "rym-akremi",
+      firstName: "Rym",
+      lastName: "Ben Dhief Akremi",
+      photo: "https://www.pmomastery.tn/assets/img/team/rymA.png",
+      positionFr: "Entrepreneure · Consultante en Stratégie RSE & ESG",
+      positionEn: "Entrepreneur · CSR & ESG Strategy Consultant",
+      company: null,
+      biographyFr: "Rym Ben Dhief Akremi est entrepreneure et consultante en stratégie RSE et ESG. Elle accompagne les organisations dans leur démarche de responsabilité sociétale et environnementale.\n\nSon expertise combine vision durable, innovation et performance business.",
+      biographyEn: "Rym Ben Dhief Akremi is an entrepreneur and CSR & ESG strategy consultant. She supports organizations in their corporate social and environmental responsibility approach.\n\nHer expertise combines sustainable vision, innovation and business performance.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 19,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfem00177vycvuldk32v",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "sarah-lamine",
+      firstName: "Sarah",
+      lastName: "Lamine",
+      photo: "https://www.pmomastery.tn/assets/img/team/sarraL.png",
+      positionFr: "CEO at Convergen Agency",
+      positionEn: "CEO at Convergen Agency",
+      company: null,
+      biographyFr: "Sarah Lamine est CEO de Convergen Agency. Elle apporte une vision marketing et communicationnelle au monde du PMO.\n\nSon expertise couvre la stratégie de marque, la communication digitale et l'innovation marketing.",
+      biographyEn: "Sarah Lamine is CEO of Convergen Agency. She brings a marketing and communication vision to the PMO world.\n\nHer expertise covers brand strategy, digital communication and marketing innovation.",
+      country: "Tunisie",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: false,
+      displayOrder: 20,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmsvxyfeo00197vyc69xsb6qb",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "aimen-ktari",
+      firstName: "Aimen",
+      lastName: "Ktari",
+      photo: "https://www.pmomastery.tn/assets/img/team/team-2/aimen.png",
+      positionFr: "Directeur, Plateforme ESG & Développement Durable, PwC France & Maghreb",
+      positionEn: "Director, ESG & Sustainable Development Platform, PwC France & Maghreb",
+      company: null,
+      biographyFr: "Aimen Ktari est directeur de la plateforme ESG & Développement Durable chez PwC France & Maghreb. Il accompagne les organisations dans leur transition durable et leur reporting ESG.\n\nSon expertise couvre les standards ESG, la finance durable et la transformation responsable.",
+      biographyEn: "Aimen Ktari is Director of the ESG & Sustainable Development platform at PwC France & Maghreb. He supports organizations in their sustainable transition and ESG reporting.\n\nHis expertise covers ESG standards, sustainable finance and responsible transformation.",
+      country: "France",
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 21,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmtq0dj8v00017vqkgrhawda2",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "yassine-chaker",
+      firstName: "Yassine",
+      lastName: "Chaker",
+      photo: null,
+      positionFr: null,
+      positionEn: null,
+      company: null,
+      biographyFr: null,
+      biographyEn: null,
+      country: null,
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 100,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmtq0owgz00017vw057d42f2s",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "yosra-torjmen",
+      firstName: "Yosra",
+      lastName: "Torjmen",
+      photo: null,
+      positionFr: "Managing Director, Fondatrice de PMO Mastery",
+      positionEn: "Managing Director, Founder of PMO Mastery",
+      company: null,
+      biographyFr: null,
+      biographyEn: null,
+      country: null,
+      linkedinUrl: null,
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 101,
+    },
+  })
+  console.log("  ✓ 23 speakers")
+
+  await db.programmeDay.create({
+    data: {
+      id: "cmsvxyfer001b7vych7t61hu7",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      nameFr: "Jour 1 — Formation",
+      nameEn: "Day 1 — Training",
+      date: new Date("2025-10-11T00:00:00.000Z"),
+      isActive: true,
+      displayOrder: 0,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmsvxyfg7001f7vyc0b19mt7g",
+      programmeDayId: "cmsvxyfer001b7vych7t61hu7",
+      startTime: "08:30",
+      endTime: "10:00",
+      titleFr: "Comment créer un bureau de gestion de projets réussi : outils et techniques essentiels",
+      titleEn: "How to create a successful project management office: essential tools and techniques",
+      titleAr: "كيفية إنشاء مكتب إدارة مشاريع ناجح: الأدوات والتقنيات الأساسية من النظرية إلى التطبيق",
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "WORKSHOP",
+      language: "AR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 0,
+      isActive: true,
+    },
+  })
+  await db.sessionSpeaker.create({ data: { sessionId: "cmsvxyfg7001f7vyc0b19mt7g", speakerId: "cmsvxyfd200077vycchc7v59l" } })
+  await db.programmeSession.create({
+    data: {
+      id: "cmsvxyfgi001h7vycfou7g9f2",
+      programmeDayId: "cmsvxyfer001b7vych7t61hu7",
+      startTime: "10:00",
+      endTime: "10:30",
+      titleFr: "Pause Café",
+      titleEn: "Coffee Break",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "BREAK",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 1,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmsvxyfgl001j7vycq7cldnfa",
+      programmeDayId: "cmsvxyfer001b7vych7t61hu7",
+      startTime: "10:30",
+      endTime: "12:30",
+      titleFr: "PMO Hybride et Pilotage de performance : Intégrer Méthode agile, Traditionnel et KPI",
+      titleEn: "Hybrid PMO and Performance Management: Integrating Agile, Traditional Methods and KPIs",
+      titleAr: null,
+      descriptionFr: "Pour être efficace, un PMO doit conjuguer flexibilité et rigueur. Orienté résultats, le bureau de gestion de projets doit s'adapter aux différentes méthodologies de gestion de projet tout en assurant un suivi précis de la performance.",
+      descriptionEn: "To be effective, a PMO must combine flexibility and rigor. Results-oriented, the project office must adapt to different project management methodologies while maintaining precise performance tracking.",
+      sessionType: "WORKSHOP",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 2,
+      isActive: true,
+    },
+  })
+  await db.sessionSpeaker.create({ data: { sessionId: "cmsvxyfgl001j7vycq7cldnfa", speakerId: "cmsvxyfd9000b7vycep1t3e2b" } })
+  await db.programmeSession.create({
+    data: {
+      id: "cmsvxyfgp001l7vychliqfu0r",
+      programmeDayId: "cmsvxyfer001b7vych7t61hu7",
+      startTime: "12:30",
+      endTime: "13:30",
+      titleFr: "Déjeuner & Networking",
+      titleEn: "Lunch & Networking",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "NETWORKING",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 4,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmsvxyfgr001n7vycj6655hey",
+      programmeDayId: "cmsvxyfer001b7vych7t61hu7",
+      startTime: "13:30",
+      endTime: "15:30",
+      titleFr: "De la Stratégie aux KPI jusqu'à l'Exécution Agile",
+      titleEn: "From Strategy to KPIs to Agile Execution",
+      titleAr: null,
+      descriptionFr: "Dans un environnement marqué par l'incertitude et des changements rapides, de nombreuses organisations échouent non pas dans la formulation de leur stratégie, mais dans son exécution. Les KPI jouent un rôle essentiel dans la transformation des objectifs stratégiques en résultats mesurables et pilotables. L'approche agile renforce cette dynamique en apportant flexibilité, adaptabilité et amélioration continue dans le pilotage de la stratégie.",
+      descriptionEn: "In an environment marked by uncertainty and rapid change, many organizations fail not in formulating their strategy but in executing it. KPIs play an essential role in transforming strategic objectives into measurable and manageable results. The agile approach reinforces this dynamic by providing flexibility, adaptability, and continuous improvement in strategy management.",
+      sessionType: "WORKSHOP",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 5,
+      isActive: true,
+    },
+  })
+  await db.sessionSpeaker.create({ data: { sessionId: "cmsvxyfgr001n7vycj6655hey", speakerId: "cmtq0dj8v00017vqkgrhawda2" } })
+  await db.programmeSession.create({
+    data: {
+      id: "cmsvxyfgw001p7vyc18ine7lh",
+      programmeDayId: "cmsvxyfer001b7vych7t61hu7",
+      startTime: "15:30",
+      endTime: "16:00",
+      titleFr: "Pause Café",
+      titleEn: "Coffee Break",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "BREAK",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 6,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmsvxyfgz001r7vyc186ppz9k",
+      programmeDayId: "cmsvxyfer001b7vych7t61hu7",
+      startTime: "16:00",
+      endTime: "17:30",
+      titleFr: "Optimisez la performance de vos projets grâce aux outils d'intelligence artificielle du PMI",
+      titleEn: "Optimize your project performance with PMI's artificial intelligence tools",
+      titleAr: null,
+      descriptionFr: "L'IA permet aux chefs de projet et aux PMO de se concentrer davantage sur les aspects stratégiques et humains de leurs missions, en s'appuyant sur des outils puissants de pilotage et d'anticipation.",
+      descriptionEn: "AI allows project managers and PMOs to focus more on the strategic and human aspects of their missions, relying on powerful tools for management and anticipation.",
+      sessionType: "WORKSHOP",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 7,
+      isActive: true,
+    },
+  })
+  await db.sessionSpeaker.create({ data: { sessionId: "cmsvxyfgz001r7vyc186ppz9k", speakerId: "cmsvxyfdd000d7vycgg6hmumu" } })
+
+  await db.programmeDay.create({
+    data: {
+      id: "cmsvxyfew001d7vyc7c5ericc",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      nameFr: "Jour 2 — Événement",
+      nameEn: "Day 2 — Main Event",
+      date: new Date("2025-10-12T00:00:00.000Z"),
+      isActive: true,
+      displayOrder: 1,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owhn00037vw0e7fkcxul",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "08:00",
+      endTime: "08:45",
+      titleFr: "Accueil et petit-déjeuner de réseautage",
+      titleEn: "Welcome, Registration and Networking",
+      titleAr: null,
+      descriptionFr: "Participez à un moment convivial d'inscription dans une ambiance détendue. Profitez d'un délicieux petit-déjeuner pour échanger et faire de nouvelles rencontres.",
+      descriptionEn: "Participate in a friendly registration moment in a relaxed atmosphere. Enjoy a delicious breakfast to connect and make new contacts.",
+      sessionType: "NETWORKING",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 0,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owht00057vw0am9vned5",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "08:50",
+      endTime: "09:10",
+      titleFr: "Mot de bienvenue et ouverture",
+      titleEn: "Welcome and opening remarks",
+      titleAr: null,
+      descriptionFr: "Discours de bienvenue de l'hôte de la conférence, mot d'accueil suivi du mot d'ouverture et présentation de l'agenda de la journée et les thèmes clés.",
+      descriptionEn: "Welcome address by the conference host, welcome remarks followed by opening remarks and presentation of the day's agenda and key themes.",
+      sessionType: "SESSION",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 1,
+      isActive: true,
+    },
+  })
+  await db.sessionSpeaker.create({ data: { sessionId: "cmtq0owht00057vw0am9vned5", speakerId: "cmsvxyfcw00057vycglxcqf7r" } })
+  await db.sessionSpeaker.create({ data: { sessionId: "cmtq0owht00057vw0am9vned5", speakerId: "cmtq0owgz00017vw057d42f2s" } })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owi400077vw0y0p7t5lc",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "09:15",
+      endTime: "09:45",
+      titleFr: "Keynote 1 : Excellence des bureaux des projets (PMOs)",
+      titleEn: "Keynote 1: Excellence in Project Management Offices (PMOs)",
+      titleAr: null,
+      descriptionFr: "Comment les PMO peuvent piloter la transformation business.",
+      descriptionEn: "How PMOs can drive business transformation.",
+      sessionType: "KEYNOTE",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 2,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owi700097vw0wb9022tv",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "09:50",
+      endTime: "10:35",
+      titleFr: "Panel de Discussion 1 : PMO stratégiques : Passer de la gestion à la création de Valeur",
+      titleEn: "Discussion Panel 1: Strategic PMO: Shifting from Management to Value Creation",
+      titleAr: null,
+      descriptionFr: "♦ Diriger avec vision \"Commencer par le pourquoi\"\n♦ Modèles concrets : quand les PMO deviennent des centres de revenus\n♦ Alignement des projets avec la stratégie business\n♦ ROI du PMO : les métriques parlantes pour les décideurs",
+      descriptionEn: "♦ Lead with Vision: \"Start with Why\"\n♦ Concrete Models: When PMOs Become Revenue Centers\n♦ Project Alignment with Business Strategy\n♦ PMO ROI: Meaningful Metrics for Decision Makers",
+      sessionType: "PANEL",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 3,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owib000b7vw0i9ru9fvo",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "10:40",
+      endTime: "11:15",
+      titleFr: "Panel de Discussion 2 (Session parallèle) : PMO et RSE – Un duo stratégique pour des projets responsables et durables",
+      titleEn: "Discussion Panel 2 (Parallel Session): PMO and RSE – A Strategic Duo for Responsible and Sustainable Projects",
+      titleAr: null,
+      descriptionFr: "♦ Intégrer le RSE dans la gouvernance projet : Comment le PMO peut-il devenir un acteur clé ?\n♦ PMO et projets de transformation durables : étude de cas\n♦ Collaboration PMO – Institutions publiques - ONG en Tunisie pour des projets à fort impact",
+      descriptionEn: "♦ Integrating RSE into Project Governance: How Can the PMO Become a Key Player?\n♦ PMO and Sustainable Transformation Projects: Case Studies\n♦ PMO Collaboration with Public Institutions and NGOs in Tunisia for Impactful Projects",
+      sessionType: "PANEL",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 4,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owie000d7vw0wjfknx70",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "11:15",
+      endTime: "11:30",
+      titleFr: "Pause Café & Networking",
+      titleEn: "Coffee Break & Networking",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "BREAK",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 5,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owii000f7vw04ppwv75w",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "11:35",
+      endTime: "12:00",
+      titleFr: "Keynote 2 : L'information : la force vitale d'un PMO",
+      titleEn: "Keynote 2: Information: The Lifeblood of a PMO",
+      titleAr: null,
+      descriptionFr: "Découvrez une success story inspirante mettant en lumière les possibilités offertes par l'intelligence artificielle. Explorez également les défis rencontrés et les solutions innovantes pour les surmonter.",
+      descriptionEn: null,
+      sessionType: "KEYNOTE",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 6,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owil000h7vw0uzxwc406",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "12:05",
+      endTime: "12:40",
+      titleFr: "Panel de discussion 2 : Comment l'IA redéfinit les règles des PMO (Data/Prise de décision)",
+      titleEn: "Panel Discussion 2: From Data to Decision: How AI is Redefining PMO Rules",
+      titleAr: null,
+      descriptionFr: "♦ L'IA au cœur de la transformation\n♦ Du Big Data aux bonnes décisions\n♦ Cyber-résilience des portefeuilles",
+      descriptionEn: "♦ AI at the Core of PMO Operations\n♦ From Big Data to Smart Decisions\n♦ Detecting Cyber Risks in Project Portfolios",
+      sessionType: "PANEL",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 7,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owin000j7vw09kjhi1jx",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "12:45",
+      endTime: "13:15",
+      titleFr: "IA et transformation sectorielle : secteur bancaire & télécom",
+      titleEn: "AI and Sectoral Transformation: Banking & Telecom Sector",
+      titleAr: null,
+      descriptionFr: "♦ Secteur bancaire : entre innovation et contraintes réglementaires\n♦ Télécoms et IA : accélérer la performance opérationnelle et la 5G\n♦ Rôle du PMO : trouver l'équilibre entre agilité, sécurité et ROI",
+      descriptionEn: "♦ Banking sector: between innovation and regulatory constraints\n♦ Telecoms and AI: accelerating operational performance and 5G\n♦ Role of the PMO: finding the balance between agility, security, and ROI",
+      sessionType: "PANEL",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 8,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owiq000l7vw0zc7pjqcb",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "13:15",
+      endTime: "14:25",
+      titleFr: "Déjeuner & Networking",
+      titleEn: "Lunch & Networking",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "NETWORKING",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 9,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owis000n7vw0b9jlzubs",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "14:30",
+      endTime: "14:55",
+      titleFr: "Dynamiser le côté humain des PMO",
+      titleEn: "The Fire Factor: Energizing the Human Side of PMOs",
+      titleAr: null,
+      descriptionFr: "Explorez comment les leaders visionnaires surmontent les résistances au changement. Découvrez leurs stratégies pour transformer les obstacles en opportunités et mobiliser l'adhésion autour de leurs initiatives.",
+      descriptionEn: "Explore how visionary leaders overcome resistance to change. Discover their strategies to turn obstacles into opportunities and mobilize adherence around their initiatives.",
+      sessionType: "KEYNOTE",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 10,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owiv000p7vw035b9bc3z",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "15:00",
+      endTime: "15:45",
+      titleFr: "Panel de discussion 3 : Synergie Gagnante : Conduite du changement et IA au service des bureaux de gestion de projets",
+      titleEn: "Panel Discussion 3: Winning Synergy: Change Management and AI in Service of Project Management Offices",
+      titleAr: null,
+      descriptionFr: "♦ Naviguer les transitions digitales et culturelles\n♦ Leadership distribué et intelligence émotionnelle à l'ère de l'IA\n♦ Sponsorship et parties prenantes : transformer l'implication des décideurs en véritable catalyseur de performance.",
+      descriptionEn: "♦ Navigating Digital and Cultural Transitions\n♦ Distributed Leadership and Emotional Intelligence in the Age of AI\n♦ Sponsorship and stakeholders: transforming decision-makers' involvement into a true catalyst for performance.",
+      sessionType: "PANEL",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 11,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owix000r7vw0tij3if3y",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "15:50",
+      endTime: "16:15",
+      titleFr: "Keynote de Clôture : Le PMO en 2030 - Quel avenir pour les PMOs ?",
+      titleEn: "Closing Keynote: The PMO in 2030 - What's Next for PMOs?",
+      titleAr: null,
+      descriptionFr: "♦ Futur des PMO : tendances mondiales et régionales clés\n♦ Et si Darwin avait raison ? S'adapter ou disparaître ?\n♦ Synthèse des points clés",
+      descriptionEn: "♦ The Future of PMOs: Key Global and Regional Trends\n♦ What if Darwin Was Right? Adapt or Disappear?\n♦ Key Points Summary",
+      sessionType: "CLOSING",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 12,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtq0owj0000t7vw0167d7f30",
+      programmeDayId: "cmsvxyfew001d7vyc7c5ericc",
+      startTime: "16:15",
+      endTime: null,
+      titleFr: "Clôture de l'évènement",
+      titleEn: "Closing of the Event",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "CLOSING",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 13,
+      isActive: true,
+    },
+  })
+  console.log("  ✓ 2 programme days, 21 sessions")
+
+  await db.pass.create({
+    data: {
+      id: "cmsvxyfib002j7vyc129hlyof",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "pass-evenement",
+      nameFr: "Pass Événement",
+      nameEn: "Event Pass",
+      image: null,
+      descriptionFr: "Accès complet aux 2 jours de conférence et panels.",
+      descriptionEn: "Full access to the 2-day conference and panels.",
+      price: 500,
+      currency: "TND",
+      vatRate: 0.19,
+      featuresFr: "Accès aux 2 jours de conférence\nToutes les keynotes et panels\nPause café & déjeuners\nCoffret goodies PMO Mastery\nNetworking avec les intervenants",
+      featuresEn: "Access to 2 conference days\nAll keynotes and panels\nCoffee breaks & lunches\nPMO Mastery goodies kit\nNetworking with speakers",
+      paymentUrl: "https://international-event-for-pmo-leaders.businessroom.io/?ticket_id=154",
+      minQuantity: 1,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 1,
+    },
+  })
+
+  await db.pass.create({
+    data: {
+      id: "cmsvxyfig002l7vyc00jv9cma",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "pass-formation",
+      nameFr: "Pass Formation",
+      nameEn: "Training Pass",
+      image: null,
+      descriptionFr: "Accès au jour de formation (atelier pratique).",
+      descriptionEn: "Access to the training day (practical workshop).",
+      price: 400,
+      currency: "TND",
+      vatRate: 0.19,
+      featuresFr: "Accès au jour de formation\nAtelier pratique interactif\nSupports de formation\nPause café & déjeuner\nCertificat de participation",
+      featuresEn: "Access to training day\nInteractive practical workshop\nTraining materials\nCoffee break & lunch\nCertificate of participation",
+      paymentUrl: "https://international-event-for-pmo-leaders.businessroom.io/?ticket_id=153",
+      minQuantity: 1,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 2,
+    },
+  })
+
+  await db.pass.create({
+    data: {
+      id: "cmsvxyfii002n7vyca51bdaxs",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "pass-duo",
+      nameFr: "Pass Duo",
+      nameEn: "Duo Pass",
+      image: null,
+      descriptionFr: "Événement + 1 Formation — la formule complète.",
+      descriptionEn: "Event + 1 Training — the complete package.",
+      price: 900,
+      currency: "TND",
+      vatRate: 0.19,
+      featuresFr: "Tous les avantages Pass Événement\n+ 1 jour de formation au choix\nAtelier pratique interactif\nSupports de formation\nCertificat de participation",
+      featuresEn: "All Event Pass benefits\n+ 1 training day of your choice\nInteractive practical workshop\nTraining materials\nCertificate of participation",
+      paymentUrl: "https://international-event-for-pmo-leaders.businessroom.io/?ticket_id=155",
+      minQuantity: 1,
+      isFeatured: true,
+      isActive: true,
+      displayOrder: 3,
+    },
+  })
+
+  await db.pass.create({
+    data: {
+      id: "cmsvxyfil002p7vycb48wd0id",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "pass-etudiant",
+      nameFr: "Pass Étudiant",
+      nameEn: "Student Pass",
+      image: null,
+      descriptionFr: "Tarif réduit pour les étudiants.",
+      descriptionEn: "Discounted rate for students.",
+      price: 200,
+      currency: "TND",
+      vatRate: 0.19,
+      featuresFr: "Accès aux 2 jours\nSur présentation carte étudiante\nPause café inclus",
+      featuresEn: "Access to both days\nStudent ID required\nCoffee break included",
+      paymentUrl: null,
+      minQuantity: 1,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 4,
+    },
+  })
+
+  await db.pass.create({
+    data: {
+      id: "cmsvxyfio002r7vycrbyh4aw5",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      slug: "pass-equipe",
+      nameFr: "Pass Équipe",
+      nameEn: "Team Pass",
+      image: null,
+      descriptionFr: "Tarif préférentiel pour inscription de 2 personnes ou plus.",
+      descriptionEn: "Discounted rate for 2+ registrations.",
+      price: 450,
+      currency: "TND",
+      vatRate: 0.19,
+      featuresFr: "Tarif par personne\nMinimum 2 inscrits\nTous les avantages Pass Événement",
+      featuresEn: "Per-person rate\nMinimum 2 registrations\nAll Event Pass benefits",
+      paymentUrl: null,
+      minQuantity: 2,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 5,
+    },
+  })
+  console.log("  ✓ 5 passes")
+
+  await db.organizer.create({
+    data: {
+      id: "cmsvxyfir002t7vyc0du34dfd",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      name: "Empowerment Paths",
+      logo: "https://www.pmomastery.tn/assets/img/logo/logo.png",
+      descriptionFr: "Cabinet de conseil et de développement professionnel. Trois pôles : (1) Conseil — PMO, évaluation de maturité, modèles opérationnels, conduite du changement ; (2) Formation — gestion de projet (PMP®, PgMP®), excellence PMO, agilité, soft skills, leadership ; (3) Coaching exécutif & d'équipe.\n\nAmbition : positionner la Tunisie comme un hub régional d'excellence PMO.",
+      descriptionEn: "Consulting and professional development firm. Three poles: (1) Consulting — PMO, maturity assessment, operational models, change management; (2) Training — project management (PMP®, PgMP®), PMO excellence, agility, soft skills, leadership; (3) Executive & team coaching.\n\nAmbition: position Tunisia as a regional hub of PMO excellence.",
+      websiteUrl: "https://www.pmomastery.tn",
+      linkedinUrl: "https://www.linkedin.com/company/pmo-mastery-tun/about/",
+      facebookUrl: "https://www.facebook.com/pmomastery",
+      instagramUrl: "https://www.instagram.com/pmomastery/",
+      founderName: "Yosra Torjmen",
+      founderTitle: "Managing Director, Fondatrice de PMO Mastery",
+      founderPhoto: "https://www.pmomastery.tn/assets/img/team/yosra.png",
+      founderCredentials: "PgMP®, PMP®, PMO-CP, Coach Professionnelle",
+      isActive: true,
+      displayOrder: 0,
+    },
+  })
+  console.log("  ✓ 1 organizers")
+
+  await db.partner.create({
+    data: {
+      id: "cmsvxyfix002v7vycs0ybzaog",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      name: "Excellia Leadership",
+      logo: "https://www.pmomastery.tn/assets/img/ex.jpg",
+      category: "STRATEGIC",
+      websiteUrl: "https://excellialeadership.com/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 0,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmsvxyfj1002x7vycrte8d5o0",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      name: "Royal Tulip Taj Sultan",
+      logo: "https://www.pmomastery.tn/assets/img/tt.png",
+      category: "STRATEGIC",
+      websiteUrl: "https://royal-tulip-taj-sultan.goldentulip.com/fr-fr/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 1,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmsvxyfj3002z7vycjd4fjsu5",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      name: "Tunisie Telecom",
+      logo: "https://www.pmomastery.tn/assets/img/LogoTT.png",
+      category: "DIAMOND",
+      websiteUrl: "https://www.tunisietelecom.tn/particulier/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 2,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmsvxyfj600317vyce0diyjio",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      name: "Managers.tn",
+      logo: "https://www.pmomastery.tn/assets/img/manager.png",
+      category: "MEDIA",
+      websiteUrl: "https://managers.tn/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 3,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmsvxyfj800337vychndm9dgf",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      name: "PMI — Project Management Institute",
+      logo: "https://www.pmomastery.tn/assets/img/part.jpg",
+      category: "STRATEGIC",
+      websiteUrl: "https://www.pmi.org/",
+      descriptionFr: "Project Management Institute (PMI) est la principale association professionnelle mondiale dédiée au management de projet. PMI publie le PMBOK® Guide et administre les certifications PMP®, PgMP®, PMI-ACP® et autres.",
+      descriptionEn: "Project Management Institute (PMI) is the world's leading professional association dedicated to project management. PMI publishes the PMBOK® Guide and administers the PMP®, PgMP®, PMI-ACP® and other certifications.",
+      isActive: true,
+      displayOrder: 4,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmsvxyfja00357vycuduu8yy9",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      name: "FlowUp",
+      logo: "https://www.pmomastery.tn/assets/img/flow.jpg",
+      category: "PARTNER",
+      websiteUrl: "http://flowup.tn/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 5,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmsvxyfjd00377vyc88h9hz6u",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      name: "Talys Digital",
+      logo: "https://www.pmomastery.tn/assets/img/lt.jpg",
+      category: "PARTNER",
+      websiteUrl: "https://www.talys.digital/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 6,
+    },
+  })
+  console.log("  ✓ 7 partners")
+
+  await db.popup.create({
+    data: {
+      id: "cmt1qm9ko00017vqgx9vmpm92",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      name: "Yosra Torjmen",
+      photo: "https://www.pmomastery.tn/assets/img/team/yosra.png",
+      messageFr: "Ne manquez pas cet atelier PMO exclusif !",
+      messageEn: "Don't miss this exclusive PMO workshop!",
+      ctaUrl: "/pass-formation",
+      isActive: true,
+      displayOrder: 0,
+    },
+  })
+  console.log("  ✓ 1 popups")
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmt2k2lz8000a7vtgwrgm0r3f",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/e7750f25-6887-42a7-8e79-e8edcb28459a.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: false,
+      displayOrder: 2,
+    },
+  })
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmt2k2og4000c7vtguxfm70mh",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/1d146253-dfee-43f2-8789-c5b56c26cdca.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: true,
+      displayOrder: 0,
+    },
+  })
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmt2k2qyo000e7vtgq93yvlvn",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/8c8673dc-6acf-4ee8-8368-7bdf54492a39.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: true,
+      displayOrder: 3,
+    },
+  })
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmu4sutth000a7vz4n5vog8f4",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/5938cb17-c1cb-47dc-bf15-b6b7f58e75a6.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: false,
+      displayOrder: 4,
+    },
+  })
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmu4sv3df000c7vz418t8tx3l",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/1bc0bd25-d42b-4696-a595-fc78493ee738.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: true,
+      displayOrder: 5,
+    },
+  })
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmu4svirn000e7vz4sorsxr1m",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/cc86ddee-34b5-4b0e-a62b-05632d1ca174.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: false,
+      displayOrder: 6,
+    },
+  })
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmu4v0hrt000l7vz4exfs3g7f",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/2158fb01-e426-49b7-b4c7-23c62f067eff.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: false,
+      displayOrder: 7,
+    },
+  })
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmu4v0y2r000n7vz4h1hre332",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/4e2cc03c-cf4c-4173-851d-f024eeaba1ed.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: false,
+      displayOrder: 8,
+    },
+  })
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmu4v1cun000p7vz4wn867rep",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/1a6c6c1c-5f38-48fb-9a0e-264c1c5f32b9.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: false,
+      displayOrder: 1,
+    },
+  })
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmu4v2ept000r7vz41so6gsct",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/57d8adf8-0463-41a9-b370-76e90bd9c2a6.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: false,
+      displayOrder: 9,
+    },
+  })
+
+  await db.galleryItem.create({
+    data: {
+      id: "cmu4v43ms000x7vz4d19at8yh",
+      eventId: "cmsvxyfck00017vycwelfl2u3",
+      type: "IMAGE",
+      imageUrl: "/uploads/3c1e2d48-c793-4a62-aa73-a256d8bb4e22.webp",
+      videoUrl: null,
+      thumbnail: null,
+      captionFr: "",
+      captionEn: "",
+      isActive: true,
+      showOnHomepage: false,
+      displayOrder: 10,
+    },
+  })
+  console.log("  ✓ 11 gallery items")
+
+  // ==========================================================================
+  // Event: PMO Mastery 2027
+  // ==========================================================================
+  await db.event.create({
+    data: {
+      id: "cmtve4rp700047v8g9iv0snfz",
+      slug: "pmo-mastery-2027",
+      editionName: "PMO Mastery 2027",
+      titleFr: "Événement international pour les leaders des PMOs",
+      titleEn: "International Event for PMO Leaders",
+      subtitleFr: "25 – 26 mars 2027 · Tunis",
+      subtitleEn: "25 – 26 mars 2027 · Tunis",
+      themeTaglineFr: "Au-delà de la gouvernance, au-delà des projets, piloter la résilience.",
+      themeTaglineEn: null,
+      descriptionFr: "",
+      descriptionEn: "",
+      startDate: new Date("2027-03-25T10:30:00.000Z"),
+      endDate: new Date("2027-03-26T10:34:00.000Z"),
+      startTime: "09:00",
+      endTime: "18:00",
+      timezone: "Africa/Tunis",
+      countdownTarget: new Date("2027-03-25T08:00:00.000Z"),
+      venue: "Tunis",
+      address: "Tunis",
+      city: "Tunis",
+      country: "Tunisie",
+      latitude: 36.8381,
+      longitude: 10.2497,
+      mapUrl: "https://maps.app.goo.gl/c6SoreJBxKqndf4J9",
+      heroImageDesktop: null,
+      heroImageMobile: null,
+      heroLogo: "/uploads/77786f3f-66e1-46f1-91ee-bb87ebc6db39.webp",
+      ogImage: null,
+      registrationEnabled: false,
+      status: "UPCOMING",
+      isActive: true,
+    },
+  })
+  console.log("  ✓ Event: PMO Mastery 2027")
+
+  await db.contactInfo.create({
+    data: {
+      id: "cmtve4rpj00067v8g7qgxk2xy",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      email: "contact@pmomastery.tn",
+      phone: "+216 94 108 023",
+      address: null,
+      city: null,
+      country: null,
+      mapUrl: "https://share.google/zSfDo6duPmVgkl2oz",
+      linkedinUrl: "https://www.linkedin.com/company/pmo-mastery-tun/",
+      facebookUrl: "https://www.facebook.com/pmomastery/",
+      instagramUrl: "https://www.instagram.com/pmomastery/",
+      youtubeUrl: null,
+      websiteUrl: null,
+    },
+  })
+
+  await db.websiteSection.create({
+    data: {
+      id: "cmu2tefnk00017v5gsv9n1g50",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      sectionKey: "ABOUT",
+      titleFr: "À propos de PMO Mastery 2027",
+      titleEn: "About PMO Mastery 2027",
+      subtitleFr: null,
+      subtitleEn: null,
+      descriptionFr: "PMO Mastery est né d'un vide : en Afrique francophone, la fonction PMO grandit vite, mais sans lieu commun pour se former, se benchmarker et se rencontrer. La première édition a comblé ce vide et prouvé qu'un rendez-vous francophone dédié au PMO avait sa place.\n\nPensé comme une biennale, l'événement vise à devenir le rendez-vous francophone de référence du PMO. Cette deuxième édition franchit un palier : un format en deux temps (masterclasses puis conférence plénière), des partenariats structurants avec des organismes régionaux, et un rayonnement élargi aux banques, aux porteurs de projets et aux étudiants — les prochains bâtisseurs de la fonction.",
+      descriptionEn: "PMO Mastery was born out of a gap: in French-speaking Africa, the PMO function is growing fast, but without a common place to learn, benchmark, and connect. The first edition filled that gap and proved that a French-speaking event dedicated to the PMO had its place.\nDesigned as a biennial event, it has a clear ambition: to become the go-to French-speaking event for the PMO. This second edition raises the bar with a two-part format (masterclasses followed by a plenary conference), structuring regional partnerships, and a wider reach to banks, project sponsors and students — the function's next builders.",
+      ctaTextFr: null,
+      ctaTextEn: null,
+      ctaUrl: null,
+      backgroundImage: "/uploads/7464271d-2756-4c8d-8218-6ebb23579f51.webp",
+      isActive: true,
+    },
+  })
+
+  await db.websiteSection.create({
+    data: {
+      id: "cmu2vbhfg00017v3ojqmndkon",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      sectionKey: "WHY_PARTICIPATE",
+      titleFr: "Pourquoi y participer ?",
+      titleEn: "Why participate?",
+      subtitleFr: null,
+      subtitleEn: null,
+      descriptionFr: "Vous ne repartez pas avec des notes. Vous repartez avec un réseau, des méthodes, une avance.\nDeux journées, deux logiques : le Jour 1 vous met dans le concret — masterclasses en petit comité, face à des praticiens qui arbitrent les mêmes sujets que vous. Le Jour 2 vous met dans la salle où ça se décide — keynotes, panels, décideurs.",
+      descriptionEn: "You don't leave with notes. You leave with a network, methods, and a head start.\nTwo days, two logics: Day 1 puts you in the thick of it — small-group masterclasses with practitioners navigating the same issues you are. Day 2 puts you in the room where it's decided — keynotes, panels, decision-makers.",
+      ctaTextFr: null,
+      ctaTextEn: null,
+      ctaUrl: null,
+      backgroundImage: "/uploads/5fcec6cb-85f3-4910-89d9-5372d4122902.webp",
+      isActive: true,
+      benefits: {
+        create: [
+          {
+            id: "cmu2vzdhc00027vqsb5rzi8z6",
+            icon: "Users",
+            titleFr: "Un réseau que vous ne croisez nulle part ailleurs — pairs, décideurs, futurs partenaires",
+            titleEn: "A network you won't find anywhere else — peers, decision-makers, future partners",
+            descriptionFr: null,
+            descriptionEn: null,
+            displayOrder: 0,
+            isActive: true,
+          },
+          {
+            id: "cmu2vzdhc00037vqs878c7be0",
+            icon: "Target",
+            titleFr: "Des méthodes testées sur le terrain, applicables dès le lundi",
+            titleEn: "Field-tested methods you can apply as soon as Monday",
+            descriptionFr: null,
+            descriptionEn: null,
+            displayOrder: 1,
+            isActive: true,
+          },
+          {
+            id: "cmu2vzdhd00047vqsi0gutfl4",
+            icon: "Award",
+            titleFr: "Une reconnaissance professionnelle : votre présence signale votre sérieux",
+            titleEn: "Professional recognition: your presence signals your seriousness",
+            descriptionFr: null,
+            descriptionEn: null,
+            displayOrder: 2,
+            isActive: true,
+          },
+          {
+            id: "cmu2vzdhd00057vqsduxhu5mg",
+            icon: "TrendingUp",
+            titleFr: "Un temps d'avance sur ce qui redéfinit la fonction PMO dans la région",
+            titleEn: "A head start on what's redefining the PMO function in the region",
+            descriptionFr: null,
+            descriptionEn: null,
+            displayOrder: 3,
+            isActive: true,
+          },
+        ],
+      },
+    },
+  })
+
+  await db.websiteSection.create({
+    data: {
+      id: "cmu4l4h5000017vfkovsjx3s7",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      sectionKey: "CHAIRMAN_MESSAGE",
+      titleFr: "Mon message, ma vision",
+      titleEn: "My message, my vision",
+      subtitleFr: "Yosra Torjmen",
+      subtitleEn: "Yosra Torjmen",
+      descriptionFr: "Je porte ce combat parce que je l'ai vécu de l'intérieur.\nPendant près de vingt ans, j'ai vu des organisations investir dans des projets sans jamais investir dans la structure censée les faire réussir. Le PMO reste, dans une grande partie de l'Afrique francophone, une fonction mal comprise, sous-dotée, parfois réduite à un rôle administratif — alors qu'elle devrait être au cœur de la performance des organisations.\nJe ne crois pas qu'on change cela par des discours. On le change en réunissant les bonnes personnes, au bon endroit, et en leur donnant des outils qu'elles peuvent utiliser dès leur retour au bureau. C'est exactement ce que PMO Mastery a commencé à faire — et c'est pour cela que je le porte de nouveau, deux ans plus tard, avec plus d'exigence.\nPourquoi maintenant ? Parce que la maturité de projet devient un sujet de compétitivité, pas seulement de méthode. Les organisations qui structureront leur gouvernance de projet aujourd'hui seront celles qui absorberont demain la complexité — économique, réglementaire, technologique — sans se fracturer.\nPMO Mastery n'est pas un événement de deux jours. C'est un jalon dans une trajectoire plus longue : celle d'une communauté francophone du PMO qui se professionnalise, se reconnaît, et prend sa place. Si vous partagez cette ambition, votre place est ici.",
+      descriptionEn: null,
+      ctaTextFr: "Managing Director, Fondatrice de PMO Mastery",
+      ctaTextEn: "Managing Director, Founder of PMO Mastery",
+      ctaUrl: null,
+      backgroundImage: "/uploads/050A0043.jpg",
+      isActive: true,
+    },
+  })
+
+  await db.websiteSection.create({
+    data: {
+      id: "cmu4sttyi00087vz488y8rtm4",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      sectionKey: "GALLERY_HERO",
+      titleFr: "",
+      titleEn: "",
+      subtitleFr: "",
+      subtitleEn: "",
+      descriptionFr: "",
+      descriptionEn: "",
+      ctaTextFr: "",
+      ctaTextEn: "",
+      ctaUrl: null,
+      backgroundImage: "/uploads/0a0a9ed7-e8fb-4ea0-8bae-5e8dc8dd31e0.mp4",
+      isActive: true,
+    },
+  })
+  console.log("  ✓ 4 CMS sections")
+
+  await db.speaker.create({
+    data: {
+      id: "cmu356ymj00017vi4m4ic05b5",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      slug: "khemaies-bahri",
+      firstName: "Khemaies",
+      lastName: "Bahri",
+      photo: "/uploads/25c053be-def4-4661-9023-9ea17b223211.webp",
+      positionFr: "CEO de Bahri Group",
+      positionEn: null,
+      company: "Bahri Group",
+      biographyFr: "Depuis 1993 avec EPPM, Monsieur BAHRI a acquis une vaste expérience en tant que Directeur de Projet pluridisciplinaire dans les domaines de l'environnement, du pétrole et gaz, de l'énergie, des cimenteries et de l'industrie chimique. Monsieur BAHRI a notamment assuré la direction du projet pour le management, l'ingénierie et la construction d'une plateforme offshore et d'un pipeline onshore et offshore de 6” – 36 km – reliant Kherkenah à Sfax en Tunisie pour le compte de TBS (TPS). Il a également dirigé et participé, en tant que directeur de projet ou expert en électromécanique, à de nombreux projets dans le domaine de l'environnement avec l'ONAS (réalisation de 13 STEP et d'une centaine de stations de pompage), avec la SONEDE (réalisation de stations de surpression) et avec la CRDA (réalisation de 3 périmètres irrigués).\nIl a été également Directeur de projet dans différents secteurs. Formateur PMP, Expert en communication des projets du cadre bâti, Instructeur partenaire de formation autorisé PMP, PMI-CP®, PMI-SCP®, Praticien certifié en gestion du changement Prosci®.",
+      biographyEn: null,
+      country: "Tunisie",
+      linkedinUrl: "https://www.linkedin.com/in/khemaies-bahri-pmp%C2%AE-pmi-scp%C2%AE-prosci%C2%AE-cm-atp-instructor-56173b13",
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 1,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmu4g1wi100017v5wurxzqze0",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      slug: "lee-lambert",
+      firstName: "Lee ",
+      lastName: "Lambert",
+      photo: "/uploads/ee3d1a56-528c-40fa-9678-c87bcd7cc661.webp",
+      positionFr: "CEO, Lambert Consulting Group",
+      positionEn: "CEO, Lambert Consulting Group",
+      company: "Lambert Consulting Group",
+      biographyFr: "Lee R. Lambert est reconnu dans le monde entier comme l’un des grands leaders d’opinion dans le domaine de la gestion de projet. Depuis plus de 50 ans, il contribue à promouvoir et à faire évoluer la profession de chef de projet. Il fait également partie des fondateurs de la certification PMP. Le Project Management Institute (PMI) l’a reconnu comme l’un de ses 70 membres « PMI Fellows ».\n\nLee Lambert apporte une approche fondée sur l’expérience du terrain à tous ceux qui souhaitent exceller dans la gestion de projets. Son style unique, à la fois dynamique et humoristique, crée un environnement d’apprentissage agréable et particulièrement efficace.\n\nAu cours de sa carrière, Lambert a mis en œuvre quatre systèmes d’information de gestion de projets à l’échelle de grandes entreprises. Son travail dans le développement d’équipes à haute performance a été qualifié de véritable « miracle ». Il a également conçu et dispensé des formations à des milliers d’employés au sein d’entreprises telles qu’AT&T, IBM, General Electric, Microsoft, Roche et de nombreuses autres organisations.\n\nSes activités de conseil et de formation à forte valeur ajoutée ont contribué à la création de PMO performants, permettant d’accélérer la mise en œuvre des projets. Il a animé des programmes de formation ouverts au public pour plus de 50 000 professionnels dans 23 pays.\n\nLee Lambert aime partager son expérience et ses connaissances afin d’aider les professionnels à développer leurs compétences et à réussir dans le domaine de la gestion de projet.\n",
+      biographyEn: "Lee R. Lambert is considered throughout the world as one of the project management profession’s thought leaders. He has been spreading the PM word for over 50 years and was one of the Founders of the PMP. Lee has been recognized by the Project Management Institute as one of only 70 PMI Fellows. He brings a “real world” message to those hoping to excel in their role of managing projects. His unique and humorous style creates an enjoyable and productive learning environment.\n\nLambert has implemented four enterprise-wide project management information systems and his work in developing High Performance Teams has been judged a miracle. He has prepared and delivered user training to thousands of employees at AT&T, IBM, General Electric, MicroSoft, Roche and countless others. His value-add consulting and training has been instrumental in creating successful PMOs to drive rapid implementation. He has provided “public” training programs for more than 50,000 professionals in 23 countries. Lee loves sharing his experience and knowledge.",
+      country: "Powell, Ohio, United States",
+      linkedinUrl: "https://www.linkedin.com/in/lelambert/",
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 0,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmu5lh95k00017vw4sdm6uee9",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      slug: "bruno-morgante",
+      firstName: "Bruno",
+      lastName: "Morgante",
+      photo: "/uploads/5d4fe9f8-aa2b-4048-827c-e81f6b38cda1.webp",
+      positionFr: "Founder & CEO de Mantegora.",
+      positionEn: "Mantegora Founder & CEO ",
+      company: "Mantegora",
+      biographyFr: "Bruno Morgante est un expert international en management de projet, PMO et transformation organisationnelle. Fort de plus de 20 ans d’expérience au sein de grandes organisations internationales, il accompagne les professionnels et les équipes dans l’amélioration de la performance des projets, la mise en œuvre de stratégies et la conduite du changement.\n\nFondateur et CEO de Mantegora, il intervient également comme coach, mentor et conférencier, partageant une approche concrète et inspirante du leadership, du management de projet et de la transformation.\n",
+      biographyEn: "Bruno Morgante is a Project Management and PMO leader, coach, mentor, and international keynote speaker with more than 20 years of experience in large multinational organizations. He has led PMOs, transformation programs, and complex project portfolios, helping organizations improve project delivery, execute strategy, and create sustainable business value.\n\nSince 2024, Bruno has been the Founder and CEO of Mantegora, where he helps individuals, teams, and organizations develop the skills, mindset, and structures needed to deliver impactful projects and meaningful change. He is also recognized for his engaging storytelling and practical approach to leadership, project management, and transformation.\n",
+      country: "Berlin, Germany",
+      linkedinUrl: "https://www.linkedin.com/in/brunomorgante/",
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 2,
+    },
+  })
+  await db.speaker.create({
+    data: {
+      id: "cmu5lo4sr00027vw4wl8ybgw0",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      slug: "billy-samuel-mwape",
+      firstName: "Billy",
+      lastName: "Samuel Mwape",
+      photo: "/uploads/aa4dbea8-9d86-429e-b380-ee8f24af6757.webp",
+      positionFr: "Chief Information Officer (CIO)",
+      positionEn: "Chief Information Officer (CIO)",
+      company: "First National Bank (FNB) Zambia",
+      biographyFr: "Billy S. Mwape, PMP est un leader dans les domaines de la technologie, du management de projet et de la transformation numérique, avec plus de 18 ans d’expérience dans les secteurs minier et bancaire.\n\nIl occupe actuellement le poste de Chief Information Officer (CIO) chez First National Bank Zambia, où il contribue à la stratégie technologique, à la transformation numérique et à la gouvernance informatique. Professionnel certifié en management de projet, coach en leadership et conférencier international, il s’intéresse particulièrement à la manière dont la technologie, le management de projet et le leadership peuvent contribuer à créer un impact durable au sein des organisations.\n\nIl est également Président du Project Management Institute (PMI) Zambia Chapter, où il contribue au développement de la communauté du management de projet en Zambie.\n",
+      biographyEn: "Billy S. Mwape, PMP is a technology and project management leader with more than 18 years of experience across the mining and banking sectors. He currently serves as Chief Information Officer at First National Bank Zambia, where he is involved in IT leadership, digital transformation, technology strategy, and governance.\n\nA certified project management professional, agile and leadership coach, educator, and international speaker, Billy is passionate about connecting technology, project management, and leadership to create meaningful organizational impact. He has participated in numerous international speaking engagements and has contributed to the global project management community through PMI Zambia and other professional organizations.\n",
+      country: "Zambia",
+      linkedinUrl: "https://www.linkedin.com/in/billy-s-mwape-pmp-89310338/",
+      websiteUrl: null,
+      twitterUrl: null,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 3,
+    },
+  })
+  console.log("  ✓ 4 speakers")
+
+  await db.programmeDay.create({
+    data: {
+      id: "cmtveawum00077v8gilgeq9ic",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      nameFr: "Jour 1 - Formation",
+      nameEn: "Day 1 - Training",
+      date: new Date("2027-03-25T00:00:00.000Z"),
+      isActive: true,
+      displayOrder: 0,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtveaytd00087v8gtkel0v5y",
+      programmeDayId: "cmtveawum00077v8gilgeq9ic",
+      startTime: "08:00",
+      endTime: "08:30",
+      titleFr: "Accueil des participants",
+      titleEn: "Welcoming participants",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "NETWORKING",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 0,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtveeu9300097v8g2k6coknn",
+      programmeDayId: "cmtveawum00077v8gilgeq9ic",
+      startTime: "08:30",
+      endTime: "15:30",
+      titleFr: "Masterclass 1 ",
+      titleEn: "Masterclass 1 ",
+      titleAr: null,
+      descriptionFr: "Maîtriser les risques pour mieux décider",
+      descriptionEn: "Mastering risk for better decision-making",
+      sessionType: "MASTERCLASS",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 1,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtvejw24000a7v8gj0gvtthp",
+      programmeDayId: "cmtveawum00077v8gilgeq9ic",
+      startTime: "08:30",
+      endTime: "15:30",
+      titleFr: "Masterclass 2",
+      titleEn: "Masterclass 2",
+      titleAr: null,
+      descriptionFr: "Les couleurs du leadership : comprendre et mobiliser les équipes avec LEGO®",
+      descriptionEn: "The colors of leadership: understanding and engaging teams with LEGO®",
+      sessionType: "MASTERCLASS",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 2,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtvfy2za000c7v8gtksoapc2",
+      programmeDayId: "cmtveawum00077v8gilgeq9ic",
+      startTime: "08:30",
+      endTime: "15:30",
+      titleFr: "Masterclass 3",
+      titleEn: "Masterclass 3",
+      titleAr: null,
+      descriptionFr: "Pilotage de portefeuille : prioriser pour créer de la valeur",
+      descriptionEn: "Portfolio management: prioritizing to create value",
+      sessionType: "MASTERCLASS",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 4,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtvgvqyl000d7v8g3xndpswq",
+      programmeDayId: "cmtveawum00077v8gilgeq9ic",
+      startTime: "08:30",
+      endTime: "15:30",
+      titleFr: "Masterclass 4",
+      titleEn: "Masterclass 4",
+      titleAr: null,
+      descriptionFr: "Neurosciences & IA : Résistances au changement & prise de décision",
+      descriptionEn: "Neuroscience & AI: Resistance to change & decision-making",
+      sessionType: "MASTERCLASS",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 5,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtvgzfuk000f7v8g27vxhxad",
+      programmeDayId: "cmtveawum00077v8gilgeq9ic",
+      startTime: "10:45",
+      endTime: "11:15",
+      titleFr: " Pause café & Networking",
+      titleEn: "Coffee break & Networking\t",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "BREAK",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 3,
+      isActive: true,
+    },
+  })
+
+  await db.programmeDay.create({
+    data: {
+      id: "cmtvh1uml000g7v8gm77cp2al",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      nameFr: "Jour 2 - Événement",
+      nameEn: "Day 2 - Event",
+      date: new Date("2027-03-26T00:00:00.000Z"),
+      isActive: true,
+      displayOrder: 1,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtvh210c000h7v8g8chknpee",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "08:00",
+      endTime: "08:45",
+      titleFr: "Accueil et petit-déjeuner de réseautage",
+      titleEn: "Welcome and networking breakfast",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "NETWORKING",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 0,
+      isActive: true,
+      moderatorId: "cmu356ymj00017vi4m4ic05b5",
+    },
+  })
+  await db.sessionSpeaker.create({ data: { sessionId: "cmtvh210c000h7v8g8chknpee", speakerId: "cmu356ymj00017vi4m4ic05b5" } })
+  await db.programmeSession.create({
+    data: {
+      id: "cmtvhtpnp000i7v8g8edl3lmp",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "08:50",
+      endTime: "09:10",
+      titleFr: "Mot de bienvenue et ouverture",
+      titleEn: "Welcome remarks and opening",
+      titleAr: null,
+      descriptionFr: "Discours de bienvenue de l'hôte de la conférence, mot d'accueil suivi du mot d'ouverture et présentation de l'agenda de la journée et les thèmes clés.",
+      descriptionEn: "Welcome address by the conference host, followed by the opening speech, presentation of the day's agenda and key themes.",
+      sessionType: "SESSION",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 1,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug5v00037vakvehfdgrh",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "",
+      endTime: null,
+      titleFr: "Session Plénière 1",
+      titleEn: "Plenary Session 1",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "SESSION",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: true,
+      displayOrder: 2,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug5y00057vak20ux3ilv",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "09:15",
+      endTime: "09:45",
+      titleFr: "Keynote 1 : Du PMO qui reporte au PMO qui décide",
+      titleEn: "Keynote 1: From a reporting PMO to a decision-making PMO",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "KEYNOTE",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 3,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6100077vakzmtx9skz",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "09:50",
+      endTime: "10:35",
+      titleFr: "Panel 1 : Résilience du portefeuille et maîtrise des risques",
+      titleEn: "Panel 1: Portfolio Resilience and Risk Management",
+      titleAr: null,
+      descriptionFr: "♦ Quand tout ne peut pas être financé : comment arbitrer un portefeuille ?\n♦ Un portefeuille réellement sous pression : retour d'expérience\n♦ Peut-on mieux décider grâce à la donnée et à l'IA ?",
+      descriptionEn: "♦ When not everything can be funded: how do you prioritize a portfolio?\n♦ A portfolio under real pressure: lessons from experience\n♦ Can data and AI help us make better decisions?",
+      sessionType: "PANEL",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 4,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6400097vak0ihi4mlc",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "10:40",
+      endTime: "11:15",
+      titleFr: "Session thématique 1 : Résilience nationale",
+      titleEn: "Thematic Session 1: National Resilience",
+      titleAr: null,
+      descriptionFr: "♦ Quelle capacité d'exécution pour renforcer la résilience du secteur public ?\n♦ Quel rôle concret pour le PMO dans les projets à impact ?",
+      descriptionEn: "♦ What execution capacity is needed to strengthen public sector resilience?\n♦ What concrete role can the PMO play in high-impact projects?",
+      sessionType: "PANEL",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 5,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug67000b7vakfeczjz1r",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "11:15",
+      endTime: "11:30",
+      titleFr: "Pause café & Networking",
+      titleEn: "Coffee break & networking",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "BREAK",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 6,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6a000d7vakt24uvz8y",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "",
+      endTime: null,
+      titleFr: "Session Plénière 2",
+      titleEn: "Plenary Session 2",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "SESSION",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: true,
+      displayOrder: 7,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6d000f7vake8fpmrqu",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "11:35",
+      endTime: "12:00",
+      titleFr: "Keynote 2 : Le PMO leader en temps d'instabilité : influencer, décider, embarquer",
+      titleEn: "Keynote 2: The PMO leader in times of instability: Influencing, deciding, and engaging",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "KEYNOTE",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 8,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6g000h7vaktwafl52c",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "12:05",
+      endTime: "12:40",
+      titleFr: "Panel 2 : Leadership et Résilience : Piloter la transformation dans un monde incertain",
+      titleEn: "Panel 2: Leadership and Resilience: Driving transformation in an uncertain world",
+      titleAr: null,
+      descriptionFr: "♦ Quand le plan ne fonctionne plus : que fait le leader PMO ?\n♦ Une transformation qui résiste : ce qui s'est vraiment passé\n♦ Sponsoriser un projet : soutien symbolique ou véritable levier de performance ?",
+      descriptionEn: "♦ When the plan no longer works: what does the PMO leader do?\n♦ A transformation that held up: what really happened\n♦ Sponsoring a project: symbolic support or a real performance driver?",
+      sessionType: "PANEL",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 9,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6i000j7vakybdzrqgs",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "12:45",
+      endTime: "13:15",
+      titleFr: "Session thématique 2 : PMO & Transformation 4.0 : Regards croisés sur la compétitivité",
+      titleEn: "Thematic Session 2: PMO & Transformation 4.0: Cross perspectives on competitiveness",
+      titleAr: null,
+      descriptionFr: "Trois secteurs : Énergie + Industrie + Agriculture",
+      descriptionEn: "Three sectors: Energy + Industry + Agriculture",
+      sessionType: "PANEL",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 10,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6l000l7vak9ydyrxsq",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "13:15",
+      endTime: "14:25",
+      titleFr: "Déjeuner & Networking",
+      titleEn: "Lunch & Networking",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "NETWORKING",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 11,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6n000n7vakh34cxz8j",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "",
+      endTime: null,
+      titleFr: "Session Plénière 3",
+      titleEn: "Plenary Session 3",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "SESSION",
+      language: null,
+      room: null,
+      topic: null,
+      isHeader: true,
+      displayOrder: 12,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6q000p7vakv15r34s2",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "14:30",
+      endTime: "14:55",
+      titleFr: "Keynote 3 : Décider vite, décider juste : l'agilité au service de la performance PMO",
+      titleEn: "Keynote 3: Decide fast, decide right: Agility as a driver of PMO performance",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "KEYNOTE",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 13,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6t000r7vakpga4yb8v",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "15:00",
+      endTime: "15:45",
+      titleFr: "Panel 3 : PMO agiles et adaptatives (Lean, Agile, IA)",
+      titleEn: "Panel 3: Agile and Adaptive PMOs (Lean, Agile, AI)",
+      titleAr: null,
+      descriptionFr: "♦ Jusqu'où peut-on alléger la gouvernance sans perdre le contrôle ?\n♦ Où se cache le gaspillage dans un PMO ?\n♦ Que peut-on automatiser demain dans un PMO ?",
+      descriptionEn: "♦ How far can governance be simplified without losing control?\n♦ Where does waste hide in a PMO?\n♦ What can be automated in a PMO tomorrow?",
+      sessionType: "PANEL",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 14,
+      isActive: true,
+    },
+  })
+  await db.programmeSession.create({
+    data: {
+      id: "cmu2xug6v000t7vakeq1m9mp5",
+      programmeDayId: "cmtvh1uml000g7v8gm77cp2al",
+      startTime: "15:50",
+      endTime: "16:15",
+      titleFr: "Keynote de Clôture : Ana Chayef",
+      titleEn: "Closing Keynote: Ana Chayef",
+      titleAr: null,
+      descriptionFr: null,
+      descriptionEn: null,
+      sessionType: "CLOSING",
+      language: "FR",
+      room: null,
+      topic: null,
+      isHeader: false,
+      displayOrder: 15,
+      isActive: true,
+    },
+  })
+  console.log("  ✓ 2 programme days, 22 sessions")
+
+  await db.pass.create({
+    data: {
+      id: "cmu72hvt900017vssna5nhbg6",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      slug: "pass-evenement",
+      nameFr: "Pass Événement",
+      nameEn: "Event Pass",
+      image: "/uploads/3b691c8c-910d-4ab6-bfe3-91668a02b74d.webp",
+      descriptionFr: "Accès complet aux 2 jours de conférence et panels.",
+      descriptionEn: "Full access to the 2-day conference and panels.",
+      price: 500,
+      currency: "TND",
+      vatRate: 0.19,
+      featuresFr: "Accès aux 2 jours de conférence\nToutes les keynotes et panels\nPause café & déjeuners\nCoffret goodies PMO Mastery\nNetworking avec les intervenants",
+      featuresEn: "Access to 2 conference days\nAll keynotes and panels\nCoffee breaks & lunches\nPMO Mastery goodies kit\nNetworking with speakers",
+      paymentUrl: null,
+      minQuantity: 1,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 1,
+    },
+  })
+
+  await db.pass.create({
+    data: {
+      id: "cmu72hvtj00037vss0mau5x9s",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      slug: "pass-formation",
+      nameFr: "Pass Formation",
+      nameEn: "Training Pass",
+      image: "/uploads/b3eea5d9-1c9a-47b0-80e6-38d93a16b577.webp",
+      descriptionFr: "Accès au jour de formation (atelier pratique).",
+      descriptionEn: "Access to the training day (practical workshop).",
+      price: 400,
+      currency: "TND",
+      vatRate: 0.19,
+      featuresFr: "Accès au jour de formation\nAtelier pratique interactif\nSupports de formation\nPause café & déjeuner\nCertificat de participation",
+      featuresEn: "Access to training day\nInteractive practical workshop\nTraining materials\nCoffee break & lunch\nCertificate of participation",
+      paymentUrl: null,
+      minQuantity: 1,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 2,
+    },
+  })
+
+  await db.pass.create({
+    data: {
+      id: "cmu72hvtm00057vssah900xm0",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      slug: "pass-duo",
+      nameFr: "Pass Duo",
+      nameEn: "Duo Pass",
+      image: "/uploads/53bf3d54-b6e7-4521-9436-3c987a75c600.webp",
+      descriptionFr: "Événement + 1 Formation — la formule complète.",
+      descriptionEn: "Event + 1 Training — the complete package.",
+      price: 900,
+      currency: "TND",
+      vatRate: 0.19,
+      featuresFr: "Tous les avantages Pass Événement\n+ 1 jour de formation au choix\nAtelier pratique interactif\nSupports de formation\nCertificat de participation",
+      featuresEn: "All Event Pass benefits\n+ 1 training day of your choice\nInteractive practical workshop\nTraining materials\nCertificate of participation",
+      paymentUrl: null,
+      minQuantity: 1,
+      isFeatured: true,
+      isActive: true,
+      displayOrder: 3,
+    },
+  })
+
+  await db.pass.create({
+    data: {
+      id: "cmu72hvtq00077vssl0zkzz25",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      slug: "pass-etudiant",
+      nameFr: "Pass Étudiant",
+      nameEn: "Student Pass",
+      image: "/uploads/1d11dfeb-ea6e-4af2-a59c-ac4a0a922294.webp",
+      descriptionFr: "Tarif réduit pour les étudiants.",
+      descriptionEn: "Discounted rate for students.",
+      price: 200,
+      currency: "TND",
+      vatRate: 0.19,
+      featuresFr: "Accès aux 2 jours\nSur présentation carte étudiante\nPause café inclus",
+      featuresEn: "Access to both days\nStudent ID required\nCoffee break included",
+      paymentUrl: null,
+      minQuantity: 1,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 4,
+    },
+  })
+
+  await db.pass.create({
+    data: {
+      id: "cmu72hvtt00097vss5fyknzy3",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      slug: "pass-equipe",
+      nameFr: "Pass Équipe",
+      nameEn: "Team Pass",
+      image: "/uploads/9ee9766a-7b1a-4fe9-9bc9-951fbbfbb99c.webp",
+      descriptionFr: "Tarif préférentiel pour inscription de 2 personnes ou plus.",
+      descriptionEn: "Discounted rate for 2+ registrations.",
+      price: 450,
+      currency: "TND",
+      vatRate: 0.19,
+      featuresFr: "Tarif par personne\nMinimum 2 inscrits\nTous les avantages Pass Événement",
+      featuresEn: "Per-person rate\nMinimum 2 registrations\nAll Event Pass benefits",
+      paymentUrl: null,
+      minQuantity: 2,
+      isFeatured: false,
+      isActive: true,
+      displayOrder: 5,
+    },
+  })
+  console.log("  ✓ 5 passes")
+
+  await db.organizer.create({
+    data: {
+      id: "cmu72a3fa00017vo4dr301tvs",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      name: "Empowerment Paths",
+      logo: "/uploads/da0c0ec0-0e6c-4cb4-bd50-73fade478078.webp",
+      descriptionFr: "Dirigé par Mme Yosra Torjmen, PgMP®, PMP®, PMO-CP, Coach Professionnelle. Empowerment Paths est un cabinet ATP de conseil et de développement professionnel qui accompagne les organisations dans la conception, la mise en place et l'optimisation de leurs PMOs pour renforcer l'alignement stratégique, la visibilité des portefeuilles et la création de valeur.\n\nActif dans des secteurs variés, nous proposons des solutions sur-mesure autour de trois pôles :\n🔹 Conseil – PMO, évaluation de maturité, modèles opérationnels et conduite du changement via des projets de transformation\n🔹 Formation – en gestion de projet (PMP®, PgMP®), excellence PMO, agilité, soft skills, leadership\n🔹 Coaching exécutif & d'équipe – pour renforcer la performance individuelle, collective et managériale",
+      descriptionEn: "Led by Ms. Yosra Torjmen, PgMP®, PMP®, PMO-CP, Professional Coach. Empowerment Paths is a consulting and professional development firm that supports organizations in designing, implementing, and optimizing their PMOs to strengthen strategic alignment, portfolio visibility, and value creation.\n\nActive in various sectors, we offer tailored solutions around three pillars:\n🔹 Consulting – PMO, maturity assessment, operational models, and change management through transformation projects\n🔹 Training – in project management (PMP®, PgMP®), PMO excellence, agility, soft skills, leadership\n🔹 Executive & team coaching – to enhance individual, collective, and managerial performance",
+      websiteUrl: null,
+      linkedinUrl: null,
+      facebookUrl: null,
+      instagramUrl: null,
+      founderName: null,
+      founderTitle: null,
+      founderPhoto: null,
+      founderCredentials: null,
+      isActive: true,
+      displayOrder: 0,
+    },
+  })
+  console.log("  ✓ 1 organizers")
+
+  await db.partner.create({
+    data: {
+      id: "cmu72q5nv00017vzohafzgjav",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      name: "Excellia Leadership",
+      logo: null,
+      category: "STRATEGIC",
+      websiteUrl: "https://excellialeadership.com/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 0,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmu72q5pw00037vzowoxfv8ii",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      name: "Royal Tulip Taj Sultan",
+      logo: null,
+      category: "STRATEGIC",
+      websiteUrl: "https://royal-tulip-taj-sultan.goldentulip.com/fr-fr/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 1,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmu72q5rg00057vzoeokkxe9a",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      name: "Tunisie Telecom",
+      logo: null,
+      category: "DIAMOND",
+      websiteUrl: "https://www.tunisietelecom.tn/particulier/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 2,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmu72q5wl00077vzo8orprakg",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      name: "Managers.tn",
+      logo: null,
+      category: "MEDIA",
+      websiteUrl: "https://managers.tn/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 3,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmu72q5y400097vzohxepn7bi",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      name: "PMI — Project Management Institute",
+      logo: null,
+      category: "STRATEGIC",
+      websiteUrl: "https://www.pmi.org/",
+      descriptionFr: "Project Management Institute (PMI) est la principale association professionnelle mondiale dédiée au management de projet. PMI publie le PMBOK® Guide et administre les certifications PMP®, PgMP®, PMI-ACP® et autres.",
+      descriptionEn: "Project Management Institute (PMI) is the world's leading professional association dedicated to project management. PMI publishes the PMBOK® Guide and administers the PMP®, PgMP®, PMI-ACP® and other certifications.",
+      isActive: true,
+      displayOrder: 4,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmu72q5zo000b7vzon35rzwbx",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      name: "FlowUp",
+      logo: null,
+      category: "PARTNER",
+      websiteUrl: "http://flowup.tn/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 5,
+    },
+  })
+
+  await db.partner.create({
+    data: {
+      id: "cmu72q61h000d7vzoqhlva561",
+      eventId: "cmtve4rp700047v8g9iv0snfz",
+      name: "Talys Digital",
+      logo: null,
+      category: "PARTNER",
+      websiteUrl: "https://www.talys.digital/",
+      descriptionFr: null,
+      descriptionEn: null,
+      isActive: true,
+      displayOrder: 6,
+    },
+  })
+  console.log("  ✓ 7 partners")
+
+  // Media asset tracking records (files themselves live in public/uploads/, committed to git)
+  await db.mediaAsset.create({ data: {
+      id: "cmt2ioxyb00117v7cpz0q623r",
+      filename: "fd2e1ce3-eb90-4b68-a41f-56b07b46200b.webp",
+      originalName: "a.png",
+      mimeType: "image/webp",
+      size: 33752,
+      url: "/uploads/fd2e1ce3-eb90-4b68-a41f-56b07b46200b.webp",
+      width: 546,
+      height: 527,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmtps723q00007vfsh2ig3w5z",
+      filename: "b1fae852-0a1a-48ab-adf8-4534856c78c2.webp",
+      originalName: "hero-group-photo-v2.jpg",
+      mimeType: "image/webp",
+      size: 108472,
+      url: "/uploads/b1fae852-0a1a-48ab-adf8-4534856c78c2.webp",
+      width: 1444,
+      height: 736,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmtpux89400037vfs393ukqtu",
+      filename: "763da107-2ff3-4a8d-b953-c22013fd1cb7.webp",
+      originalName: "logo blanc pmo.png",
+      mimeType: "image/webp",
+      size: 20950,
+      url: "/uploads/763da107-2ff3-4a8d-b953-c22013fd1cb7.webp",
+      width: 1081,
+      height: 1080,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmtvdv5r400017v8giky9i5r4",
+      filename: "9413a2d4-b0b0-4318-9485-203a02e8ebca.webp",
+      originalName: "pmo2.jpg",
+      mimeType: "image/webp",
+      size: 42276,
+      url: "/uploads/9413a2d4-b0b0-4318-9485-203a02e8ebca.webp",
+      width: 843,
+      height: 1264,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmtvdwrdf00027v8gn3jha16x",
+      filename: "7861498a-5e61-43e3-ba91-fbe9e87f4129.webp",
+      originalName: "pmp1.jpg",
+      mimeType: "image/webp",
+      size: 80492,
+      url: "/uploads/7861498a-5e61-43e3-ba91-fbe9e87f4129.webp",
+      width: 843,
+      height: 1264,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmtvdx4ff00037v8gdlgpwqqv",
+      filename: "a57d7a06-e6a4-41eb-909c-f390da3bd60a.webp",
+      originalName: "Pmo3.jpg",
+      mimeType: "image/webp",
+      size: 88278,
+      url: "/uploads/a57d7a06-e6a4-41eb-909c-f390da3bd60a.webp",
+      width: 843,
+      height: 1264,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmtvfal6n000b7v8gsoz8dc5o",
+      filename: "77786f3f-66e1-46f1-91ee-bb87ebc6db39.webp",
+      originalName: "logo-dark-bg.png",
+      mimeType: "image/webp",
+      size: 18490,
+      url: "/uploads/77786f3f-66e1-46f1-91ee-bb87ebc6db39.webp",
+      width: 755,
+      height: 580,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu2thj9t00007vqs3bamcoza",
+      filename: "7464271d-2756-4c8d-8218-6ebb23579f51.webp",
+      originalName: "hero-2.jpg",
+      mimeType: "image/webp",
+      size: 113936,
+      url: "/uploads/7464271d-2756-4c8d-8218-6ebb23579f51.webp",
+      width: 1920,
+      height: 1280,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu2vz9jc00017vqsrw9by9qb",
+      filename: "5fcec6cb-85f3-4910-89d9-5372d4122902.webp",
+      originalName: "050A0082.jpg",
+      mimeType: "image/webp",
+      size: 67198,
+      url: "/uploads/5fcec6cb-85f3-4910-89d9-5372d4122902.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu372fih00027vp48p8kognl",
+      filename: "25c053be-def4-4661-9023-9ea17b223211.webp",
+      originalName: "ChatGPT Image 15 sept. 2026, 22_38_48 (4).png",
+      mimeType: "image/webp",
+      size: 76414,
+      url: "/uploads/25c053be-def4-4661-9023-9ea17b223211.webp",
+      width: 1086,
+      height: 1448,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4smkr800017vz43ljnfrhk",
+      filename: "e7750f25-6887-42a7-8e79-e8edcb28459a.webp",
+      originalName: "050A0047-2.jpg",
+      mimeType: "image/webp",
+      size: 84838,
+      url: "/uploads/e7750f25-6887-42a7-8e79-e8edcb28459a.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4sorvp00037vz4pxitysji",
+      filename: "1d146253-dfee-43f2-8789-c5b56c26cdca.webp",
+      originalName: "050A0041.jpg",
+      mimeType: "image/webp",
+      size: 86398,
+      url: "/uploads/1d146253-dfee-43f2-8789-c5b56c26cdca.webp",
+      width: 4794,
+      height: 2729,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4spy8h00057vz402x8udtl",
+      filename: "8c8673dc-6acf-4ee8-8368-7bdf54492a39.webp",
+      originalName: "050A0063-2.jpg",
+      mimeType: "image/webp",
+      size: 97296,
+      url: "/uploads/8c8673dc-6acf-4ee8-8368-7bdf54492a39.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4sts3i00067vz4dluwcl2s",
+      filename: "0a0a9ed7-e8fb-4ea0-8bae-5e8dc8dd31e0.mp4",
+      originalName: "PMO VID1 HORIZANTAL REC - yosra Mekni (1080p).mp4",
+      mimeType: "video/mp4",
+      size: 19080810,
+      url: "/uploads/0a0a9ed7-e8fb-4ea0-8bae-5e8dc8dd31e0.mp4",
+      width: null,
+      height: null,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4sur7h00097vz4sv3t0a7c",
+      filename: "5938cb17-c1cb-47dc-bf15-b6b7f58e75a6.webp",
+      originalName: "050A0085-2.jpg",
+      mimeType: "image/webp",
+      size: 87984,
+      url: "/uploads/5938cb17-c1cb-47dc-bf15-b6b7f58e75a6.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4sv0r0000b7vz4cayxe6fy",
+      filename: "1bc0bd25-d42b-4696-a595-fc78493ee738.webp",
+      originalName: "050A0292.jpg",
+      mimeType: "image/webp",
+      size: 122518,
+      url: "/uploads/1bc0bd25-d42b-4696-a595-fc78493ee738.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4svhbi000d7vz40rgv9gzu",
+      filename: "cc86ddee-34b5-4b0e-a62b-05632d1ca174.webp",
+      originalName: "050A0130.jpg",
+      mimeType: "image/webp",
+      size: 211966,
+      url: "/uploads/cc86ddee-34b5-4b0e-a62b-05632d1ca174.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4v0g2e000k7vz4jp17pada",
+      filename: "2158fb01-e426-49b7-b4c7-23c62f067eff.webp",
+      originalName: "050A0059-2.jpg",
+      mimeType: "image/webp",
+      size: 92246,
+      url: "/uploads/2158fb01-e426-49b7-b4c7-23c62f067eff.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4v0w3z000m7vz4kokycly4",
+      filename: "4e2cc03c-cf4c-4173-851d-f024eeaba1ed.webp",
+      originalName: "050A0038.jpg",
+      mimeType: "image/webp",
+      size: 164660,
+      url: "/uploads/4e2cc03c-cf4c-4173-851d-f024eeaba1ed.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4v1avc000o7vz4n0werb35",
+      filename: "1a6c6c1c-5f38-48fb-9a0e-264c1c5f32b9.webp",
+      originalName: "050A9925.jpg",
+      mimeType: "image/webp",
+      size: 82056,
+      url: "/uploads/1a6c6c1c-5f38-48fb-9a0e-264c1c5f32b9.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4v2dba000q7vz4061qqnyy",
+      filename: "57d8adf8-0463-41a9-b370-76e90bd9c2a6.webp",
+      originalName: "050A9990.jpg",
+      mimeType: "image/webp",
+      size: 193216,
+      url: "/uploads/57d8adf8-0463-41a9-b370-76e90bd9c2a6.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu4v41xy000w7vz4m0sm7z3w",
+      filename: "3c1e2d48-c793-4a62-aa73-a256d8bb4e22.webp",
+      originalName: "050A0366.jpg",
+      mimeType: "image/webp",
+      size: 170980,
+      url: "/uploads/3c1e2d48-c793-4a62-aa73-a256d8bb4e22.webp",
+      width: 6000,
+      height: 4000,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu5hbdjd00007vr8dkyehljw",
+      filename: "ee3d1a56-528c-40fa-9678-c87bcd7cc661.webp",
+      originalName: "lee-lambert.webp",
+      mimeType: "image/webp",
+      size: 78774,
+      url: "/uploads/ee3d1a56-528c-40fa-9678-c87bcd7cc661.webp",
+      width: 1086,
+      height: 1448,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu5l7q9l00007vw4hghpkyd3",
+      filename: "5d4fe9f8-aa2b-4048-827c-e81f6b38cda1.webp",
+      originalName: "ChatGPT Image 15 sept. 2026, 22_38_47 (1).png",
+      mimeType: "image/webp",
+      size: 104294,
+      url: "/uploads/5d4fe9f8-aa2b-4048-827c-e81f6b38cda1.webp",
+      width: 1086,
+      height: 1448,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu5loo1r00037vw4ggek99l4",
+      filename: "aa4dbea8-9d86-429e-b380-ee8f24af6757.webp",
+      originalName: "ChatGPT Image 15 sept. 2026, 22_38_48 (2).png",
+      mimeType: "image/webp",
+      size: 100386,
+      url: "/uploads/aa4dbea8-9d86-429e-b380-ee8f24af6757.webp",
+      width: 1086,
+      height: 1448,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu729qkm00007vyktxv9rsmf",
+      filename: "da0c0ec0-0e6c-4cb4-bd50-73fade478078.webp",
+      originalName: "e.jpg",
+      mimeType: "image/webp",
+      size: 4920,
+      url: "/uploads/da0c0ec0-0e6c-4cb4-bd50-73fade478078.webp",
+      width: 350,
+      height: 350,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu75ywfa00007v5s0orx2czn",
+      filename: "3b691c8c-910d-4ab6-bfe3-91668a02b74d.webp",
+      originalName: "ChatGPT Image 18 sept. 2026, 17_18_58 (1).png",
+      mimeType: "image/webp",
+      size: 95020,
+      url: "/uploads/3b691c8c-910d-4ab6-bfe3-91668a02b74d.webp",
+      width: 1672,
+      height: 941,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu75zkb800017v5s53capfgn",
+      filename: "b3eea5d9-1c9a-47b0-80e6-38d93a16b577.webp",
+      originalName: "ChatGPT Image 18 sept. 2026, 17_18_58 (2).png",
+      mimeType: "image/webp",
+      size: 97546,
+      url: "/uploads/b3eea5d9-1c9a-47b0-80e6-38d93a16b577.webp",
+      width: 1672,
+      height: 941,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu760nms00037v5sl78pdyir",
+      filename: "1d11dfeb-ea6e-4af2-a59c-ac4a0a922294.webp",
+      originalName: "ChatGPT Image 18 sept. 2026, 17_18_58 (4).png",
+      mimeType: "image/webp",
+      size: 86072,
+      url: "/uploads/1d11dfeb-ea6e-4af2-a59c-ac4a0a922294.webp",
+      width: 1672,
+      height: 941,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu761ejo00057v5spfkcte3s",
+      filename: "53bf3d54-b6e7-4521-9436-3c987a75c600.webp",
+      originalName: "ChatGPT Image 18 sept. 2026, 17_18_58 (3).png",
+      mimeType: "image/webp",
+      size: 111890,
+      url: "/uploads/53bf3d54-b6e7-4521-9436-3c987a75c600.webp",
+      width: 1672,
+      height: 941,
+      alt: null,
+    } }).catch(() => {})
+  await db.mediaAsset.create({ data: {
+      id: "cmu761r4000067v5sc7dh99q3",
+      filename: "9ee9766a-7b1a-4fe9-9bc9-951fbbfbb99c.webp",
+      originalName: "ChatGPT Image 18 sept. 2026, 17_18_58 (5).png",
+      mimeType: "image/webp",
+      size: 95404,
+      url: "/uploads/9ee9766a-7b1a-4fe9-9bc9-951fbbfbb99c.webp",
+      width: 1672,
+      height: 941,
+      alt: null,
+    } }).catch(() => {})
+  console.log("  ✓ 31 media asset records")
+
+  await db.seoSettings.upsert({
+    where: { id: "singleton" },
+    update: {},
+    create: {
+      id: "singleton",
+      extraDisallow: "",
+      extraAllow: "",
+      crawlDelay: null,
+    },
+  })
+  await db.sitemapEntry.upsert({
+    where: { page: "contact" },
+    update: {},
+    create: {
+      id: "cmt2efgd000007v7ce87lxd30",
+      page: "contact",
+      included: true,
+      priorityOverride: null,
+    },
+  })
+  console.log("  ✓ SEO settings + sitemap entries")
 
   await seedUiText()
   console.log("  ✓ UI text catalog")
@@ -1012,215 +2998,187 @@ async function main() {
   console.log("  ✓ SEO meta catalog")
 
   console.log("\n✅ Seed complete!")
-  console.log(`   Admin login: ${adminEmail} / ${adminPassword}`)
-  console.log(`   Event: ${event.editionName} (${event.titleFr})`)
-  console.log(`   Public site: http://localhost:3000`)
-  console.log(`   Admin dashboard: http://localhost:3000/admin`)
 }
 
 // ---------------------------------------------------------------------------
-// UI text catalog — admin-editable translations for hardcoded page chrome.
-// Global (not Event-scoped), upserted by key so re-seeding never clobbers an
-// admin's edits. Every initial value is the exact string that was previously
-// hardcoded in the corresponding component, so this migration is a no-op
-// visually until an admin actually changes something. A few entries fix a
-// pre-existing bug where the English value was never localized (marked below).
+// UI text catalog — nav labels, headings, buttons, empty states.
 // ---------------------------------------------------------------------------
 
-const UI_TEXT: { key: string; category: string; valueFr: string; valueEn: string }[] = [
-  // --- nav ---
-  { key: "nav.home", category: "nav", valueFr: "Accueil", valueEn: "Home" },
-  { key: "nav.event", category: "nav", valueFr: "Événement", valueEn: "Event" },
-  { key: "nav.event.programme", category: "nav", valueFr: "Programme", valueEn: "Programme" },
-  { key: "nav.event.passEvenement", category: "nav", valueFr: "Pass Événement", valueEn: "Event Pass" },
-  { key: "nav.event.passFormation", category: "nav", valueFr: "Pass Formation", valueEn: "Training Pass" },
-  { key: "nav.event.passDuo", category: "nav", valueFr: "Pass Duo", valueEn: "Duo Pass" },
-  { key: "nav.speakers", category: "nav", valueFr: "Intervenants", valueEn: "Speakers" },
-  { key: "nav.orgPartners", category: "nav", valueFr: "Organisateurs & Partenaires", valueEn: "Organizers & Partners" },
-  { key: "nav.organizers", category: "nav", valueFr: "Organisateurs", valueEn: "Organizers" },
-  { key: "nav.partners", category: "nav", valueFr: "Partenaires", valueEn: "Partners" },
-  { key: "nav.contact", category: "nav", valueFr: "Contact", valueEn: "Contact" },
-  { key: "nav.cta.register", category: "nav", valueFr: "Je m'inscris", valueEn: "Register" },
-
-  // --- common (reused verbatim across several pages) ---
-  { key: "common.breadcrumb.home", category: "common", valueFr: "Accueil", valueEn: "Home" },
-  { key: "common.breadcrumb.event", category: "common", valueFr: "Événement", valueEn: "Event" },
-  { key: "common.cta.register", category: "common", valueFr: "Je m'inscris", valueEn: "Register now" },
-  { key: "common.speaker.viewProfile", category: "common", valueFr: "Voir le profil", valueEn: "View profile" },
-  { key: "common.cta.viewDetails", category: "common", valueFr: "Voir les détails", valueEn: "View details" },
-  { key: "common.why.titleFallback", category: "common", valueFr: "Pourquoi y participer ?", valueEn: "Why participate?" },
+const UI_TEXT: { key: string; category: string; valueFr: string; valueEn?: string | null }[] = [
   { key: "common.about.titleFallback", category: "common", valueFr: "À propos de l'événement", valueEn: "About the event" },
-
-  // --- home ---
-  { key: "home.hero.badge", category: "home", valueFr: "Événement international", valueEn: "International event" },
-  { key: "home.hero.ctaSecondary", category: "home", valueFr: "Découvrir le programme", valueEn: "View programme" },
+  { key: "common.breadcrumb.event", category: "common", valueFr: "Événement", valueEn: "Event" },
+  { key: "common.breadcrumb.home", category: "common", valueFr: "Accueil", valueEn: "Home" },
+  { key: "common.cta.register", category: "common", valueFr: "Je m'inscris", valueEn: "Register now" },
+  { key: "common.cta.viewDetails", category: "common", valueFr: "Voir les détails", valueEn: "View details" },
+  { key: "common.speaker.viewProfile", category: "common", valueFr: "Voir le profil", valueEn: "View profile" },
+  { key: "common.why.titleFallback", category: "common", valueFr: "Pourquoi y participer ?", valueEn: "Why participate?" },
+  { key: "contact.address", category: "contact", valueFr: "Adresse", valueEn: "Address" },
+  { key: "contact.email", category: "contact", valueFr: "Email", valueEn: "Email" },
+  { key: "contact.followUs", category: "contact", valueFr: "Suivez-nous", valueEn: "Follow us" },
+  { key: "contact.form.emailPlaceholder", category: "contact", valueFr: "vous@exemple.com", valueEn: "you@example.com" },
+  { key: "contact.form.errorFallback", category: "contact", valueFr: "Échec de l'envoi.", valueEn: "Failed to send." },
+  { key: "contact.form.messageLabel", category: "contact", valueFr: "Message", valueEn: "Message" },
+  { key: "contact.form.messagePlaceholder", category: "contact", valueFr: "Votre message…", valueEn: "Your message…" },
+  { key: "contact.form.nameLabel", category: "contact", valueFr: "Nom complet", valueEn: "Full name" },
+  { key: "contact.form.namePlaceholder", category: "contact", valueFr: "Votre nom", valueEn: "Your name" },
+  { key: "contact.form.phonePlaceholder", category: "contact", valueFr: "+216 …", valueEn: "+216 …" },
+  { key: "contact.form.send", category: "contact", valueFr: "Envoyer le message", valueEn: "Send message" },
+  { key: "contact.form.sendAnother", category: "contact", valueFr: "Envoyer un autre message", valueEn: "Send another message" },
+  { key: "contact.form.sending", category: "contact", valueFr: "Envoi…", valueEn: "Sending…" },
+  { key: "contact.form.subjectLabel", category: "contact", valueFr: "Sujet", valueEn: "Subject" },
+  { key: "contact.form.successBody", category: "contact", valueFr: "Nous vous répondrons dans les plus brefs délais.", valueEn: "We'll get back to you as soon as possible." },
+  { key: "contact.form.successTitle", category: "contact", valueFr: "Message envoyé !", valueEn: "Message sent!" },
+  { key: "contact.formTitle", category: "contact", valueFr: "Envoyez-nous un message", valueEn: "Send us a message" },
+  { key: "contact.hero.eyebrow", category: "contact", valueFr: "Échangeons", valueEn: "Let's talk" },
+  { key: "contact.hero.subtitle", category: "contact", valueFr: "Une question, une demande de partenariat ou besoin d'informations ? Notre équipe vous répond rapidement.", valueEn: "A question, a partnership request or need information? Our team responds quickly." },
+  { key: "contact.hero.title", category: "contact", valueFr: "Contact", valueEn: "Contact" },
+  { key: "contact.hours", category: "contact", valueFr: "Horaires", valueEn: "Hours" },
+  { key: "contact.hoursValue", category: "contact", valueFr: "Lun – Ven · 9h00 – 18h00", valueEn: "Mon – Fri · 9:00 AM – 6:00 PM" },
+  { key: "contact.infoTitle", category: "contact", valueFr: "Informations de contact", valueEn: "Contact information" },
+  { key: "contact.phone", category: "contact", valueFr: "Téléphone", valueEn: "Phone" },
+  { key: "countdown.days", category: "countdown", valueFr: "Jours", valueEn: "Days" },
+  { key: "countdown.ended", category: "countdown", valueFr: "Événement terminé", valueEn: "Event ended" },
+  { key: "countdown.hours", category: "countdown", valueFr: "Heures", valueEn: "Hours" },
+  { key: "countdown.inProgress", category: "countdown", valueFr: "Événement en cours", valueEn: "Event in progress" },
+  { key: "countdown.minutes", category: "countdown", valueFr: "Minutes", valueEn: "Minutes" },
+  { key: "countdown.seconds", category: "countdown", valueFr: "Secondes", valueEn: "Seconds" },
+  { key: "event.cityLabel", category: "event", valueFr: "Ville", valueEn: "City" },
+  { key: "event.countdownLabel", category: "event", valueFr: "L'événement commence dans", valueEn: "The event starts in" },
+  { key: "event.ctaProgramme", category: "event", valueFr: "Voir le programme", valueEn: "View programme" },
+  { key: "event.dateLabel", category: "event", valueFr: "Dates", valueEn: "Dates" },
+  { key: "event.editionLabel", category: "event", valueFr: "Édition", valueEn: "Edition" },
+  { key: "event.emptyState", category: "event", valueFr: "Événement à venir.", valueEn: "Event coming soon." },
+  { key: "event.hero.eyebrow", category: "event", valueFr: "L'événement", valueEn: "The event" },
+  { key: "event.timeLabel", category: "event", valueFr: "Horaires", valueEn: "Hours" },
+  { key: "event.venueAddress", category: "event", valueFr: "Adresse", valueEn: "Address" },
+  { key: "event.venueMap", category: "event", valueFr: "Voir sur la carte", valueEn: "View on map" },
+  { key: "event.venueTitle", category: "event", valueFr: "Le lieu", valueEn: "The venue" },
+  { key: "footer.bottomTagline", category: "footer", valueFr: "Conçu avec passion pour les leaders PMO", valueEn: "Crafted with passion for PMO leaders" },
+  { key: "footer.followUs", category: "footer", valueFr: "Suivez-nous", valueEn: "Follow us" },
+  { key: "footer.nav", category: "footer", valueFr: "Navigation", valueEn: "Navigation" },
+  { key: "footer.passesHeading", category: "footer", valueFr: "Pass", valueEn: "Pass" },
+  { key: "footer.rights", category: "footer", valueFr: "Tous droits réservés.", valueEn: "All rights reserved." },
+  { key: "footer.taglineDefault", category: "footer", valueFr: "Événement international pour les leaders des PMO.", valueEn: "International event for PMO leaders." },
+  { key: "gallery.hero.eyebrow", category: "home", valueFr: "Souvenirs", valueEn: "Memories" },
+  { key: "gallery.hero.subtitle", category: "home", valueFr: "Revivez les temps forts en images et en vidéos, édition après édition.", valueEn: "Relive the highlights in photos and videos, edition after edition." },
+  { key: "gallery.hero.title", category: "home", valueFr: "Moments", valueEn: "Highlights" },
   { key: "home.aboutCta", category: "home", valueFr: "En savoir plus", valueEn: "Learn more" },
   { key: "home.countdownLabel", category: "home", valueFr: "Plus que", valueEn: "Only" },
   { key: "home.editionLabel", category: "home", valueFr: "Édition", valueEn: "Edition" },
-  { key: "home.venueLink", category: "home", valueFr: "Voir le lieu", valueEn: "View venue" },
-  { key: "home.stat.speakers", category: "home", valueFr: "Intervenants", valueEn: "Speakers" },
-  { key: "home.stat.days", category: "home", valueFr: "Jours", valueEn: "Days" },
-  { key: "home.stat.passes", category: "home", valueFr: "Pass disponibles", valueEn: "Passes" },
-  { key: "home.stat.partners", category: "home", valueFr: "Partenaires", valueEn: "Partners" },
-  { key: "home.speakers.title", category: "home", valueFr: "Intervenants", valueEn: "Speakers" },
-  { key: "home.speakers.subtitle", category: "home", valueFr: "Des experts reconnus partagent leur vision", valueEn: "Renowned experts share their vision" },
-  { key: "home.speakers.cta", category: "home", valueFr: "Voir tous les intervenants", valueEn: "View all speakers" },
-  { key: "home.programme.title", category: "home", valueFr: "Programme", valueEn: "Programme" },
-  { key: "home.programme.subtitle", category: "home", valueFr: "2 jours intensifs d'échanges et d'apprentissage", valueEn: "2 intensive days of exchange and learning" },
-  { key: "home.programme.cta", category: "home", valueFr: "Voir le programme complet", valueEn: "View full programme" },
-  { key: "home.passes.title", category: "home", valueFr: "Choisissez votre pass", valueEn: "Choose your pass" },
-  { key: "home.passes.subtitle", category: "home", valueFr: "Des formules adaptées à chaque besoin", valueEn: "Options for every need" },
-  { key: "home.passes.cta", category: "home", valueFr: "Comparer tous les passes", valueEn: "Compare all passes" },
-  { key: "home.partners.title", category: "home", valueFr: "Partenaires", valueEn: "Partners" },
-  { key: "home.partners.subtitle", category: "home", valueFr: "Ils soutiennent PMO Mastery", valueEn: "They support PMO Mastery" },
-  { key: "home.partners.viewAll", category: "home", valueFr: "Voir tous les partenaires", valueEn: "View all partners" },
-  { key: "home.emptyState.title", category: "home", valueFr: "Événement à venir", valueEn: "Event coming soon" },
   { key: "home.emptyState.body", category: "home", valueFr: "Les informations sur le prochain événement PMO Mastery seront bientôt disponibles.", valueEn: "Information about the next PMO Mastery event will be available soon." },
-
-  // --- event (Événement page) ---
-  { key: "event.hero.eyebrow", category: "event", valueFr: "L'événement", valueEn: "The event" },
-  { key: "event.venueTitle", category: "event", valueFr: "Le lieu", valueEn: "The venue" },
-  { key: "event.venueAddress", category: "event", valueFr: "Adresse", valueEn: "Address" },
-  { key: "event.venueMap", category: "event", valueFr: "Voir sur la carte", valueEn: "View on map" },
-  { key: "event.countdownLabel", category: "event", valueFr: "L'événement commence dans", valueEn: "The event starts in" },
-  { key: "event.editionLabel", category: "event", valueFr: "Édition", valueEn: "Edition" },
-  { key: "event.dateLabel", category: "event", valueFr: "Dates", valueEn: "Dates" },
-  { key: "event.timeLabel", category: "event", valueFr: "Horaires", valueEn: "Hours" },
-  { key: "event.cityLabel", category: "event", valueFr: "Ville", valueEn: "City" },
-  { key: "event.ctaProgramme", category: "event", valueFr: "Voir le programme", valueEn: "View programme" },
-  { key: "event.emptyState", category: "event", valueFr: "Événement à venir.", valueEn: "Event coming soon." },
-
-  // --- programme ---
-  { key: "programme.hero.eyebrow", category: "programme", valueFr: "Agenda", valueEn: "Schedule" },
-  { key: "programme.hero.title", category: "programme", valueFr: "Programme", valueEn: "Programme" },
-  { key: "programme.hero.subtitle", category: "programme", valueFr: "2 jours intensifs d'échanges, d'apprentissage et de networking au cœur des meilleures pratiques PMO.", valueEn: "2 intensive days of exchange, learning and networking at the heart of best PMO practices." },
-  { key: "programme.dayLabel", category: "programme", valueFr: "Jour", valueEn: "Day" },
-  { key: "programme.emptyState.subtitle", category: "programme", valueFr: "Le programme sera bientôt publié.", valueEn: "The programme will be published soon." },
-  { key: "programme.stat.days", category: "programme", valueFr: "jours", valueEn: "days" },
-  { key: "programme.stat.speakers", category: "programme", valueFr: "intervenants", valueEn: "speakers" },
-  // session-type labels — EN values fixed here (previously French-only regardless of locale)
-  { key: "programme.sessionType.KEYNOTE", category: "programme", valueFr: "Keynote", valueEn: "Keynote" },
-  { key: "programme.sessionType.PANEL", category: "programme", valueFr: "Panel", valueEn: "Panel" },
-  { key: "programme.sessionType.BREAK", category: "programme", valueFr: "Pause", valueEn: "Break" },
-  { key: "programme.sessionType.NETWORKING", category: "programme", valueFr: "Networking", valueEn: "Networking" },
-  { key: "programme.sessionType.CLOSING", category: "programme", valueFr: "Clôture", valueEn: "Closing" },
-  { key: "programme.sessionType.WORKSHOP", category: "programme", valueFr: "Atelier", valueEn: "Workshop" },
-  { key: "programme.sessionType.SESSION", category: "programme", valueFr: "Session", valueEn: "Session" },
-
-  // --- speakers ---
-  { key: "speakers.hero.eyebrow", category: "speakers", valueFr: "Speakers", valueEn: "Speakers" },
-  { key: "speakers.hero.title", category: "speakers", valueFr: "Intervenants", valueEn: "Speakers" },
-  { key: "speakers.hero.subtitle", category: "speakers", valueFr: "Des experts reconnus, des leaders inspirants et des praticiens de renom partagent leur vision du PMO du futur.", valueEn: "Recognized experts, inspiring leaders and renowned practitioners share their vision of the PMO of the future." },
-  { key: "speakers.stat.speakers", category: "speakers", valueFr: "intervenants", valueEn: "speakers" },
-  { key: "speakers.stat.featured", category: "speakers", valueFr: "en vedette", valueEn: "featured" },
-  { key: "speakers.emptyState", category: "speakers", valueFr: "Les intervenants seront bientôt annoncés.", valueEn: "Speakers will be announced soon." },
-  { key: "speakers.search.placeholder", category: "speakers", valueFr: "Rechercher un intervenant…", valueEn: "Search a speaker…" },
-  { key: "speakers.filter.all", category: "speakers", valueFr: "Tous", valueEn: "All" },
-  { key: "speakers.filter.featured", category: "speakers", valueFr: "Vedettes", valueEn: "Featured" },
-  { key: "speakers.noResults", category: "speakers", valueFr: "Aucun intervenant trouvé.", valueEn: "No speakers found." },
-  { key: "speakers.badge.featured", category: "speakers", valueFr: "Vedette", valueEn: "Featured" },
-  { key: "speakers.modal.biography", category: "speakers", valueFr: "Biographie", valueEn: "Biography" },
-  { key: "speakers.modal.featuredBadge", category: "speakers", valueFr: "Speaker vedette", valueEn: "Featured speaker" },
-
-  // --- passes ---
-  { key: "passes.duo.eyebrow", category: "passes", valueFr: "Billet", valueEn: "Ticket" },
-  { key: "passes.duo.title", category: "passes", valueFr: "Pass Duo", valueEn: "Duo Pass" },
-  { key: "passes.duo.subtitle", category: "passes", valueFr: "La formule complète : Événement + 1 jour de Formation. Le meilleur rapport qualité-prix.", valueEn: "The complete package: Event + 1 Training day. Best value for money." },
-  { key: "passes.evenement.eyebrow", category: "passes", valueFr: "Billet", valueEn: "Ticket" },
-  { key: "passes.evenement.title", category: "passes", valueFr: "Pass Événement", valueEn: "Event Pass" },
-  { key: "passes.evenement.subtitle", category: "passes", valueFr: "L'accès complet aux deux jours de conférence, keynotes et panels.", valueEn: "Full access to both conference days, keynotes and panels." },
-  { key: "passes.formation.eyebrow", category: "passes", valueFr: "Billet", valueEn: "Ticket" },
-  { key: "passes.formation.title", category: "passes", valueFr: "Pass Formation", valueEn: "Training Pass" },
-  { key: "passes.formation.subtitle", category: "passes", valueFr: "Un jour de formation pratique pour monter en compétences sur des thématiques ciblées.", valueEn: "A practical training day to build skills on targeted topics." },
-  { key: "passes.detail.includes", category: "passes", valueFr: "Ce pass inclut", valueEn: "This pass includes" },
-  { key: "passes.detail.priceHt", category: "passes", valueFr: "HT", valueEn: "ex. VAT" },
-  { key: "passes.detail.vat", category: "passes", valueFr: "TVA", valueEn: "VAT" },
-  { key: "passes.detail.ttc", category: "passes", valueFr: "TTC", valueEn: "inc. VAT" },
-  { key: "passes.detail.registrationSoon", category: "passes", valueFr: "Inscriptions bientôt ouvertes", valueEn: "Registration opening soon" },
-  { key: "passes.detail.minQty", category: "passes", valueFr: "Quantité minimum", valueEn: "Minimum quantity" },
-  { key: "passes.detail.otherPasses", category: "passes", valueFr: "Autres passes", valueEn: "Other passes" },
-  { key: "passes.detail.guarantee", category: "passes", valueFr: "Paiement sécurisé", valueEn: "Secure payment" },
-  { key: "passes.detail.backToPasses", category: "passes", valueFr: "Voir tous les passes", valueEn: "View all passes" },
-  { key: "passes.detail.perPerson", category: "passes", valueFr: "/ personne", valueEn: "/ person" },
-  { key: "passes.detail.recommendedBadge", category: "passes", valueFr: "Formule recommandée", valueEn: "Recommended package" },
-  { key: "passes.detail.priceLabel", category: "passes", valueFr: "Tarif", valueEn: "Price" },
-  { key: "passes.detail.access2days", category: "passes", valueFr: "Accès 2 jours", valueEn: "2-day access" },
-  { key: "passes.detail.networkingIncluded", category: "passes", valueFr: "Networking inclus", valueEn: "Networking included" },
-  { key: "passes.recommended", category: "passes", valueFr: "Recommandé", valueEn: "Recommended" },
-
-  // --- partners ---
-  { key: "partners.hero.eyebrow", category: "partners", valueFr: "Sponsors", valueEn: "Sponsors" },
-  { key: "partners.hero.title", category: "partners", valueFr: "Partenaires", valueEn: "Partners" },
-  { key: "partners.hero.subtitle", category: "partners", valueFr: "Ils soutiennent PMO Mastery et accompagnent le développement de l'excellence PMO en Tunisie et dans la région.", valueEn: "They support PMO Mastery and foster the development of PMO excellence in Tunisia and the region." },
-  { key: "partners.visitSite", category: "partners", valueFr: "Visiter le site", valueEn: "Visit website" },
+  { key: "home.emptyState.title", category: "home", valueFr: "Événement à venir", valueEn: "Event coming soon" },
+  { key: "home.gallery.cta", category: "home", valueFr: "Voir toute la galerie", valueEn: "View full gallery" },
+  { key: "home.gallery.subtitle", category: "home", valueFr: "Revivez les temps forts en images et en vidéos", valueEn: "Relive the highlights in photos and videos" },
+  { key: "home.gallery.title", category: "home", valueFr: "Moments", valueEn: "Highlights" },
+  { key: "home.hero.badge", category: "home", valueFr: "Événement international", valueEn: "International event" },
+  { key: "home.hero.ctaSecondary", category: "home", valueFr: "Découvrir le programme", valueEn: "View programme" },
+  { key: "home.partners.subtitle", category: "home", valueFr: "Ils soutiennent PMO Mastery", valueEn: "They support PMO Mastery" },
+  { key: "home.partners.title", category: "home", valueFr: "Partenaires", valueEn: "Partners" },
+  { key: "home.partners.viewAll", category: "home", valueFr: "Voir tous les partenaires", valueEn: "View all partners" },
+  { key: "home.passes.cta", category: "home", valueFr: "Comparer tous les passes", valueEn: "Compare all passes" },
+  { key: "home.passes.subtitle", category: "home", valueFr: "Des formules adaptées à chaque besoin", valueEn: "Options for every need" },
+  { key: "home.passes.title", category: "home", valueFr: "Choisissez votre pass", valueEn: "Choose your pass" },
+  { key: "home.programme.cta", category: "home", valueFr: "Voir le programme complet", valueEn: "View full programme" },
+  { key: "home.programme.subtitle", category: "home", valueFr: "2 jours intensifs d'échanges et d'apprentissage", valueEn: "2 intensive days of exchange and learning" },
+  { key: "home.programme.title", category: "home", valueFr: "Programme", valueEn: "Programme" },
+  { key: "home.speakers.cta", category: "home", valueFr: "Voir tous les intervenants", valueEn: "View all speakers" },
+  { key: "home.speakers.subtitle", category: "home", valueFr: "Des experts reconnus partagent leur vision", valueEn: "Renowned experts share their vision" },
+  { key: "home.speakers.title", category: "home", valueFr: "Intervenants", valueEn: "Speakers" },
+  { key: "home.stat.days", category: "home", valueFr: "Jours", valueEn: "Days" },
+  { key: "home.stat.partners", category: "home", valueFr: "Partenaires", valueEn: "Partners" },
+  { key: "home.stat.passes", category: "home", valueFr: "Pass disponibles", valueEn: "Passes" },
+  { key: "home.stat.speakers", category: "home", valueFr: "Intervenants", valueEn: "Speakers" },
+  { key: "home.venueLink", category: "home", valueFr: "Voir le lieu", valueEn: "View venue" },
+  { key: "nav.contact", category: "nav", valueFr: "Contact", valueEn: "Contact" },
+  { key: "nav.cta.register", category: "nav", valueFr: "Je m'inscris", valueEn: "Register" },
+  { key: "nav.event", category: "nav", valueFr: "Événement", valueEn: "Event" },
+  { key: "nav.event.passDuo", category: "nav", valueFr: "Pass Duo", valueEn: "Duo Pass" },
+  { key: "nav.event.passEvenement", category: "nav", valueFr: "Pass Événement", valueEn: "Event Pass" },
+  { key: "nav.event.passFormation", category: "nav", valueFr: "Pass Formation", valueEn: "Training Pass" },
+  { key: "nav.event.programme", category: "nav", valueFr: "Programme", valueEn: "Programme" },
+  { key: "nav.gallery", category: "nav", valueFr: "Moments", valueEn: "Highlights" },
+  { key: "nav.home", category: "nav", valueFr: "Accueil", valueEn: "Home" },
+  { key: "nav.organizers", category: "nav", valueFr: "Organisateurs", valueEn: "Organizers" },
+  { key: "nav.orgPartners", category: "nav", valueFr: "Organisateurs & Partenaires", valueEn: "Organizers & Partners" },
+  { key: "nav.partners", category: "nav", valueFr: "Partenaires", valueEn: "Partners" },
+  { key: "nav.speakers", category: "nav", valueFr: "Intervenants", valueEn: "Speakers" },
+  { key: "organizers.aboutOrg", category: "organizers", valueFr: "À propos", valueEn: "About" },
+  { key: "organizers.credentials", category: "organizers", valueFr: "Certifications", valueEn: "Credentials" },
+  { key: "organizers.ctaButton", category: "organizers", valueFr: "Voir les partenaires", valueEn: "View partners" },
+  { key: "organizers.ctaText", category: "organizers", valueFr: "Découvrez aussi nos partenaires qui soutiennent l'événement.", valueEn: "Also discover our partners who support the event." },
+  { key: "organizers.emptyState", category: "organizers", valueFr: "Les organisateurs seront bientôt présentés.", valueEn: "Organizers will be showcased soon." },
+  { key: "organizers.founderLabel", category: "organizers", valueFr: "Fondatrice", valueEn: "Founder" },
+  { key: "organizers.hero.eyebrow", category: "organizers", valueFr: "L'équipe", valueEn: "The team" },
+  { key: "organizers.hero.subtitle", category: "organizers", valueFr: "L'équipe derrière PMO Mastery, engagée pour l'excellence du PMO en Tunisie et dans la région MENA.", valueEn: "The team behind PMO Mastery, committed to PMO excellence in Tunisia and the MENA region." },
+  { key: "organizers.hero.title", category: "organizers", valueFr: "Organisateurs", valueEn: "Organizers" },
+  { key: "organizers.website", category: "organizers", valueFr: "Site web", valueEn: "Website" },
   { key: "partners.becomePartner", category: "partners", valueFr: "Devenir partenaire", valueEn: "Become a partner" },
   { key: "partners.becomePartnerDesc", category: "partners", valueFr: "Vous souhaitez associer votre marque à PMO Mastery ? Contactez notre équipe pour découvrir nos offres de partenariat.", valueEn: "Want to associate your brand with PMO Mastery? Contact our team to discover our partnership offers." },
   { key: "partners.contactUs", category: "partners", valueFr: "Nous contacter", valueEn: "Contact us" },
-  { key: "partners.emptyState", category: "partners", valueFr: "Les partenaires seront bientôt annoncés.", valueEn: "Partners will be announced soon." },
   { key: "partners.countSuffix", category: "partners", valueFr: "partenaire(s)", valueEn: "partner(s)" },
-  { key: "partners.tier.STRATEGIC", category: "partners", valueFr: "Partenaires stratégiques", valueEn: "Strategic partners" },
+  { key: "partners.emptyState", category: "partners", valueFr: "Les partenaires seront bientôt annoncés.", valueEn: "Partners will be announced soon." },
+  { key: "partners.hero.eyebrow", category: "partners", valueFr: "Sponsors", valueEn: "Sponsors" },
+  { key: "partners.hero.subtitle", category: "partners", valueFr: "Ils soutiennent PMO Mastery et accompagnent le développement de l'excellence PMO en Tunisie et dans la région.", valueEn: "They support PMO Mastery and foster the development of PMO excellence in Tunisia and the region." },
+  { key: "partners.hero.title", category: "partners", valueFr: "Partenaires", valueEn: "Partners" },
   { key: "partners.tier.DIAMOND", category: "partners", valueFr: "Partenaires Diamond", valueEn: "Diamond partners" },
   { key: "partners.tier.GOLD", category: "partners", valueFr: "Partenaires Gold", valueEn: "Gold partners" },
-  { key: "partners.tier.SILVER", category: "partners", valueFr: "Partenaires Silver", valueEn: "Silver partners" },
-  { key: "partners.tier.MEDIA", category: "partners", valueFr: "Partenaires média", valueEn: "Media partners" },
   { key: "partners.tier.INSTITUTIONAL", category: "partners", valueFr: "Partenaires institutionnels", valueEn: "Institutional partners" },
+  { key: "partners.tier.MEDIA", category: "partners", valueFr: "Partenaires média", valueEn: "Media partners" },
   { key: "partners.tier.PARTNER", category: "partners", valueFr: "Partenaires", valueEn: "Partners" },
-
-  // --- organizers ---
-  { key: "organizers.hero.eyebrow", category: "organizers", valueFr: "L'équipe", valueEn: "The team" },
-  { key: "organizers.hero.title", category: "organizers", valueFr: "Organisateurs", valueEn: "Organizers" },
-  { key: "organizers.hero.subtitle", category: "organizers", valueFr: "L'équipe derrière PMO Mastery, engagée pour l'excellence du PMO en Tunisie et dans la région MENA.", valueEn: "The team behind PMO Mastery, committed to PMO excellence in Tunisia and the MENA region." },
-  { key: "organizers.founderLabel", category: "organizers", valueFr: "Fondatrice", valueEn: "Founder" },
-  { key: "organizers.aboutOrg", category: "organizers", valueFr: "À propos", valueEn: "About" },
-  { key: "organizers.credentials", category: "organizers", valueFr: "Certifications", valueEn: "Credentials" },
-  { key: "organizers.website", category: "organizers", valueFr: "Site web", valueEn: "Website" },
-  { key: "organizers.emptyState", category: "organizers", valueFr: "Les organisateurs seront bientôt présentés.", valueEn: "Organizers will be showcased soon." },
-  { key: "organizers.ctaText", category: "organizers", valueFr: "Découvrez aussi nos partenaires qui soutiennent l'événement.", valueEn: "Also discover our partners who support the event." },
-  { key: "organizers.ctaButton", category: "organizers", valueFr: "Voir les partenaires", valueEn: "View partners" },
-
-  // --- contact ---
-  { key: "contact.hero.eyebrow", category: "contact", valueFr: "Échangeons", valueEn: "Let's talk" },
-  { key: "contact.hero.title", category: "contact", valueFr: "Contact", valueEn: "Contact" },
-  { key: "contact.hero.subtitle", category: "contact", valueFr: "Une question, une demande de partenariat ou besoin d'informations ? Notre équipe vous répond rapidement.", valueEn: "A question, a partnership request or need information? Our team responds quickly." },
-  { key: "contact.formTitle", category: "contact", valueFr: "Envoyez-nous un message", valueEn: "Send us a message" },
-  { key: "contact.infoTitle", category: "contact", valueFr: "Informations de contact", valueEn: "Contact information" },
-  { key: "contact.email", category: "contact", valueFr: "Email", valueEn: "Email" },
-  { key: "contact.phone", category: "contact", valueFr: "Téléphone", valueEn: "Phone" },
-  { key: "contact.address", category: "contact", valueFr: "Adresse", valueEn: "Address" },
-  { key: "contact.hours", category: "contact", valueFr: "Horaires", valueEn: "Hours" },
-  { key: "contact.followUs", category: "contact", valueFr: "Suivez-nous", valueEn: "Follow us" },
-  { key: "contact.hoursValue", category: "contact", valueFr: "Lun – Ven · 9h00 – 18h00", valueEn: "Mon – Fri · 9:00 AM – 6:00 PM" },
-  { key: "contact.form.nameLabel", category: "contact", valueFr: "Nom complet", valueEn: "Full name" },
-  { key: "contact.form.namePlaceholder", category: "contact", valueFr: "Votre nom", valueEn: "Your name" },
-  // email placeholder — EN value fixed here (was always French-style regardless of locale)
-  { key: "contact.form.emailPlaceholder", category: "contact", valueFr: "vous@exemple.com", valueEn: "you@example.com" },
-  { key: "contact.form.phonePlaceholder", category: "contact", valueFr: "+216 …", valueEn: "+216 …" },
-  { key: "contact.form.subjectLabel", category: "contact", valueFr: "Sujet", valueEn: "Subject" },
-  { key: "contact.form.messageLabel", category: "contact", valueFr: "Message", valueEn: "Message" },
-  { key: "contact.form.messagePlaceholder", category: "contact", valueFr: "Votre message…", valueEn: "Your message…" },
-  { key: "contact.form.sending", category: "contact", valueFr: "Envoi…", valueEn: "Sending…" },
-  { key: "contact.form.send", category: "contact", valueFr: "Envoyer le message", valueEn: "Send message" },
-  { key: "contact.form.successTitle", category: "contact", valueFr: "Message envoyé !", valueEn: "Message sent!" },
-  { key: "contact.form.successBody", category: "contact", valueFr: "Nous vous répondrons dans les plus brefs délais.", valueEn: "We'll get back to you as soon as possible." },
-  { key: "contact.form.sendAnother", category: "contact", valueFr: "Envoyer un autre message", valueEn: "Send another message" },
-  // error toast fallback — EN value fixed here (was always French regardless of locale)
-  { key: "contact.form.errorFallback", category: "contact", valueFr: "Échec de l'envoi.", valueEn: "Failed to send." },
-
-  // --- footer ---
-  { key: "footer.nav", category: "footer", valueFr: "Navigation", valueEn: "Navigation" },
-  { key: "footer.passesHeading", category: "footer", valueFr: "Pass", valueEn: "Pass" },
-  { key: "footer.followUs", category: "footer", valueFr: "Suivez-nous", valueEn: "Follow us" },
-  { key: "footer.rights", category: "footer", valueFr: "Tous droits réservés.", valueEn: "All rights reserved." },
-  { key: "footer.taglineDefault", category: "footer", valueFr: "Événement international pour les leaders des PMO.", valueEn: "International event for PMO leaders." },
-  { key: "footer.bottomTagline", category: "footer", valueFr: "Conçu avec passion pour les leaders PMO", valueEn: "Crafted with passion for PMO leaders" },
-
-  // --- countdown ---
-  { key: "countdown.days", category: "countdown", valueFr: "Jours", valueEn: "Days" },
-  { key: "countdown.hours", category: "countdown", valueFr: "Heures", valueEn: "Hours" },
-  { key: "countdown.minutes", category: "countdown", valueFr: "Minutes", valueEn: "Minutes" },
-  { key: "countdown.seconds", category: "countdown", valueFr: "Secondes", valueEn: "Seconds" },
-  { key: "countdown.inProgress", category: "countdown", valueFr: "Événement en cours", valueEn: "Event in progress" },
-  { key: "countdown.ended", category: "countdown", valueFr: "Événement terminé", valueEn: "Event ended" },
+  { key: "partners.tier.SILVER", category: "partners", valueFr: "Partenaires Silver", valueEn: "Silver partners" },
+  { key: "partners.tier.STRATEGIC", category: "partners", valueFr: "Partenaires stratégiques", valueEn: "Strategic partners" },
+  { key: "partners.visitSite", category: "partners", valueFr: "Visiter le site", valueEn: "Visit website" },
+  { key: "passes.detail.access2days", category: "passes", valueFr: "Accès 2 jours", valueEn: "2-day access" },
+  { key: "passes.detail.backToPasses", category: "passes", valueFr: "Voir tous les passes", valueEn: "View all passes" },
+  { key: "passes.detail.guarantee", category: "passes", valueFr: "Paiement sécurisé", valueEn: "Secure payment" },
+  { key: "passes.detail.includes", category: "passes", valueFr: "Ce pass inclut", valueEn: "This pass includes" },
+  { key: "passes.detail.minQty", category: "passes", valueFr: "Quantité minimum", valueEn: "Minimum quantity" },
+  { key: "passes.detail.networkingIncluded", category: "passes", valueFr: "Networking inclus", valueEn: "Networking included" },
+  { key: "passes.detail.otherPasses", category: "passes", valueFr: "Autres passes", valueEn: "Other passes" },
+  { key: "passes.detail.perPerson", category: "passes", valueFr: "/ personne", valueEn: "/ person" },
+  { key: "passes.detail.priceHt", category: "passes", valueFr: "HT", valueEn: "ex. VAT" },
+  { key: "passes.detail.priceLabel", category: "passes", valueFr: "Tarif", valueEn: "Price" },
+  { key: "passes.detail.recommendedBadge", category: "passes", valueFr: "Formule recommandée", valueEn: "Recommended package" },
+  { key: "passes.detail.registrationSoon", category: "passes", valueFr: "Inscriptions bientôt ouvertes", valueEn: "Registration opening soon" },
+  { key: "passes.detail.ttc", category: "passes", valueFr: "TTC", valueEn: "inc. VAT" },
+  { key: "passes.detail.vat", category: "passes", valueFr: "TVA", valueEn: "VAT" },
+  { key: "passes.duo.eyebrow", category: "passes", valueFr: "Billet", valueEn: "Ticket" },
+  { key: "passes.duo.subtitle", category: "passes", valueFr: "La formule complète : Événement + 1 jour de Formation. Le meilleur rapport qualité-prix.", valueEn: "The complete package: Event + 1 Training day. Best value for money." },
+  { key: "passes.duo.title", category: "passes", valueFr: "Pass Duo", valueEn: "Duo Pass" },
+  { key: "passes.evenement.eyebrow", category: "passes", valueFr: "Billet", valueEn: "Ticket" },
+  { key: "passes.evenement.subtitle", category: "passes", valueFr: "L'accès complet aux deux jours de conférence, keynotes et panels.", valueEn: "Full access to both conference days, keynotes and panels." },
+  { key: "passes.evenement.title", category: "passes", valueFr: "Pass Événement", valueEn: "Event Pass" },
+  { key: "passes.formation.eyebrow", category: "passes", valueFr: "Billet", valueEn: "Ticket" },
+  { key: "passes.formation.subtitle", category: "passes", valueFr: "Un jour de formation pratique pour monter en compétences sur des thématiques ciblées.", valueEn: "A practical training day to build skills on targeted topics." },
+  { key: "passes.formation.title", category: "passes", valueFr: "Pass Formation", valueEn: "Training Pass" },
+  { key: "passes.recommended", category: "passes", valueFr: "Recommandé", valueEn: "Recommended" },
+  { key: "programme.dayLabel", category: "programme", valueFr: "Jour", valueEn: "Day" },
+  { key: "programme.emptyState.subtitle", category: "programme", valueFr: "Le programme sera bientôt publié.", valueEn: "The programme will be published soon." },
+  { key: "programme.hero.eyebrow", category: "programme", valueFr: "Agenda", valueEn: "Schedule" },
+  { key: "programme.hero.subtitle", category: "programme", valueFr: "2 jours intensifs d'échanges, d'apprentissage et de networking au cœur des meilleures pratiques PMO.", valueEn: "2 intensive days of exchange, learning and networking at the heart of best PMO practices." },
+  { key: "programme.hero.title", category: "programme", valueFr: "Programme", valueEn: "Programme" },
+  { key: "programme.sessionType.BREAK", category: "programme", valueFr: "Pause", valueEn: "Break" },
+  { key: "programme.sessionType.CLOSING", category: "programme", valueFr: "Clôture", valueEn: "Closing" },
+  { key: "programme.sessionType.KEYNOTE", category: "programme", valueFr: "Keynote", valueEn: "Keynote" },
+  { key: "programme.sessionType.NETWORKING", category: "programme", valueFr: "Networking", valueEn: "Networking" },
+  { key: "programme.sessionType.PANEL", category: "programme", valueFr: "Panel", valueEn: "Panel" },
+  { key: "programme.sessionType.SESSION", category: "programme", valueFr: "Session", valueEn: "Session" },
+  { key: "programme.sessionType.WORKSHOP", category: "programme", valueFr: "Atelier", valueEn: "Workshop" },
+  { key: "programme.stat.days", category: "programme", valueFr: "jours", valueEn: "days" },
+  { key: "programme.stat.speakers", category: "programme", valueFr: "intervenants", valueEn: "speakers" },
+  { key: "speakers.badge.featured", category: "speakers", valueFr: "Vedette", valueEn: "Featured" },
+  { key: "speakers.emptyState", category: "speakers", valueFr: "Les intervenants seront bientôt annoncés.", valueEn: "Speakers will be announced soon." },
+  { key: "speakers.filter.all", category: "speakers", valueFr: "Tous", valueEn: "All" },
+  { key: "speakers.filter.featured", category: "speakers", valueFr: "Vedettes", valueEn: "Featured" },
+  { key: "speakers.hero.eyebrow", category: "speakers", valueFr: "Speakers", valueEn: "Speakers" },
+  { key: "speakers.hero.subtitle", category: "speakers", valueFr: "Des experts reconnus, des leaders inspirants et des praticiens de renom partagent leur vision du PMO du futur.", valueEn: "Recognized experts, inspiring leaders and renowned practitioners share their vision of the PMO of the future." },
+  { key: "speakers.hero.title", category: "speakers", valueFr: "Intervenants", valueEn: "Speakers" },
+  { key: "speakers.modal.biography", category: "speakers", valueFr: "Biographie", valueEn: "Biography" },
+  { key: "speakers.modal.featuredBadge", category: "speakers", valueFr: "Speaker vedette", valueEn: "Featured speaker" },
+  { key: "speakers.noResults", category: "speakers", valueFr: "Aucun intervenant trouvé.", valueEn: "No speakers found." },
+  { key: "speakers.search.placeholder", category: "speakers", valueFr: "Rechercher un intervenant…", valueEn: "Search a speaker…" },
+  { key: "speakers.stat.featured", category: "speakers", valueFr: "en vedette", valueEn: "featured" },
+  { key: "speakers.stat.speakers", category: "speakers", valueFr: "intervenants", valueEn: "speakers" },
 ]
 
 export async function seedUiText() {
@@ -1234,72 +3192,57 @@ export async function seedUiText() {
 }
 
 // ---------------------------------------------------------------------------
-// SEO meta catalog — admin-editable per-page title/description/OG image.
-// Global, upserted by page key so re-seeding never clobbers an admin's
-// edits. Initial values mirror the copy already used as the `ui()` fallback
-// on each page's hero, so the migration is visually invisible until an
-// admin actually edits something.
+// SEO meta catalog — per-page title/description defaults.
 // ---------------------------------------------------------------------------
 
-const SEO_META: { page: string; titleFr: string; titleEn: string; descriptionFr: string; descriptionEn: string }[] = [
+const SEO_META: { page: string; titleFr?: string | null; titleEn?: string | null; descriptionFr?: string | null; descriptionEn?: string | null; ogImage?: string | null }[] = [
   {
-    page: "home",
-    titleFr: "PMO Mastery — Le PMO du Futur : Stratégie, IA et Performance",
-    titleEn: "PMO Mastery — International Event for PMO Leaders",
-    descriptionFr:
-      "Événement international pour les leaders des PMO. Deux jours intensifs au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership.",
-    descriptionEn:
-      "International event for PMO leaders. Two intensive days on best practices in project management, PMO, change management, AI and leadership.",
+    page: "contact",
+    titleFr: "Contact",
+    titleEn: "Contact",
+    descriptionFr: "Une question, une demande de partenariat ou besoin d'informations ? Contactez l'équipe PMO Mastery.",
+    descriptionEn: "A question, a partnership request or need information? Get in touch with the PMO Mastery team.",
+    ogImage: null,
   },
   {
     page: "evenement",
     titleFr: "L'événement",
     titleEn: "The Event",
-    descriptionFr:
-      "Dates, lieu, programme et informations pratiques sur PMO Mastery — l'événement international dédié aux leaders PMO.",
-    descriptionEn:
-      "Dates, venue, programme and practical information about PMO Mastery — the international event for PMO leaders.",
+    descriptionFr: "Dates, lieu, programme et informations pratiques sur PMO Mastery — l'événement international dédié aux leaders PMO.",
+    descriptionEn: "Dates, venue, programme and practical information about PMO Mastery — the international event for PMO leaders.",
+    ogImage: null,
   },
   {
-    page: "programme",
-    titleFr: "Programme",
-    titleEn: "Programme",
-    descriptionFr:
-      "2 jours intensifs d'échanges, d'apprentissage et de networking au cœur des meilleures pratiques PMO.",
-    descriptionEn: "2 intensive days of exchange, learning and networking at the heart of best PMO practices.",
-  },
-  {
-    page: "contact",
-    titleFr: "Contact",
-    titleEn: "Contact",
-    descriptionFr:
-      "Une question, une demande de partenariat ou besoin d'informations ? Contactez l'équipe PMO Mastery.",
-    descriptionEn: "A question, a partnership request or need information? Get in touch with the PMO Mastery team.",
+    page: "home",
+    titleFr: "PMO Mastery — Le PMO du Futur : Stratégie, IA et Performance",
+    titleEn: "PMO Mastery — International Event for PMO Leaders",
+    descriptionFr: "Événement international pour les leaders des PMO. Deux jours intensifs au cœur des meilleures pratiques en management de projets, PMO, conduite du changement, IA et leadership.",
+    descriptionEn: "International event for PMO leaders. Two intensive days on best practices in project management, PMO, change management, AI and leadership.",
+    ogImage: null,
   },
   {
     page: "intervenants",
     titleFr: "Intervenants",
     titleEn: "Speakers",
-    descriptionFr:
-      "Des experts reconnus, des leaders inspirants et des praticiens de renom partagent leur vision du PMO du futur.",
-    descriptionEn:
-      "Recognized experts, inspiring leaders and renowned practitioners share their vision of the PMO of the future.",
+    descriptionFr: "Des experts reconnus, des leaders inspirants et des praticiens de renom partagent leur vision du PMO du futur.",
+    descriptionEn: "Recognized experts, inspiring leaders and renowned practitioners share their vision of the PMO of the future.",
+    ogImage: null,
   },
   {
     page: "organisateurs",
     titleFr: "Organisateurs",
     titleEn: "Organizers",
-    descriptionFr:
-      "L'équipe derrière PMO Mastery, engagée pour l'excellence du PMO en Tunisie et dans la région MENA.",
+    descriptionFr: "L'équipe derrière PMO Mastery, engagée pour l'excellence du PMO en Tunisie et dans la région MENA.",
     descriptionEn: "The team behind PMO Mastery, committed to PMO excellence in Tunisia and the MENA region.",
+    ogImage: null,
   },
   {
     page: "partenaires",
     titleFr: "Partenaires",
     titleEn: "Partners",
-    descriptionFr:
-      "Ils soutiennent PMO Mastery et accompagnent le développement de l'excellence PMO en Tunisie et dans la région.",
+    descriptionFr: "Ils soutiennent PMO Mastery et accompagnent le développement de l'excellence PMO en Tunisie et dans la région.",
     descriptionEn: "They support PMO Mastery and foster the development of PMO excellence in Tunisia and the region.",
+    ogImage: null,
   },
   {
     page: "pass-duo",
@@ -1307,6 +3250,7 @@ const SEO_META: { page: string; titleFr: string; titleEn: string; descriptionFr:
     titleEn: "Duo Pass",
     descriptionFr: "La formule complète : Événement + 1 jour de Formation. Le meilleur rapport qualité-prix.",
     descriptionEn: "The complete package: Event + 1 Training day. Best value for money.",
+    ogImage: null,
   },
   {
     page: "pass-evenement",
@@ -1314,6 +3258,7 @@ const SEO_META: { page: string; titleFr: string; titleEn: string; descriptionFr:
     titleEn: "Event Pass",
     descriptionFr: "L'accès complet aux deux jours de conférence, keynotes et panels.",
     descriptionEn: "Full access to both conference days, keynotes and panels.",
+    ogImage: null,
   },
   {
     page: "pass-formation",
@@ -1321,6 +3266,15 @@ const SEO_META: { page: string; titleFr: string; titleEn: string; descriptionFr:
     titleEn: "Training Pass",
     descriptionFr: "Un jour de formation pratique pour monter en compétences sur des thématiques ciblées.",
     descriptionEn: "A practical training day to build skills on targeted topics.",
+    ogImage: null,
+  },
+  {
+    page: "programme",
+    titleFr: null,
+    titleEn: null,
+    descriptionFr: null,
+    descriptionEn: null,
+    ogImage: null,
   },
 ]
 

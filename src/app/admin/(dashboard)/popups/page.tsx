@@ -256,7 +256,7 @@ export default function PopupsPage() {
                 <Input
                   value={editing.ctaUrl ?? ""}
                   onChange={(e) => setEditing({ ...editing, ctaUrl: e.target.value })}
-                  placeholder="/pass-formation"
+                  placeholder="/passes"
                 />
               </Field>
 

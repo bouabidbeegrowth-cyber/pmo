@@ -10,6 +10,7 @@ interface Pass {
   slug: string
   nameFr: string
   nameEn?: string | null
+  image?: string | null
   descriptionFr?: string | null
   descriptionEn?: string | null
   price: number
@@ -28,14 +29,6 @@ interface Props {
   labels: { recommended: string; priceHt: string; vat: string; ttc: string; viewDetails: string }
 }
 
-const SLUG_TO_HREF: Record<string, string> = {
-  "pass-evenement": "/pass-evenement",
-  "pass-formation": "/pass-formation",
-  "pass-duo": "/pass-duo",
-  "pass-etudiant": "/pass-evenement",
-  "pass-equipe": "/pass-evenement",
-}
-
 export function PassesHomePreview({ passes, locale, labels }: Props) {
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -48,34 +41,47 @@ export function PassesHomePreview({ passes, locale, labels }: Props) {
           locale === "en" ? pass.featuresEn ?? pass.featuresFr : pass.featuresFr,
         )
         const priceTtc = pass.price + pass.price * pass.vatRate
-        const detailHref = SLUG_TO_HREF[pass.slug] ?? "/pass-duo"
+        const detailHref = "/passes"
 
         return (
           <div
             key={pass.id}
             className={cn(
-              "relative rounded-3xl p-6 sm:p-8 flex flex-col transition-all",
+              "relative rounded-3xl overflow-hidden flex flex-col transition-all",
               pass.isFeatured
                 ? "bg-white text-pmo-navy shadow-premium-lg lg:scale-105 ring-2 ring-pmo-gold"
                 : "bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/[0.08]",
             )}
           >
-            {pass.isFeatured && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-pmo-gold-gradient text-white text-[10px] font-bold uppercase tracking-wider px-4 py-1 shadow-premium">
-                ★ {labels.recommended}
+            {pass.image && (
+              <div className="relative aspect-video w-full overflow-hidden bg-muted">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={pass.image} alt={name} className="w-full h-full object-cover" />
               </div>
             )}
 
-            <h3 className={cn("font-display text-xl font-bold mb-1", pass.isFeatured ? "text-foreground" : "text-white")}>
-              {name}
-            </h3>
-            {description && (
-              <p className={cn("text-sm mb-4", pass.isFeatured ? "text-muted-foreground" : "text-white/60")}>
-                {description}
-              </p>
-            )}
+            <div className="relative p-6 sm:p-8 flex flex-col flex-1">
+              {pass.isFeatured && (
+                <div
+                  className={cn(
+                    "rounded-full bg-pmo-gold-gradient text-white text-[10px] font-bold uppercase tracking-wider px-4 py-1 shadow-premium w-fit mb-4",
+                    pass.image ? "" : "absolute -top-3 left-1/2 -translate-x-1/2 mb-0",
+                  )}
+                >
+                  ★ {labels.recommended}
+                </div>
+              )}
 
-            <div className="mb-6">
+              <h3 className={cn("font-display text-xl font-bold mb-1", pass.isFeatured ? "text-foreground" : "text-white")}>
+                {name}
+              </h3>
+              {description && (
+                <p className={cn("text-sm mb-4", pass.isFeatured ? "text-muted-foreground" : "text-white/60")}>
+                  {description}
+                </p>
+              )}
+
+              <div className="mb-6">
               <div className="flex items-baseline gap-1">
                 <span className={cn("font-display text-4xl font-bold", pass.isFeatured ? "text-foreground" : "text-white")}>
                   {formatPrice(pass.price, pass.currency, locale)}
@@ -119,6 +125,7 @@ export function PassesHomePreview({ passes, locale, labels }: Props) {
               {labels.viewDetails}
               <ArrowRight className="w-4 h-4" />
             </Link>
+            </div>
           </div>
         )
       })}

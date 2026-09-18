@@ -57,16 +57,14 @@ const PAGE_LABELS: Record<string, string> = {
   organisateurs: "Organisateurs",
   partenaires: "Partenaires",
   galerie: "Galerie",
-  "pass-duo": "Pass Duo",
-  "pass-evenement": "Pass Événement",
-  "pass-formation": "Pass Formation",
+  passes: "Passes & Billets",
 }
 
 const PAGE_ORDER = Object.keys(PAGE_LABELS)
 
 const SITEMAP_DEFAULT_PRIORITY: Record<string, number> = {
   home: 1, evenement: 0.9, programme: 0.9, intervenants: 0.8,
-  "pass-duo": 0.8, "pass-evenement": 0.8, "pass-formation": 0.8,
+  passes: 0.8,
   partenaires: 0.7, organisateurs: 0.6, contact: 0.5,
 }
 

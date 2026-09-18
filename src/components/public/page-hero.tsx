@@ -9,14 +9,16 @@ interface PageHeroProps {
   subtitle?: string
   breadcrumbs?: { href?: string; label: string }[]
   backgroundVideo?: string | null
+  backgroundImage?: string | null
 }
 
 /**
  * Shared hero band for inner public pages (not the home page).
  * Uses the premium navy gradient with subtle grid, or an optional single
- * autoplaying background video (opt-in per page via `backgroundVideo`).
+ * autoplaying background video (opt-in per page via `backgroundVideo`), or
+ * a static banner image (opt-in via `backgroundImage`).
  */
-export function PageHero({ eyebrow, title, subtitle, breadcrumbs, backgroundVideo }: PageHeroProps) {
+export function PageHero({ eyebrow, title, subtitle, breadcrumbs, backgroundVideo, backgroundImage }: PageHeroProps) {
   if (backgroundVideo) {
     return (
       <section className="relative bg-pmo-navy text-white overflow-hidden h-[440px] sm:h-[520px] lg:h-[600px] flex flex-col">
@@ -73,9 +75,19 @@ export function PageHero({ eyebrow, title, subtitle, breadcrumbs, backgroundVide
 
   return (
     <section className="relative bg-pmo-navy-gradient text-white overflow-hidden pt-32 pb-16 sm:pt-36 sm:pb-20">
-      <div className="absolute inset-0 bg-grid opacity-20" />
-      <div className="absolute -top-32 right-1/4 w-96 h-96 rounded-full bg-pmo-violet/20 blur-3xl" />
-      <div className="absolute -bottom-24 left-1/4 w-80 h-80 rounded-full bg-pmo-gold/10 blur-3xl" />
+      {backgroundImage ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={backgroundImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-pmo-navy via-pmo-navy/85 to-pmo-navy/60" />
+        </>
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-grid opacity-20" />
+          <div className="absolute -top-32 right-1/4 w-96 h-96 rounded-full bg-pmo-violet/20 blur-3xl" />
+          <div className="absolute -bottom-24 left-1/4 w-80 h-80 rounded-full bg-pmo-gold/10 blur-3xl" />
+        </>
+      )}
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {breadcrumbs && breadcrumbs.length > 0 && (

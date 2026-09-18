@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 
 // Keep in sync with whatsapp-button.tsx's ALLOWED_PATHS — the toast sits
 // higher on pages where the floating WhatsApp button is also present.
-const WHATSAPP_PATHS = ["/evenement", "/programme", "/pass-evenement", "/pass-formation", "/pass-duo"]
+const WHATSAPP_PATHS = ["/evenement", "/programme", "/passes"]
 
 export interface PopupItem {
   id: string

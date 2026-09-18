@@ -309,6 +309,7 @@ model Pass {
   slug            String
   nameFr          String
   nameEn          String?
+  image           String?
   descriptionFr   String?
   descriptionEn   String?
   price           Float

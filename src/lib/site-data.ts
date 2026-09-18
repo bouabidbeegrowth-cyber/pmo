@@ -115,6 +115,16 @@ export async function getGalleryHeroVideo() {
   return section.backgroundImage ?? null
 }
 
+/** The background banner image for the Passes page hero, if one is set. */
+export async function getPassesHeroImage() {
+  const active = await db.event.findFirst({ where: { isActive: true } })
+  if (!active) return null
+  const section = await db.websiteSection.findUnique({
+    where: { eventId_sectionKey: { eventId: active.id, sectionKey: "PASSES_HERO" } },
+  })
+  return section?.backgroundImage ?? null
+}
+
 /** Helper to pick the right localized string. */
 export function pick<T>(fr: T | null | undefined, en: T | null | undefined, locale: Locale): T | null | undefined {
   return locale === "en" ? (en ?? fr) : fr

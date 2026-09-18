@@ -12,6 +12,7 @@ const RESERVED_PATHS = new Set([
   "/intervenants",
   "/organisateurs",
   "/partenaires",
+  "/passes",
   "/pass-duo",
   "/pass-evenement",
   "/pass-formation",

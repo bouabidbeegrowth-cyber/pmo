@@ -24,9 +24,7 @@ interface NavLabels {
   home: string
   event: string
   eventProgramme: string
-  eventPassEvenement: string
-  eventPassFormation: string
-  eventPassDuo: string
+  eventPasses: string
   speakers: string
   orgPartners: string
   organizers: string
@@ -55,9 +53,7 @@ function buildNav(t: NavLabels) {
       href: "/evenement",
       children: [
         { href: "/programme", label: t.eventProgramme },
-        { href: "/pass-evenement", label: t.eventPassEvenement },
-        { href: "/pass-formation", label: t.eventPassFormation },
-        { href: "/pass-duo", label: t.eventPassDuo },
+        { href: "/passes", label: t.eventPasses },
       ],
     },
     { href: "/intervenants", label: t.speakers },
@@ -240,7 +236,7 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
               asChild
               className="hidden sm:flex hero-btn-gradient text-white hover:opacity-95 font-semibold rounded-full shadow-premium"
             >
-              <Link href="/pass-duo">
+              <Link href="/passes">
                 {labels.register}
                 <ArrowRight className="w-4 h-4 ml-1.5" />
               </Link>
@@ -313,7 +309,7 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
                     asChild
                     className="mt-auto hero-btn-gradient text-white hover:opacity-95 font-semibold rounded-full"
                   >
-                    <Link href="/pass-duo">
+                    <Link href="/passes">
                       {labels.register}
                       <ArrowRight className="w-4 h-4 ml-1.5" />
                     </Link>
