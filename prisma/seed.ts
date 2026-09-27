@@ -3277,7 +3277,7 @@ export async function seedUiText() {
   for (const row of UI_TEXT) {
     await db.uiText.upsert({
       where: { key: row.key },
-      update: {},
+      update: { valueFr: row.valueFr, valueEn: row.valueEn ?? null, category: row.category },
       create: row,
     })
   }
@@ -3374,7 +3374,13 @@ export async function seedSeoMeta() {
   for (const row of SEO_META) {
     await db.seoMeta.upsert({
       where: { page: row.page },
-      update: {},
+      update: {
+        titleFr: row.titleFr ?? null,
+        titleEn: row.titleEn ?? null,
+        descriptionFr: row.descriptionFr ?? null,
+        descriptionEn: row.descriptionEn ?? null,
+        ogImage: row.ogImage ?? null,
+      },
       create: row,
     })
   }
