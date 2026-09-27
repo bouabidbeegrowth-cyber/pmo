@@ -38,9 +38,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return fail("Invalid payment URL. Must start with http:// or https://", 400)
   }
 
+  const ALLOWED_CATEGORIES = ["EVENEMENT", "FORMATION", "DUO", "ETUDIANT", "AUTRE"]
+
   try {
     const data: Prisma.PassUpdateInput = {
       slug: body.slug ?? existing.slug,
+      category: ALLOWED_CATEGORIES.includes(body.category) ? body.category : existing.category,
       nameFr: body.nameFr ?? existing.nameFr,
       nameEn: body.nameEn !== undefined ? body.nameEn : existing.nameEn,
       image: body.image !== undefined ? safeUrl(body.image) : existing.image,

@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { Linkedin, Facebook, Instagram, Youtube, Mail, Phone, MapPin, Globe } from "lucide-react"
 
 interface ContactInfo {
   email?: string | null
@@ -32,6 +31,16 @@ interface FooterLabels {
   rights: string
   taglineDefault: string
   bottomTagline: string
+  legalTitle: string
+  ipLabel: string
+  ipText: string
+  dataLabel: string
+  dataTextStart: string
+  dataTextMid: string
+  cookiesLabel: string
+  cookiesText: string
+  hostingLabel: string
+  hostingTextStart: string
 }
 
 interface FooterProps {
@@ -43,181 +52,114 @@ interface FooterProps {
   labels: FooterLabels
 }
 
-export function SiteFooter({ contact, footerText, copyrightText, editionName, logo, labels: t }: FooterProps) {
+export function SiteFooter({ contact, footerText, copyrightText, editionName, labels: t }: FooterProps) {
+  const socialLinks = [
+    { url: contact?.facebookUrl, label: "Facebook" },
+    { url: contact?.linkedinUrl, label: "LinkedIn" },
+    { url: contact?.instagramUrl, label: "Instagram" },
+    { url: contact?.youtubeUrl, label: "YouTube" },
+    { url: contact?.websiteUrl, label: t.contact },
+  ].filter((s) => s.url)
 
   return (
-    <footer className="bg-pmo-navy-gradient text-white relative overflow-hidden mt-auto">
-      <div className="absolute inset-0 bg-grid opacity-10" />
-      <div className="absolute -top-24 left-1/3 w-72 h-72 rounded-full bg-pmo-violet/10 blur-3xl" />
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-        <div className="grid gap-10 lg:grid-cols-4">
+    <footer className="bg-pmo-navy-deep text-white mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 items-center">
           {/* Brand */}
-          <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              {logo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={logo} alt="PMO Mastery" className="h-9 w-auto" />
-              ) : (
-                <>
-                  <div className="w-9 h-9 rounded-xl bg-pmo-violet-gradient flex items-center justify-center font-display font-bold text-white text-base shadow-premium">
-                    P
-                  </div>
-                  <span className="font-display font-semibold text-white text-lg tracking-tight">
-                    PMO Mastery
-                  </span>
-                </>
-              )}
+          <div>
+            <Link href="/" className="inline-flex items-center gap-2 mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-dark-bg.png" alt="PMO Mastery" className="h-24 sm:h-28 w-auto object-contain" />
             </Link>
-            {editionName && (
-              <p className="text-pmo-gold text-sm font-medium mb-3">{editionName}</p>
-            )}
-            <p className="text-white/60 text-sm leading-relaxed">
-              {footerText ?? t.taglineDefault}
-            </p>
+            {editionName && <p className="text-pmo-gold text-sm font-medium mb-2">{editionName}</p>}
+            <p className="text-[15px] text-gray-300 leading-relaxed">{footerText ?? t.taglineDefault}</p>
           </div>
 
           {/* Navigation */}
           <div>
-            <h4 className="font-display font-semibold text-sm uppercase tracking-widest text-white/50 mb-4">
-              {t.nav}
-            </h4>
-            <ul className="space-y-2.5 text-sm">
-              <li>
-                <Link href="/" className="text-white/70 hover:text-white transition-colors">
-                  {t.home}
-                </Link>
-              </li>
-              <li>
-                <Link href="/evenement" className="text-white/70 hover:text-white transition-colors">
-                  {t.event}
-                </Link>
-              </li>
-              <li>
-                <Link href="/programme" className="text-white/70 hover:text-white transition-colors">
-                  {t.programme}
-                </Link>
-              </li>
-              <li>
-                <Link href="/intervenants" className="text-white/70 hover:text-white transition-colors">
-                  {t.speakers}
-                </Link>
-              </li>
-              <li>
-                <Link href="/partenaires" className="text-white/70 hover:text-white transition-colors">
-                  {t.partners}
-                </Link>
-              </li>
-              <li>
-                <Link href="/galerie" className="text-white/70 hover:text-white transition-colors">
-                  {t.gallery}
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-white/70 hover:text-white transition-colors">
-                  {t.contact}
-                </Link>
-              </li>
-            </ul>
+            <h3 className="text-[13px] font-bold uppercase tracking-[0.1em] mb-4">{t.nav}</h3>
+            <div className="space-y-2.5">
+              <Link href="/" className="block text-[15px] text-gray-300 hover:text-white transition-colors">{t.home}</Link>
+              <Link href="/evenement" className="block text-[15px] text-gray-300 hover:text-white transition-colors">{t.event}</Link>
+              <Link href="/programme" className="block text-[15px] text-gray-300 hover:text-white transition-colors">{t.programme}</Link>
+              <Link href="/intervenants" className="block text-[15px] text-gray-300 hover:text-white transition-colors">{t.speakers}</Link>
+              <Link href="/passes" className="block text-[15px] text-gray-300 hover:text-white transition-colors">{t.passesLink}</Link>
+              <Link href="/partenaires" className="block text-[15px] text-gray-300 hover:text-white transition-colors">{t.partners}</Link>
+              <Link href="/galerie" className="block text-[15px] text-gray-300 hover:text-white transition-colors">{t.gallery}</Link>
+              <Link href="/contact" className="block text-[15px] text-gray-300 hover:text-white transition-colors">{t.contact}</Link>
+            </div>
           </div>
 
-          {/* Passes */}
+          {/* Contact + Follow us */}
           <div>
-            <h4 className="font-display font-semibold text-sm uppercase tracking-widest text-white/50 mb-4">
-              {t.passesHeading}
-            </h4>
-            <ul className="space-y-2.5 text-sm">
-              <li>
-                <Link href="/passes" className="text-white/70 hover:text-white transition-colors">
-                  {t.passesLink}
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact + Social */}
-          <div>
-            <h4 className="font-display font-semibold text-sm uppercase tracking-widest text-white/50 mb-4">
-              {t.contact}
-            </h4>
-            <ul className="space-y-3 text-sm">
+            <h3 className="text-[13px] font-bold uppercase tracking-[0.1em] mb-4">{t.contact}</h3>
+            <div className="space-y-2.5 mb-6">
               {contact?.email && (
-                <li>
-                  <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
-                    <Mail className="w-4 h-4 text-pmo-gold shrink-0" />
-                    <span className="truncate">{contact.email}</span>
-                  </a>
-                </li>
+                <a href={`mailto:${contact.email}`} className="block text-[15px] text-gray-300 hover:text-white transition-colors">
+                  {contact.email}
+                </a>
               )}
               {contact?.phone && (
-                <li>
-                  <a href={`tel:${contact.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
-                    <Phone className="w-4 h-4 text-pmo-gold shrink-0" />
-                    <span>{contact.phone}</span>
-                  </a>
-                </li>
+                <a href={`tel:${contact.phone.replace(/\s/g, "")}`} className="block text-[15px] text-gray-300 hover:text-white transition-colors">
+                  {contact.phone}
+                </a>
               )}
-              {contact?.address && (
-                <li className="flex items-start gap-2 text-white/70">
-                  <MapPin className="w-4 h-4 text-pmo-gold shrink-0 mt-0.5" />
-                  <span>
-                    {contact.address}
-                    {(contact.city || contact.country) && (
-                      <><br />{[contact.city, contact.country].filter(Boolean).join(", ")}</>
-                    )}
-                  </span>
-                </li>
+              {(contact?.city || contact?.country) && (
+                <p className="text-[15px] text-gray-300">{[contact?.city, contact?.country].filter(Boolean).join(", ")}</p>
               )}
-            </ul>
+            </div>
 
-            {/* Social */}
-            {(contact?.linkedinUrl || contact?.facebookUrl || contact?.instagramUrl || contact?.youtubeUrl) && (
-              <div className="mt-5">
-                <p className="text-xs uppercase tracking-widest text-white/40 mb-2">{t.followUs}</p>
-                <div className="flex items-center gap-2">
-                  {contact?.linkedinUrl && (
-                    <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer"
-                       className="w-9 h-9 rounded-full bg-white/10 hover:bg-pmo-violet flex items-center justify-center text-white transition-colors">
-                      <Linkedin className="w-4 h-4" />
+            {socialLinks.length > 0 && (
+              <>
+                <h3 className="text-[13px] font-bold uppercase tracking-[0.1em] mb-4">{t.followUs}</h3>
+                <div className="space-y-2.5">
+                  {socialLinks.map((s) => (
+                    <a
+                      key={s.label}
+                      href={s.url!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-[15px] text-gray-300 hover:text-white transition-colors"
+                    >
+                      {s.label}
                     </a>
-                  )}
-                  {contact?.facebookUrl && (
-                    <a href={contact.facebookUrl} target="_blank" rel="noopener noreferrer"
-                       className="w-9 h-9 rounded-full bg-white/10 hover:bg-pmo-violet flex items-center justify-center text-white transition-colors">
-                      <Facebook className="w-4 h-4" />
-                    </a>
-                  )}
-                  {contact?.instagramUrl && (
-                    <a href={contact.instagramUrl} target="_blank" rel="noopener noreferrer"
-                       className="w-9 h-9 rounded-full bg-white/10 hover:bg-pmo-violet flex items-center justify-center text-white transition-colors">
-                      <Instagram className="w-4 h-4" />
-                    </a>
-                  )}
-                  {contact?.youtubeUrl && (
-                    <a href={contact.youtubeUrl} target="_blank" rel="noopener noreferrer"
-                       className="w-9 h-9 rounded-full bg-white/10 hover:bg-pmo-violet flex items-center justify-center text-white transition-colors">
-                      <Youtube className="w-4 h-4" />
-                    </a>
-                  )}
-                  {contact?.websiteUrl && (
-                    <a href={contact.websiteUrl} target="_blank" rel="noopener noreferrer"
-                       className="w-9 h-9 rounded-full bg-white/10 hover:bg-pmo-violet flex items-center justify-center text-white transition-colors">
-                      <Globe className="w-4 h-4" />
-                    </a>
-                  )}
+                  ))}
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>
+      </div>
 
-        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
-          <p>
-            {copyrightText || `© ${new Date().getFullYear()} PMO Mastery — Empowerment Paths. ${t.rights}`}
-          </p>
-          <p className="text-white/40">
-            {t.bottomTagline}
-          </p>
+      <div className="border-t border-gray-700/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <p className="text-[11px] font-bold uppercase tracking-[0.05em] text-white/80 mb-5">{t.legalTitle}</p>
+          <div className="text-xs text-gray-400 leading-relaxed space-y-2.5">
+            <p><strong className="text-white/60">{t.ipLabel}</strong> {t.ipText}</p>
+            {contact?.email && (
+              <p>
+                <strong className="text-white/60">{t.dataLabel}</strong> {t.dataTextStart}{" "}
+                <a href={`mailto:${contact.email}`} className="underline hover:text-white/80">{contact.email}</a>
+                {contact?.phone && (
+                  <>
+                    {t.dataTextMid}
+                    <a href={`tel:${contact.phone.replace(/\s/g, "")}`} className="underline hover:text-white/80">{contact.phone}</a>
+                  </>
+                )}
+                .
+              </p>
+            )}
+            <p><strong className="text-white/60">{t.cookiesLabel}</strong> {t.cookiesText}</p>
+            {contact?.email && (
+              <p>
+                <strong className="text-white/60">{t.hostingLabel}</strong> {t.hostingTextStart}{" "}
+                <a href={`mailto:${contact.email}`} className="underline hover:text-white/80">{contact.email}</a>.
+              </p>
+            )}
+            <p className="pt-2">
+              {copyrightText || `© ${new Date().getFullYear()} PMO Mastery — Empowerment Paths. ${t.rights}`}
+            </p>
+          </div>
         </div>
       </div>
     </footer>

@@ -79,7 +79,7 @@ export function HeroSection({
                   {subtitle}
                 </p>
               )}
-              <p className="font-display text-sm sm:text-base font-bold uppercase tracking-[0.15em] mb-8">
+              <p className="font-display text-sm sm:text-base font-bold tracking-[0.15em] mb-8">
                 <span className="text-white">Build.</span>{" "}
                 <span className="text-pmo-blue">Lead.</span>{" "}
                 <span className="text-pmo-bright-orange">Sustain.</span>

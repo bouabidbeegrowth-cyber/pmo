@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Clock3, ArrowRight, Users } from "lucide-react"
+import { Clock3, ArrowRight, Users, Layers } from "lucide-react"
 import { getLocale, getActiveEvent, getUiText } from "@/lib/site-data"
 import { buildPageMetadata } from "@/lib/seo"
 import { PageHero } from "@/components/public/page-hero"
@@ -25,9 +25,9 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-const SESSION_TYPE_KEYS = ["KEYNOTE", "PANEL", "BREAK", "NETWORKING", "CLOSING", "WORKSHOP", "SESSION", "PMO_TALKS", "MASTERCLASS"]
+const SESSION_TYPE_KEYS = ["OUVERTURE", "KEYNOTE", "PANEL", "BREAK", "NETWORKING", "CLOSING", "WORKSHOP", "SESSION", "PMO_TALKS", "MASTERCLASS"]
 const SESSION_TYPE_DEFAULTS: Record<string, string> = {
-  KEYNOTE: "Keynote", PANEL: "Panel", BREAK: "Pause", NETWORKING: "Networking",
+  OUVERTURE: "Ouverture", KEYNOTE: "Keynote", PANEL: "Panel", BREAK: "Pause", NETWORKING: "Networking",
   CLOSING: "Clôture", WORKSHOP: "Atelier", SESSION: "Session", PMO_TALKS: "PMO Talks", MASTERCLASS: "Masterclass",
 }
 
@@ -44,7 +44,6 @@ export default async function ProgrammePage() {
       <>
         <BreadcrumbStructuredData items={emptyBreadcrumbs} />
         <PageHero
-          eyebrow={ui("programme.hero.eyebrow", "Agenda")}
           title={ui("programme.hero.title", "Programme")}
           subtitle={ui("programme.emptyState.subtitle", "Le programme sera bientôt publié.")}
           breadcrumbs={emptyBreadcrumbs}
@@ -54,27 +53,25 @@ export default async function ProgrammePage() {
   }
 
   const t = {
-    eyebrow: ui("programme.hero.eyebrow", "Agenda"),
     title: ui("programme.hero.title", "Programme"),
     subtitle: ui("programme.hero.subtitle", "2 jours intensifs d'échanges, d'apprentissage et de networking au cœur des meilleures pratiques PMO."),
     dayLabel: ui("programme.dayLabel", "Jour"),
     registerCta: ui("common.cta.register", "Je m'inscris"),
-    statDays: ui("programme.stat.days", "jours"),
-    statSpeakers: ui("programme.stat.speakers", "intervenants"),
+    statDays: ui("programme.stat.daysStatic", "2 jours"),
+    statSessions: ui("programme.stat.sessionsStatic", "4 sessions de formations"),
+    statSpeakers: ui("programme.stat.speakersStatic", "25 speakers"),
   }
 
   const sessionTypeLabels = Object.fromEntries(
     SESSION_TYPE_KEYS.map((k) => [k, ui(`programme.sessionType.${k}`, SESSION_TYPE_DEFAULTS[k])]),
   )
 
-  const totalSessions = event.programmeDays.reduce((acc, d) => acc + d.sessions.length, 0)
   const breadcrumbs = [{ href: "/", label: homeLabel }, { label: t.title }]
 
   return (
     <>
       <BreadcrumbStructuredData items={breadcrumbs} />
       <PageHero
-        eyebrow={t.eyebrow}
         title={t.title}
         subtitle={t.subtitle}
         breadcrumbs={breadcrumbs}
@@ -86,15 +83,15 @@ export default async function ProgrammePage() {
           <div className="flex items-center gap-6 text-sm">
             <div className="flex items-center gap-2">
               <Clock3 className="w-4 h-4 text-pmo-violet" />
-              <span className="font-medium">{event.programmeDays.length} {t.statDays}</span>
+              <span className="font-medium">{t.statDays}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Layers className="w-4 h-4 text-pmo-violet" />
+              <span className="font-medium">{t.statSessions}</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-pmo-violet" />
-              <span className="font-medium">{totalSessions} sessions</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ArrowRight className="w-4 h-4 text-pmo-violet" />
-              <span className="font-medium">{event.speakers.length} {t.statSpeakers}</span>
+              <span className="font-medium">{t.statSpeakers}</span>
             </div>
           </div>
           {event.registrationEnabled && (

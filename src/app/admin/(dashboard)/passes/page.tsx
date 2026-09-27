@@ -30,9 +30,19 @@ import {
 } from "@/components/ui/alert-dialog"
 import { formatPrice } from "@/lib/utils"
 
+const CATEGORY_LABELS: Record<string, string> = {
+  EVENEMENT: "Pass Événement",
+  FORMATION: "Pass Formation",
+  DUO: "Pass Duo",
+  ETUDIANT: "Pass Étudiant",
+  AUTRE: "Autre",
+}
+const CATEGORY_ORDER = ["EVENEMENT", "FORMATION", "DUO", "ETUDIANT", "AUTRE"]
+
 interface Pass {
   id: string
   slug: string
+  category: string
   nameFr: string
   nameEn?: string | null
   image?: string | null
@@ -120,6 +130,16 @@ export default function PassesListPage() {
     return passes.filter((p) => !q || p.nameFr.toLowerCase().includes(q) || p.slug.includes(q))
   }, [passes, search])
 
+  const grouped = useMemo(() => {
+    const map = new Map<string, Pass[]>()
+    for (const p of filtered) {
+      const key = p.category || "AUTRE"
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)!.push(p)
+    }
+    return CATEGORY_ORDER.filter((k) => map.has(k)).map((k) => ({ key: k, label: CATEGORY_LABELS[k], items: map.get(k)! }))
+  }, [filtered])
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <PageHeader
@@ -164,87 +184,108 @@ export default function PassesListPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((p) => (
-            <div
-              key={p.id}
-              className="bg-white rounded-2xl shadow-premium p-5 flex flex-col relative overflow-hidden"
-            >
-              {p.isFeatured && (
-                <div className="absolute top-0 right-0 bg-pmo-gold-gradient text-pmo-navy text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg z-10">
-                  Recommandé
-                </div>
-              )}
-              {p.image && (
-                <div className="-m-5 mb-3 aspect-video overflow-hidden bg-muted">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.image} alt="" className="w-full h-full object-cover" />
-                </div>
-              )}
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <div className="font-display font-bold text-lg">{p.nameFr}</div>
-                  {p.nameEn && <div className="text-xs text-muted-foreground">{p.nameEn}</div>}
-                </div>
-                <button
-                  onClick={() => toggleFeatured(p)}
-                  className={`p-1.5 rounded-md transition-colors ${
-                    p.isFeatured ? "text-pmo-gold bg-pmo-gold/10" : "text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  <Star className={`w-4 h-4 ${p.isFeatured ? "fill-current" : ""}`} />
-                </button>
-              </div>
-
-              <div className="font-display text-3xl font-bold mb-1">
-                {formatPrice(p.price, p.currency)}
-              </div>
-              <div className="text-xs text-muted-foreground mb-4">
-                +{Math.round(p.vatRate * 100)}% TVA · Qté min. {p.minQuantity}
-              </div>
-
-              <div className="space-y-2 mb-4 flex-1">
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-muted-foreground">Paiement :</span>
-                  {p.paymentUrl ? (
-                    <a
-                      href={p.paymentUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline flex items-center gap-1 truncate max-w-[200px]"
-                    >
-                      Lien configuré
-                      <ExternalLink className="w-3 h-3 shrink-0" />
-                    </a>
-                  ) : (
-                    <Badge variant="secondary" className="text-xs">
-                      Non configuré
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t">
-                <div className="flex items-center gap-2">
-                  <Switch checked={p.isActive} onCheckedChange={() => toggleActive(p)} />
-                  <span className="text-xs text-muted-foreground">
-                    {p.isActive ? "Actif" : "Masqué"}
-                  </span>
-                </div>
-                <div className="flex gap-1">
-                  <Link
-                    href={`/admin/passes/${p.id}`}
-                    className="p-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-primary"
-                  >
-                    <Pencil className="w-4 h-4" />
+        <div className="space-y-10">
+          {grouped.map((group) => (
+            <div key={group.key}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-display text-lg font-bold flex items-center gap-2">
+                  {group.label}
+                  <Badge variant="secondary" className="text-xs font-normal">
+                    {group.items.length}
+                  </Badge>
+                </h2>
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/admin/passes/new?category=${group.key}`}>
+                    <Plus className="w-3.5 h-3.5 mr-1.5" />
+                    Ajouter dans cette catégorie
                   </Link>
-                  <button
-                    onClick={() => setToDelete(p)}
-                    className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                </Button>
+              </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {group.items.map((p) => (
+                  <div
+                    key={p.id}
+                    className="bg-white rounded-2xl shadow-premium p-5 flex flex-col relative overflow-hidden"
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                    {p.isFeatured && (
+                      <div className="absolute top-0 right-0 bg-pmo-gold-gradient text-pmo-navy text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg z-10">
+                        Recommandé
+                      </div>
+                    )}
+                    {p.image && (
+                      <div className="-m-5 mb-3 aspect-video overflow-hidden bg-muted">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={p.image} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="font-display font-bold text-lg">{p.nameFr}</div>
+                        {p.nameEn && <div className="text-xs text-muted-foreground">{p.nameEn}</div>}
+                      </div>
+                      <button
+                        onClick={() => toggleFeatured(p)}
+                        className={`p-1.5 rounded-md transition-colors ${
+                          p.isFeatured ? "text-pmo-gold bg-pmo-gold/10" : "text-muted-foreground hover:bg-muted"
+                        }`}
+                      >
+                        <Star className={`w-4 h-4 ${p.isFeatured ? "fill-current" : ""}`} />
+                      </button>
+                    </div>
+
+                    <div className="font-display text-3xl font-bold mb-1">
+                      {formatPrice(p.price, p.currency)}
+                    </div>
+                    <div className="text-xs text-muted-foreground mb-4">
+                      +{Math.round(p.vatRate * 100)}% TVA · Qté min. {p.minQuantity}
+                    </div>
+
+                    <div className="space-y-2 mb-4 flex-1">
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-muted-foreground">Paiement :</span>
+                        {p.paymentUrl ? (
+                          <a
+                            href={p.paymentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline flex items-center gap-1 truncate max-w-[200px]"
+                          >
+                            Lien configuré
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">
+                            Non configuré
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <div className="flex items-center gap-2">
+                        <Switch checked={p.isActive} onCheckedChange={() => toggleActive(p)} />
+                        <span className="text-xs text-muted-foreground">
+                          {p.isActive ? "Actif" : "Masqué"}
+                        </span>
+                      </div>
+                      <div className="flex gap-1">
+                        <Link
+                          href={`/admin/passes/${p.id}`}
+                          className="p-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-primary"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Link>
+                        <button
+                          onClick={() => setToDelete(p)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}

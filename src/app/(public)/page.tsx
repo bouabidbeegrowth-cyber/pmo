@@ -5,10 +5,8 @@ import {
   Calendar,
   MapPin,
   ArrowRight,
-  Users,
   Award,
   Network,
-  Clock3,
   Ticket,
   Check,
   Images,
@@ -19,7 +17,6 @@ import { buildPageMetadata } from "@/lib/seo"
 import { renderBoldText, renderTriColorTagline } from "@/lib/text-format"
 import { HeroSection } from "@/components/public/hero-section"
 import { SpeakersHomePreview } from "@/components/public/speakers-home-preview"
-import { ProgrammeHomePreview } from "@/components/public/programme-home-preview"
 import { PassesHomePreview } from "@/components/public/passes-home-preview"
 import { GalleryGrid } from "@/components/public/gallery-grid"
 import { SmartMapButton } from "@/components/public/smart-map-button"
@@ -43,12 +40,6 @@ export async function generateMetadata(): Promise<Metadata> {
         "International event for PMO leaders. Two intensive days on best practices in project management, PMO, change management, AI and leadership.",
     },
   })
-}
-
-const SESSION_TYPE_KEYS = ["KEYNOTE", "PANEL", "BREAK", "NETWORKING", "CLOSING", "WORKSHOP", "SESSION", "PMO_TALKS", "MASTERCLASS"]
-const SESSION_TYPE_DEFAULTS: Record<string, string> = {
-  KEYNOTE: "Keynote", PANEL: "Panel", BREAK: "Pause", NETWORKING: "Networking",
-  CLOSING: "Clôture", WORKSHOP: "Atelier", SESSION: "Session", PMO_TALKS: "PMO Talks", MASTERCLASS: "Masterclass",
 }
 
 export default async function HomePage() {
@@ -105,7 +96,34 @@ export default async function HomePage() {
     statDays: ui("home.stat.days", "Jours"),
     statPasses: ui("home.stat.passes", "Pass disponibles"),
     statPartners: ui("home.stat.partners", "Partenaires"),
+    conversationsEyebrow: ui("home.conversations.eyebrow", "Les Grandes Conversations"),
+    conversationsHeading: ui("home.conversations.heading", "Quatre axes qui structureront l'édition 2027"),
+    editionIntroLabel: ui("home.editionIntro.label", "Une deuxième édition"),
+    editionIntroRest: ui("home.editionIntro.rest", " pensée comme un forum stratégique international : réunir les décideurs, les experts et les praticiens qui font du PMO un moteur de performance durable."),
   }
+
+  const conversationItems = [
+    {
+      num: "01",
+      title: ui("home.conversations.item1.title", "Résilience"),
+      description: ui("home.conversations.item1.desc", "Construire des organisations et des portefeuilles capables de faire face à l'incertitude."),
+    },
+    {
+      num: "02",
+      title: ui("home.conversations.item2.title", "Décision & Souveraineté"),
+      description: ui("home.conversations.item2.desc", "Renforcer la capacité des organisations à décider, prioriser et agir."),
+    },
+    {
+      num: "03",
+      title: ui("home.conversations.item3.title", "Leadership"),
+      description: ui("home.conversations.item3.desc", "Faire évoluer le PMO vers un véritable levier de transformation."),
+    },
+    {
+      num: "04",
+      title: ui("home.conversations.item4.title", "Croissance Durable"),
+      description: ui("home.conversations.item4.desc", "Aligner projets, investissements et transformation avec une vision durable."),
+    },
+  ]
 
   const countdownLabels = {
     days: ui("countdown.days", "Jours"),
@@ -120,10 +138,6 @@ export default async function HomePage() {
     viewProfile: ui("common.speaker.viewProfile", "Voir le profil"),
     biography: ui("speakers.modal.biography", "Biographie"),
   }
-
-  const sessionTypeLabels = Object.fromEntries(
-    SESSION_TYPE_KEYS.map((k) => [k, ui(`programme.sessionType.${k}`, SESSION_TYPE_DEFAULTS[k])]),
-  )
 
   const passLabels = {
     recommended: ui("passes.recommended", "Recommandé"),
@@ -146,6 +160,7 @@ export default async function HomePage() {
   const heroCtaUrl = heroSection?.ctaUrl ?? "/passes"
 
   const whyTitle = pick(whySection?.titleFr, whySection?.titleEn, locale) ?? t.whyTitle
+  const whySubtitle = pick(whySection?.subtitleFr, whySection?.subtitleEn, locale) || whyTitle
   const whyDesc = pick(whySection?.descriptionFr, whySection?.descriptionEn, locale) ?? ""
   const whyBenefits = whySection?.benefits ?? []
   const whyBg = whySection?.backgroundImage ?? null
@@ -169,7 +184,6 @@ export default async function HomePage() {
   const venueMapZoom = event.latitude != null && event.longitude != null ? "&z=16" : ""
 
   const speakersPreview = event.speakers.slice(0, 4)
-  const programmePreviewDays = event.programmeDays.slice(0, 1) // first day preview
   const featuredPasses = event.passes.slice(0, 3)
   const featuredPartners = event.partners.slice(0, 7)
   const galleryPreview = homepageGalleryItems.map((item) => ({
@@ -210,8 +224,62 @@ export default async function HomePage() {
         countdownLabels={countdownLabels}
       />
 
+      {/* ===================== CHAIRMAN MESSAGE ===================== */}
+      {chairmanSection?.isActive !== false && chairmanDesc && (
+        <section className="py-20 sm:py-28 bg-pmo-navy relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid opacity-20" />
+          <div className="absolute -top-32 -left-24 w-96 h-96 rounded-full bg-pmo-blue/20 blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-pmo-pink/10 blur-3xl" />
+
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-[340px_1fr] gap-10 lg:gap-16 items-center">
+              {chairmanPhoto && (
+                <div className="relative rounded-3xl overflow-hidden shadow-premium-lg aspect-[3/4] mx-auto w-full max-w-[340px]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={chairmanPhoto} alt={chairmanName} className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              <div>
+                {chairmanTitle && (
+                  <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6 text-balance">
+                    {chairmanTitle}
+                  </h2>
+                )}
+                <div className="text-white/75 text-[15px] sm:text-base leading-[1.8] mb-8 text-pretty">
+                  {chairmanDesc.split("\n").filter((p) => p.trim().length > 0).map((paragraph, i) => (
+                    <p key={i} className="mb-4">{renderBoldText(paragraph)}</p>
+                  ))}
+                </div>
+
+                {(chairmanName || chairmanRole) && (
+                  <div className="rounded-2xl border border-white/15 bg-white/5 px-6 py-5">
+                    {chairmanName && (
+                      <div className="font-display text-lg font-bold text-white">{chairmanName}</div>
+                    )}
+                    {chairmanRole && (
+                      <div className="text-sm text-white/60 mt-1">{chairmanRole}</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ====================== EDITION INTRO ====================== */}
+      <section className="py-14 sm:py-20 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+            <span className="hero-gradient-text font-bold">{t.editionIntroLabel}</span>
+            {t.editionIntroRest}
+          </p>
+        </div>
+      </section>
+
       {/* ====================== WHY PARTICIPATE ====================== */}
-      {whySection?.isActive !== false && whyBenefits.length > 0 && (
+      {whySection?.isActive !== false && (whyDesc || whyBenefits.length > 0) && (
         <section className="py-20 sm:py-28 bg-white relative overflow-hidden">
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -226,7 +294,7 @@ export default async function HomePage() {
                 <p className="text-[#e5005a] font-semibold text-xs sm:text-sm uppercase tracking-[0.15em] mb-5">
                   {whyTitle}
                 </p>
-                <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.15] mb-6 text-balance">{whyTitle}</h2>
+                <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.15] mb-6 text-balance">{whySubtitle}</h2>
                 {whyDesc && (
                   <div className="text-muted-foreground text-[15px] sm:text-base leading-[1.7] mb-8 text-pretty">
                     {whyDesc.split("\n").filter((p) => p.trim().length > 0).map((paragraph, i) => (
@@ -235,24 +303,54 @@ export default async function HomePage() {
                   </div>
                 )}
 
-                <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
-                  {whyBenefits.map((benefit) => {
-                    const title = pick(benefit.titleFr, benefit.titleEn, locale) ?? ""
-                    return (
-                      <div key={benefit.id} className="flex items-start gap-3">
-                        <span className="hero-btn-gradient shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5">
-                          <Check className="w-3.5 h-3.5 text-white" />
-                        </span>
-                        <span className="text-sm font-medium text-foreground leading-snug">{title}</span>
-                      </div>
-                    )
-                  })}
-                </div>
+                {whyBenefits.length > 0 && (
+                  <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
+                    {whyBenefits.map((benefit) => {
+                      const title = pick(benefit.titleFr, benefit.titleEn, locale) ?? ""
+                      return (
+                        <div key={benefit.id} className="flex items-start gap-3">
+                          <span className="hero-btn-gradient shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5">
+                            <Check className="w-3.5 h-3.5 text-white" />
+                          </span>
+                          <span className="text-sm font-medium text-foreground leading-snug">{title}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </section>
       )}
+
+      {/* ====================== LES GRANDES CONVERSATIONS ====================== */}
+      <section className="py-20 sm:py-28 bg-pmo-light-bg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-14">
+            <p className="text-[#0066ff] font-semibold text-xs sm:text-sm uppercase tracking-[0.15em] mb-4">
+              {t.conversationsEyebrow}
+            </p>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-balance">
+              {t.conversationsHeading}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {conversationItems.map((item) => (
+              <div
+                key={item.num}
+                className="bg-white rounded-2xl p-7 sm:p-8 shadow-premium hover:shadow-premium-lg transition-shadow duration-300 h-full flex flex-col"
+              >
+                <span className="text-muted-foreground text-sm font-medium">{item.num}</span>
+                <div className="hero-divider my-4" style={{ width: "36px" }} />
+                <h3 className="font-display text-lg sm:text-xl font-bold mb-3">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-[1.65] flex-1">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ========================= ABOUT ========================= */}
       {aboutSection?.isActive !== false && (
@@ -351,66 +449,12 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ========================= VENUE / MAP ========================= */}
-      {showVenue && (
-        <section className="py-20 sm:py-24 bg-pmo-navy-gradient text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-grid opacity-20" />
-          <div className="absolute -top-32 right-1/4 w-96 h-96 rounded-full bg-pmo-violet/20 blur-3xl" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-10 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-gold mb-4">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {t.venueTitle}
-                </div>
-                <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{venueLabel}</h2>
-                {event.address && (
-                  <p className="text-white/70 text-lg leading-relaxed mb-2">{event.address}</p>
-                )}
-                <p className="text-white/60">
-                  {[event.city, event.country].filter(Boolean).join(", ")}
-                </p>
-
-                <SmartMapButton
-                  label={t.venueMap}
-                  googleMapsUrl={event.mapUrl}
-                  latitude={event.latitude}
-                  longitude={event.longitude}
-                  addressQuery={venueAddressQuery}
-                  className="mt-6 inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-white px-6 py-3 font-semibold shadow-premium hover:scale-[1.02] transition-transform"
-                />
-              </div>
-
-              <div className="relative">
-                <div className="absolute -inset-3 bg-gradient-to-br from-pmo-gold/20 to-pmo-violet/10 rounded-[2rem] blur-2xl" />
-                <div className="relative rounded-3xl overflow-hidden shadow-premium-lg border-4 border-white/10">
-                  <iframe
-                    src={`https://www.google.com/maps?q=${encodeURIComponent(venueMapQuery)}${venueMapZoom}&output=embed`}
-                    width="100%"
-                    height="380"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title={venueLabel}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* ====================== SPEAKERS PREVIEW ====================== */}
       {speakersPreview.length > 0 && (
         <section className="py-20 sm:py-28 bg-pmo-light-bg relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-dark opacity-50" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 rounded-full bg-pmo-violet/10 border border-pmo-violet/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-violet mb-4">
-                <Users className="w-3.5 h-3.5" />
-                {t.speakersTitle}
-              </div>
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">{t.speakersTitle}</h2>
               <p className="text-muted-foreground text-lg">{t.speakersSubtitle}</p>
             </div>
@@ -440,17 +484,11 @@ export default async function HomePage() {
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 rounded-full bg-pmo-pink/10 border border-pmo-pink/20 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-pink mb-4">
-                <Clock3 className="w-3.5 h-3.5" />
-                {t.programmeTitle}
-              </div>
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">{t.programmeTitle}</h2>
               <p className="text-muted-foreground text-lg">{t.programmeSubtitle}</p>
             </div>
 
-            <ProgrammeHomePreview days={programmePreviewDays} locale={locale} sessionTypeLabels={sessionTypeLabels} />
-
-            <div className="text-center mt-10">
+            <div className="text-center mt-2">
               <Link
                 href="/programme"
                 className="inline-flex items-center gap-2 rounded-xl border-2 border-primary/20 hover:border-primary hover:bg-primary/5 px-6 py-3 font-semibold text-primary transition-all"
@@ -490,50 +528,6 @@ export default async function HomePage() {
                 {t.passesCta}
                 <ArrowRight className="w-4 h-4" />
               </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ===================== CHAIRMAN MESSAGE ===================== */}
-      {chairmanSection?.isActive !== false && chairmanDesc && (
-        <section className="py-20 sm:py-28 bg-pmo-navy relative overflow-hidden">
-          <div className="absolute inset-0 bg-grid opacity-20" />
-          <div className="absolute -top-32 -left-24 w-96 h-96 rounded-full bg-pmo-blue/20 blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-pmo-pink/10 blur-3xl" />
-
-          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-[340px_1fr] gap-10 lg:gap-16 items-center">
-              {chairmanPhoto && (
-                <div className="relative rounded-3xl overflow-hidden shadow-premium-lg aspect-[3/4] mx-auto w-full max-w-[340px]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={chairmanPhoto} alt={chairmanName} className="w-full h-full object-cover" />
-                </div>
-              )}
-
-              <div>
-                {chairmanTitle && (
-                  <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6 text-balance">
-                    {chairmanTitle}
-                  </h2>
-                )}
-                <div className="text-white/75 text-[15px] sm:text-base leading-[1.8] mb-8 text-pretty">
-                  {chairmanDesc.split("\n").filter((p) => p.trim().length > 0).map((paragraph, i) => (
-                    <p key={i} className="mb-4">{renderBoldText(paragraph)}</p>
-                  ))}
-                </div>
-
-                {(chairmanName || chairmanRole) && (
-                  <div className="rounded-2xl border border-white/15 bg-white/5 px-6 py-5">
-                    {chairmanName && (
-                      <div className="font-display text-lg font-bold text-white">{chairmanName}</div>
-                    )}
-                    {chairmanRole && (
-                      <div className="text-sm text-white/60 mt-1">{chairmanRole}</div>
-                    )}
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </section>
@@ -609,6 +603,56 @@ export default async function HomePage() {
                 {t.partnersViewAll}
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ========================= VENUE / MAP ========================= */}
+      {showVenue && (
+        <section className="py-20 sm:py-24 bg-pmo-navy-gradient text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid opacity-20" />
+          <div className="absolute -top-32 right-1/4 w-96 h-96 rounded-full bg-pmo-violet/20 blur-3xl" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-10 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs uppercase tracking-widest text-pmo-gold mb-4">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {t.venueTitle}
+                </div>
+                <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{venueLabel}</h2>
+                {event.address && (
+                  <p className="text-white/70 text-lg leading-relaxed mb-2">{event.address}</p>
+                )}
+                <p className="text-white/60">
+                  {[event.city, event.country].filter(Boolean).join(", ")}
+                </p>
+
+                <SmartMapButton
+                  label={t.venueMap}
+                  googleMapsUrl={event.mapUrl}
+                  latitude={event.latitude}
+                  longitude={event.longitude}
+                  addressQuery={venueAddressQuery}
+                  className="mt-6 inline-flex items-center gap-2 rounded-xl bg-pmo-gold-gradient text-white px-6 py-3 font-semibold shadow-premium hover:scale-[1.02] transition-transform"
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute -inset-3 bg-gradient-to-br from-pmo-gold/20 to-pmo-violet/10 rounded-[2rem] blur-2xl" />
+                <div className="relative rounded-3xl overflow-hidden shadow-premium-lg border-4 border-white/10">
+                  <iframe
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(venueMapQuery)}${venueMapZoom}&output=embed`}
+                    width="100%"
+                    height="380"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title={venueLabel}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </section>

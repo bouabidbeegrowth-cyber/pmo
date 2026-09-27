@@ -22,9 +22,18 @@ import { Loader2, Save, Link2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 import { slugify } from "@/lib/utils"
 
+const CATEGORY_OPTIONS = [
+  { value: "EVENEMENT", label: "Pass Événement" },
+  { value: "FORMATION", label: "Pass Formation" },
+  { value: "DUO", label: "Pass Duo" },
+  { value: "ETUDIANT", label: "Pass Étudiant" },
+  { value: "AUTRE", label: "Autre" },
+]
+
 interface PassForm {
   id?: string
   slug: string
+  category: string
   nameFr: string
   nameEn?: string | null
   image?: string | null
@@ -42,12 +51,13 @@ interface PassForm {
   displayOrder: number
 }
 
-export function PassForm({ initial }: { initial?: PassForm }) {
+export function PassForm({ initial, initialCategory }: { initial?: PassForm; initialCategory?: string }) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [data, setData] = useState<PassForm>(
     initial ?? {
       slug: "",
+      category: initialCategory ?? "EVENEMENT",
       nameFr: "",
       nameEn: "",
       image: null,
@@ -252,6 +262,21 @@ export function PassForm({ initial }: { initial?: PassForm }) {
 
         {/* Right column: pricing + status */}
         <div className="space-y-6">
+          <FormCard title="Catégorie de billet" description="Détermine dans quelle section du site public et de l'admin ce pass apparaît.">
+            <Field label="Catégorie">
+              <Select value={data.category} onValueChange={(v) => update("category", v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORY_OPTIONS.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </FormCard>
+
           <FormCard title="Tarification">
             <div className="space-y-4">
               <Field label="Prix HT" required>

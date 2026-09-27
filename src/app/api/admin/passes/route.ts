@@ -48,6 +48,8 @@ export async function POST(req: NextRequest) {
   }
 
   const slug = body.slug || slugify(body.nameFr)
+  const ALLOWED_CATEGORIES = ["EVENEMENT", "FORMATION", "DUO", "ETUDIANT", "AUTRE"]
+  const category = ALLOWED_CATEGORIES.includes(body.category) ? body.category : "EVENEMENT"
 
   try {
     let displayOrder = body.displayOrder
@@ -59,6 +61,7 @@ export async function POST(req: NextRequest) {
     const data: Prisma.PassCreateInput = {
       event: { connect: { id: eventId } },
       slug,
+      category,
       nameFr: body.nameFr,
       nameEn: body.nameEn ?? null,
       image: safeUrl(body.image),

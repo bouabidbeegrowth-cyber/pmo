@@ -24,7 +24,10 @@ interface NavLabels {
   home: string
   event: string
   eventProgramme: string
-  eventPasses: string
+  passEvenement: string
+  passFormation: string
+  passDuo: string
+  passEtudiant: string
   speakers: string
   orgPartners: string
   organizers: string
@@ -53,7 +56,10 @@ function buildNav(t: NavLabels) {
       href: "/evenement",
       children: [
         { href: "/programme", label: t.eventProgramme },
-        { href: "/passes", label: t.eventPasses },
+        { href: "/passes#evenement", label: t.passEvenement },
+        { href: "/passes#formation", label: t.passFormation },
+        { href: "/passes#duo", label: t.passDuo },
+        { href: "/passes#etudiant", label: t.passEtudiant },
       ],
     },
     { href: "/intervenants", label: t.speakers },
@@ -73,15 +79,7 @@ function buildNav(t: NavLabels) {
 export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, labels }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
-    onScroll()
-    window.addEventListener("scroll", onScroll)
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
 
   // Close mobile menu on route change (pathname changes via Link clicks)
   useEffect(() => {
@@ -107,8 +105,9 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
 
   // Determine if a link is active
   function isActive(href: string) {
-    if (href === "/") return pathname === "/"
-    return pathname === href || pathname.startsWith(href + "/")
+    const path = href.split("#")[0]
+    if (path === "/") return pathname === "/"
+    return pathname === path || pathname.startsWith(path + "/")
   }
 
   // Determine if any child of a dropdown is active
@@ -118,25 +117,18 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
   }
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 inset-x-0 z-50 transition-all duration-300",
-        scrolled || pathname !== "/"
-          ? "bg-pmo-navy-deep/95 backdrop-blur-md shadow-premium py-3"
-          : "bg-transparent py-5",
-      )}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group shrink-0 h-12 sm:h-14">
+    <header className="fixed top-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-b border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-28 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-3 group shrink-0 h-24">
           {logo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logo} alt="PMO Mastery" className="h-full w-auto max-w-[220px] object-contain" />
+            <img src={logo} alt="PMO Mastery" className="h-full w-auto max-w-[380px] object-contain" />
           ) : (
             <div className="flex items-center gap-2.5">
               <div className="w-12 h-12 rounded-xl bg-pmo-violet-gradient flex items-center justify-center font-display font-bold text-white text-xl shadow-premium group-hover:scale-105 transition-transform">
                 P
               </div>
-              <span className="font-display font-semibold text-white text-xl tracking-tight">
+              <span className="font-display font-semibold text-foreground text-xl tracking-tight">
                 PMO Mastery
               </span>
             </div>
@@ -153,28 +145,28 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
                   <DropdownMenuTrigger asChild>
                     <button
                       className={cn(
-                        "px-3 py-2 text-sm transition-colors relative group flex items-center gap-1",
-                        active ? "text-white" : "text-white/80 hover:text-white",
+                        "px-3 py-2 text-sm font-medium uppercase tracking-[0.08em] transition-colors relative group flex items-center gap-1",
+                        active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                       )}
                     >
                       {item.label}
                       <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />
                       <span className={cn(
-                        "absolute inset-x-3 -bottom-0.5 h-0.5 bg-pmo-gold transition-transform origin-left",
+                        "absolute inset-x-3 -bottom-0.5 h-0.5 bg-gradient-to-r from-pmo-blue via-pmo-gold to-pmo-orange transition-transform origin-left",
                         active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
                       )} />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="center"
-                    className="bg-pmo-navy-gradient border-white/10 min-w-[200px]"
+                    className="bg-white border-border min-w-[200px]"
                   >
                     {item.children.map((child) => (
                       <DropdownMenuItem key={child.href} asChild>
                         <Link
                           href={child.href}
                           className={cn(
-                            "flex items-center justify-between cursor-pointer text-white/80 hover:text-white hover:bg-white/10 focus:bg-white/10 focus:text-white",
+                            "flex items-center justify-between cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted focus:bg-muted focus:text-foreground",
                             isActive(child.href) && "text-pmo-gold",
                           )}
                         >
@@ -193,13 +185,13 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "px-3 py-2 text-sm transition-colors relative group",
-                  active ? "text-white" : "text-white/80 hover:text-white",
+                  "px-3 py-2 text-sm font-medium uppercase tracking-[0.08em] transition-colors relative group",
+                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {item.label}
                 <span className={cn(
-                  "absolute inset-x-3 -bottom-0.5 h-0.5 bg-pmo-gold transition-transform origin-left",
+                  "absolute inset-x-3 -bottom-0.5 h-0.5 bg-gradient-to-r from-pmo-blue via-pmo-gold to-pmo-orange transition-transform origin-left",
                   active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
                 )} />
               </Link>
@@ -209,13 +201,13 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
 
         <div className="flex items-center gap-2">
           {/* Locale toggle */}
-          <div className="flex items-center gap-1 rounded-full bg-white/10 border border-white/10 p-0.5 backdrop-blur-sm">
-            <Globe className="w-3.5 h-3.5 text-white/50 ml-2" />
+          <div className="flex items-center gap-1 rounded-full bg-muted border border-border p-0.5">
+            <Globe className="w-3.5 h-3.5 text-muted-foreground ml-2" />
             <button
               onClick={() => changeLocale("fr")}
               className={cn(
                 "px-2.5 py-1 rounded-full text-xs font-semibold transition-all",
-                locale === "fr" ? "bg-white text-pmo-navy" : "text-white/70 hover:text-white",
+                locale === "fr" ? "bg-foreground text-white" : "text-muted-foreground hover:text-foreground",
               )}
             >
               FR
@@ -224,7 +216,7 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
               onClick={() => changeLocale("en")}
               className={cn(
                 "px-2.5 py-1 rounded-full text-xs font-semibold transition-all",
-                locale === "en" ? "bg-white text-pmo-navy" : "text-white/70 hover:text-white",
+                locale === "en" ? "bg-foreground text-white" : "text-muted-foreground hover:text-foreground",
               )}
             >
               EN
@@ -234,7 +226,7 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
           {registrationEnabled && (
             <Button
               asChild
-              className="hidden sm:flex hero-btn-gradient text-white hover:opacity-95 font-semibold rounded-full shadow-premium"
+              className="hidden sm:flex hero-btn-gradient text-white hover:opacity-95 font-semibold uppercase tracking-[0.08em] text-xs rounded-md shadow-premium"
             >
               <Link href="/passes">
                 {labels.register}
@@ -249,22 +241,22 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden text-white hover:bg-white/10"
+                className="lg:hidden text-foreground hover:bg-muted"
                 aria-label="Menu"
               >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] p-0 bg-pmo-navy-gradient border-0 overflow-y-auto">
+            <SheetContent side="right" className="w-[300px] p-0 bg-white border-0 border-l border-border overflow-y-auto">
               <SheetHeader className="sr-only">
                 <SheetTitle>Navigation</SheetTitle>
               </SheetHeader>
-              <div className="flex flex-col h-full text-white p-6">
+              <div className="flex flex-col h-full text-foreground p-6">
                 <div className="flex items-center justify-between mb-8">
                   <span className="font-display font-semibold text-lg">PMO Mastery</span>
                   <button
                     onClick={() => setMobileOpen(false)}
-                    className="p-1 text-white/60 hover:text-white"
+                    className="p-1 text-muted-foreground hover:text-foreground"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -277,14 +269,14 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
                         className={cn(
                           "px-4 py-3 rounded-lg transition-colors font-medium",
                           isActive(item.href)
-                            ? "bg-white/10 text-white"
-                            : "text-white/80 hover:bg-white/10 hover:text-white",
+                            ? "bg-muted text-foreground"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         )}
                       >
                         {item.label}
                       </Link>
                       {item.children && (
-                        <div className="ml-4 border-l border-white/10 pl-2 mb-1">
+                        <div className="ml-4 border-l border-border pl-2 mb-1">
                           {item.children.map((child) => (
                             <Link
                               key={child.href}
@@ -293,7 +285,7 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
                                 "block px-4 py-2.5 rounded-lg text-sm transition-colors",
                                 isActive(child.href)
                                   ? "text-pmo-gold font-medium"
-                                  : "text-white/60 hover:text-white hover:bg-white/5",
+                                  : "text-muted-foreground hover:text-foreground hover:bg-muted",
                               )}
                             >
                               {child.label}
@@ -307,7 +299,7 @@ export function SiteHeader({ locale, onLocaleChange, registrationEnabled, logo, 
                 {registrationEnabled && (
                   <Button
                     asChild
-                    className="mt-auto hero-btn-gradient text-white hover:opacity-95 font-semibold rounded-full"
+                    className="mt-auto hero-btn-gradient text-white hover:opacity-95 font-semibold uppercase tracking-[0.08em] text-xs rounded-md"
                   >
                     <Link href="/passes">
                       {labels.register}

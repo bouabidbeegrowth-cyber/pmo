@@ -44,6 +44,7 @@ interface Props {
 }
 
 const TYPE_STYLES: Record<string, { color: string; dot: string }> = {
+  OUVERTURE: { color: "bg-pmo-orange/10 text-pmo-orange border-pmo-orange/20", dot: "bg-pmo-orange" },
   KEYNOTE: { color: "bg-pmo-blue/10 text-pmo-blue border-pmo-blue/20", dot: "bg-pmo-blue" },
   PANEL: { color: "bg-pmo-sky-blue/15 text-pmo-sky-blue border-pmo-sky-blue/25", dot: "bg-pmo-sky-blue" },
   BREAK: { color: "bg-pmo-bright-orange/10 text-pmo-bright-orange border-pmo-bright-orange/20", dot: "bg-pmo-bright-orange" },
@@ -86,9 +87,12 @@ export function ProgrammeHomePreview({ days, locale, sessionTypeLabels }: Props)
           const title = locale === "en"
             ? session.titleEn ?? session.titleFr
             : session.titleFr
-          const description = locale === "en"
-            ? session.descriptionEn ?? session.descriptionFr
-            : session.descriptionFr
+          const hideDetails = session.sessionType === "PANEL" || session.sessionType === "SESSION"
+          const description = hideDetails
+            ? null
+            : locale === "en"
+              ? session.descriptionEn ?? session.descriptionFr
+              : session.descriptionFr
           const timeRange = session.endTime ? `${session.startTime} – ${session.endTime}` : session.startTime
 
           return (
@@ -124,11 +128,6 @@ export function ProgrammeHomePreview({ days, locale, sessionTypeLabels }: Props)
                     <h3 className="font-display text-base sm:text-lg font-bold leading-snug">
                       {title}
                     </h3>
-                    {session.language && (
-                      <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
-                        {session.language}
-                      </span>
-                    )}
                   </div>
                   {description && (
                     <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">

@@ -42,7 +42,10 @@ export default async function PublicLayout({
     home: ui("nav.home", "Accueil"),
     event: ui("nav.event", "Événement"),
     eventProgramme: ui("nav.event.programme", "Programme"),
-    eventPasses: ui("nav.event.passes", "Passes & Billets"),
+    passEvenement: ui("passes.category.evenement", "Pass Événement"),
+    passFormation: ui("passes.category.formation", "Pass Formation"),
+    passDuo: ui("passes.category.duo", "Pass Duo"),
+    passEtudiant: ui("passes.category.etudiant", "Pass Étudiant"),
     speakers: ui("nav.speakers", "Intervenants"),
     orgPartners: ui("nav.orgPartners", "Organisateurs & Partenaires"),
     organizers: ui("nav.organizers", "Organisateurs"),
@@ -68,6 +71,16 @@ export default async function PublicLayout({
     rights: ui("footer.rights", "Tous droits réservés."),
     taglineDefault: ui("footer.taglineDefault", "Événement international pour les leaders des PMO."),
     bottomTagline: ui("footer.bottomTagline", "Conçu avec passion pour les leaders PMO"),
+    legalTitle: ui("footer.legalTitle", "Mentions légales & confidentialité"),
+    ipLabel: ui("footer.ipLabel", "Propriété intellectuelle :"),
+    ipText: ui("footer.ipText", "L'ensemble du contenu de ce site (textes, images, logos, marques) est la propriété exclusive d'Empowerment Paths. Toute reproduction, même partielle, est interdite sans autorisation écrite préalable."),
+    dataLabel: ui("footer.dataLabel", "Données personnelles :"),
+    dataTextStart: ui("footer.dataTextStart", "Les informations collectées via ce site sont traitées par Empowerment Paths dans le but de vous informer sur l'événement PMO Mastery. Elles sont stockées de manière sécurisée et ne sont ni vendues ni partagées avec des tiers. Vous disposez d'un droit d'accès, de rectification et de suppression de vos données en contactant"),
+    dataTextMid: ui("footer.dataTextMid", " ou par téléphone au "),
+    cookiesLabel: ui("footer.cookiesLabel", "Cookies & tracking :"),
+    cookiesText: ui("footer.cookiesText", "Ce site utilise des cookies techniques et, le cas échéant, des pixels publicitaires pour mesurer l'efficacité des campagnes. Aucun cookie de tracking tiers n'est déposé à des fins publicitaires sans votre consentement."),
+    hostingLabel: ui("footer.hostingLabel", "Hébergement :"),
+    hostingTextStart: ui("footer.hostingTextStart", "Pour toute question juridique, contactez"),
   }
 
   return (

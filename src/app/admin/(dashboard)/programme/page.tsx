@@ -105,6 +105,7 @@ interface Day {
 }
 
 const SESSION_TYPES: Record<string, { label: string; color: string }> = {
+  OUVERTURE: { label: "Ouverture", color: "bg-orange-100 text-orange-700" },
   KEYNOTE: { label: "Keynote", color: "bg-violet-100 text-violet-700" },
   PANEL: { label: "Panel", color: "bg-blue-100 text-blue-700" },
   BREAK: { label: "Pause", color: "bg-amber-100 text-amber-700" },

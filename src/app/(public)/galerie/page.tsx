@@ -17,8 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
     path: "/galerie",
     locale,
     defaults: {
-      titleFr: "Moments",
-      titleEn: "Highlights",
+      titleFr: "Galerie",
+      titleEn: "Gallery",
       descriptionFr: "Photos et vidéos des éditions de PMO Mastery.",
       descriptionEn: "Photos and videos from PMO Mastery editions.",
     },

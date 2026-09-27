@@ -307,6 +307,7 @@ model Pass {
   id              String   @id @default(cuid())
   eventId         String
   slug            String
+  category        String   @default("EVENEMENT") // EVENEMENT | FORMATION | DUO | ETUDIANT | AUTRE — groups passes in the admin and on the public /passes page
   nameFr          String
   nameEn          String?
   image           String?

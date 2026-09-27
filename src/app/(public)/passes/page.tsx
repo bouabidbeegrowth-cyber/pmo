@@ -23,6 +23,16 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
+const CATEGORY_ORDER = ["EVENEMENT", "FORMATION", "DUO", "ETUDIANT"]
+
+// Anchor ids used by the header nav dropdown links (/passes#evenement, …).
+const ANCHOR_IDS: Record<string, string> = {
+  EVENEMENT: "evenement",
+  FORMATION: "formation",
+  DUO: "duo",
+  ETUDIANT: "etudiant",
+}
+
 export default async function PassesPage() {
   const locale = await getLocale()
   const event = await getActiveEvent()
@@ -46,8 +56,28 @@ export default async function PassesPage() {
     emptyState: ui("passes.emptyState", "Les pass seront bientôt disponibles."),
   }
 
+  const categoryLabels: Record<string, string> = {
+    EVENEMENT: ui("passes.category.evenement", "Pass Événement"),
+    FORMATION: ui("passes.category.formation", "Pass Formation"),
+    DUO: ui("passes.category.duo", "Pass Duo"),
+    ETUDIANT: ui("passes.category.etudiant", "Pass Étudiant"),
+  }
+
   const breadcrumbs = [{ href: "/", label: ui("common.breadcrumb.home", "Accueil") }, { label: t.title }]
   const passes = event?.passes ?? []
+
+  // Group passes by their admin-assigned category, keeping the known 4
+  // categories first (in order), then any other/legacy category last.
+  const grouped = new Map<string, typeof passes>()
+  for (const pass of passes) {
+    const key = pass.category || "AUTRE"
+    if (!grouped.has(key)) grouped.set(key, [])
+    grouped.get(key)!.push(pass)
+  }
+  const orderedKeys = [
+    ...CATEGORY_ORDER.filter((k) => grouped.has(k)),
+    ...[...grouped.keys()].filter((k) => !CATEGORY_ORDER.includes(k)),
+  ]
 
   return (
     <>
@@ -61,103 +91,103 @@ export default async function PassesPage() {
               <p className="text-muted-foreground">{t.emptyState}</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-              {passes.map((pass) => {
-                const name = pick(pass.nameFr, pass.nameEn, locale) ?? pass.nameFr
-                const description = pick(pass.descriptionFr, pass.descriptionEn, locale)
-                const features = parseFeatures(pick(pass.featuresFr, pass.featuresEn, locale))
-                const priceTtc = pass.price + pass.price * pass.vatRate
+            <div className="space-y-16">
+              {orderedKeys.map((key) => {
+                const group = grouped.get(key)!
+                const sectionLabel = categoryLabels[key] ?? pick(group[0].nameFr, group[0].nameEn, locale) ?? group[0].nameFr
 
                 return (
-                  <div
-                    key={pass.id}
-                    className={cn(
-                      "relative rounded-3xl border-2 bg-card overflow-hidden flex flex-col",
-                      pass.isFeatured
-                        ? "border-pmo-gold shadow-premium-lg ring-4 ring-pmo-gold/20"
-                        : "border-border shadow-premium",
-                    )}
-                  >
-                    {pass.image && (
-                      <div className="relative aspect-video w-full overflow-hidden bg-muted">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={pass.image} alt={name} className="w-full h-full object-cover" />
-                        {pass.isFeatured && (
-                          <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-pmo-gold-gradient text-pmo-navy px-3 py-1 text-xs font-semibold shadow-premium">
-                            <Star className="w-3 h-3 fill-current" />
-                            {t.recommendedBadge}
+                  <div key={key} id={ANCHOR_IDS[key] ?? key.toLowerCase()} className="scroll-mt-32">
+                    <h2 className="font-display text-2xl sm:text-3xl font-bold mb-6">{sectionLabel}</h2>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+                      {group.map((pass) => {
+                        const name = pick(pass.nameFr, pass.nameEn, locale) ?? pass.nameFr
+                        const description = pick(pass.descriptionFr, pass.descriptionEn, locale)
+                        const features = parseFeatures(pick(pass.featuresFr, pass.featuresEn, locale))
+                        const priceTtc = pass.price + pass.price * pass.vatRate
+
+                        return (
+                          <div
+                            key={pass.id}
+                            className={cn(
+                              "relative rounded-3xl border-2 bg-card overflow-hidden flex flex-col",
+                              pass.isFeatured
+                                ? "border-pmo-gold shadow-premium-lg ring-4 ring-pmo-gold/20"
+                                : "border-border shadow-premium",
+                            )}
+                          >
+                            <div className="p-6 sm:p-8 flex flex-col flex-1">
+                              {pass.isFeatured && (
+                                <div className="inline-flex items-center gap-1.5 rounded-full border border-pmo-gold/20 bg-pmo-gold/10 text-pmo-gold px-3 py-1 text-xs font-semibold mb-4 w-fit">
+                                  <Star className="w-3 h-3 fill-current" />
+                                  {t.recommendedBadge}
+                                </div>
+                              )}
+
+                              <h3 className="font-display text-2xl font-bold mb-2">{name}</h3>
+                              {description && <p className="text-sm text-muted-foreground mb-5">{description}</p>}
+
+                              <div className="mb-6">
+                                <div className="flex items-baseline gap-1">
+                                  <span className="font-display text-4xl font-bold">
+                                    {formatPrice(pass.price, pass.currency, locale)}
+                                  </span>
+                                  <span className="text-sm text-muted-foreground">{t.priceHt}</span>
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  {Math.round(pass.vatRate * 100)}% {t.vat} · {t.ttc}:{" "}
+                                  <span className="font-semibold text-foreground">
+                                    {formatPrice(priceTtc, pass.currency, locale)}
+                                  </span>
+                                </div>
+                                {pass.minQuantity > 1 && (
+                                  <div className="mt-1 text-xs text-muted-foreground">
+                                    {t.perPerson} · {t.minQty}: {pass.minQuantity}
+                                  </div>
+                                )}
+                              </div>
+
+                              {features.length > 0 && (
+                                <ul className="space-y-2.5 mb-6 flex-1">
+                                  {features.map((f, i) => (
+                                    <li key={i} className="flex items-start gap-2.5">
+                                      <span className="shrink-0 w-5 h-5 rounded-full bg-pmo-violet/10 text-pmo-violet flex items-center justify-center mt-0.5">
+                                        <Check className="w-3 h-3" />
+                                      </span>
+                                      <span className="text-sm text-foreground/80 leading-relaxed">{f}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+
+                              {pass.paymentUrl ? (
+                                <a
+                                  href={pass.paymentUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={cn(
+                                    "inline-flex items-center justify-center gap-2 w-full rounded-xl px-6 py-3.5 font-semibold transition-all hover:scale-[1.02] shadow-premium mt-auto",
+                                    pass.isFeatured ? "bg-pmo-gold-gradient text-white" : "bg-pmo-violet-gradient text-white",
+                                  )}
+                                >
+                                  {t.register}
+                                  <ArrowRight className="w-4 h-4" />
+                                </a>
+                              ) : (
+                                <div className="rounded-xl border border-dashed border-border px-6 py-3.5 text-center text-sm text-muted-foreground mt-auto">
+                                  {t.registrationSoon}
+                                </div>
+                              )}
+
+                              <p className="text-xs text-center text-muted-foreground mt-3 flex items-center justify-center gap-1.5">
+                                <Shield className="w-3 h-3" />
+                                {t.guarantee}
+                              </p>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="p-6 sm:p-8 flex flex-col flex-1">
-                      {!pass.image && pass.isFeatured && (
-                        <div className="inline-flex items-center gap-1.5 rounded-full border border-pmo-gold/20 bg-pmo-gold/10 text-pmo-gold px-3 py-1 text-xs font-semibold mb-4 w-fit">
-                          <Star className="w-3 h-3 fill-current" />
-                          {t.recommendedBadge}
-                        </div>
-                      )}
-
-                      <h2 className="font-display text-2xl font-bold mb-2">{name}</h2>
-                      {description && <p className="text-sm text-muted-foreground mb-5">{description}</p>}
-
-                      <div className="mb-6">
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-display text-4xl font-bold">
-                          {formatPrice(pass.price, pass.currency, locale)}
-                        </span>
-                        <span className="text-sm text-muted-foreground">{t.priceHt}</span>
-                      </div>
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        {Math.round(pass.vatRate * 100)}% {t.vat} · {t.ttc}:{" "}
-                        <span className="font-semibold text-foreground">
-                          {formatPrice(priceTtc, pass.currency, locale)}
-                        </span>
-                      </div>
-                      {pass.minQuantity > 1 && (
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {t.perPerson} · {t.minQty}: {pass.minQuantity}
-                        </div>
-                      )}
-                    </div>
-
-                    {features.length > 0 && (
-                      <ul className="space-y-2.5 mb-6 flex-1">
-                        {features.map((f, i) => (
-                          <li key={i} className="flex items-start gap-2.5">
-                            <span className="shrink-0 w-5 h-5 rounded-full bg-pmo-violet/10 text-pmo-violet flex items-center justify-center mt-0.5">
-                              <Check className="w-3 h-3" />
-                            </span>
-                            <span className="text-sm text-foreground/80 leading-relaxed">{f}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {pass.paymentUrl ? (
-                      <a
-                        href={pass.paymentUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={cn(
-                          "inline-flex items-center justify-center gap-2 w-full rounded-xl px-6 py-3.5 font-semibold transition-all hover:scale-[1.02] shadow-premium mt-auto",
-                          pass.isFeatured ? "bg-pmo-gold-gradient text-white" : "bg-pmo-violet-gradient text-white",
-                        )}
-                      >
-                        {t.register}
-                        <ArrowRight className="w-4 h-4" />
-                      </a>
-                    ) : (
-                      <div className="rounded-xl border border-dashed border-border px-6 py-3.5 text-center text-sm text-muted-foreground mt-auto">
-                        {t.registrationSoon}
-                      </div>
-                    )}
-
-                      <p className="text-xs text-center text-muted-foreground mt-3 flex items-center justify-center gap-1.5">
-                        <Shield className="w-3 h-3" />
-                        {t.guarantee}
-                      </p>
+                        )
+                      })}
                     </div>
                   </div>
                 )

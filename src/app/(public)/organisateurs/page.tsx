@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import {
-  Building2,
   Globe,
   Linkedin,
   Facebook,
@@ -43,7 +42,6 @@ export default async function OrganisateursPage() {
     title: ui("organizers.hero.title", "Organisateurs"),
     subtitle: ui("organizers.hero.subtitle", "L'équipe derrière PMO Mastery, engagée pour l'excellence du PMO en Tunisie et dans la région MENA."),
     founderTitle: ui("organizers.founderLabel", "Fondatrice"),
-    aboutOrg: ui("organizers.aboutOrg", "À propos"),
     credentials: ui("organizers.credentials", "Certifications"),
     website: ui("organizers.website", "Site web"),
     emptyState: ui("organizers.emptyState", "Les organisateurs seront bientôt présentés."),
@@ -118,59 +116,54 @@ export default async function OrganisateursPage() {
                     )}
 
                     {/* Org details */}
-                    <div>
-                      <div className="flex items-start gap-4 mb-6">
-                        {org.logo && (
-                          <div className="w-16 h-16 rounded-2xl bg-card border border-border p-2 shrink-0 flex items-center justify-center">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={org.logo} alt={org.name} className="max-w-full max-h-full object-contain" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <Building2 className="w-4 h-4 text-pmo-violet" />
-                            <span className="text-xs uppercase tracking-widest text-muted-foreground">{t.aboutOrg}</span>
-                          </div>
-                          <h2 className="font-display text-2xl sm:text-3xl font-bold">{org.name}</h2>
-                        </div>
-                      </div>
-
-                      {desc && (
-                        <div className="prose prose-lg max-w-none text-muted-foreground mb-6">
-                          {desc.split("\n").filter((p) => p.trim().length > 0).map((paragraph, i) => (
-                            <p key={i} className="leading-relaxed mb-3">{paragraph}</p>
-                          ))}
+                    <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
+                      {org.logo && (
+                        <div className="w-44 h-44 sm:w-56 sm:h-56 rounded-2xl bg-card border border-border p-4 shrink-0 flex items-center justify-center mx-auto sm:mx-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={org.logo} alt={org.name} className="max-w-full max-h-full object-contain" />
                         </div>
                       )}
 
-                      {/* Social links */}
-                      <div className="flex flex-wrap items-center gap-3 mt-6">
-                        {org.websiteUrl && (
-                          <a href={org.websiteUrl} target="_blank" rel="noopener noreferrer"
-                             className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium hover:border-primary/30 hover:bg-primary/5 transition-colors">
-                            <Globe className="w-4 h-4 text-pmo-violet" />
-                            {t.website}
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </a>
+                      <div className="min-w-0">
+                        <h2 className="font-display text-2xl sm:text-3xl font-bold mb-4">{org.name}</h2>
+
+                        {desc && (
+                          <div className="prose prose-lg max-w-none text-muted-foreground mb-6">
+                            {desc.split("\n").filter((p) => p.trim().length > 0).map((paragraph, i) => (
+                              <p key={i} className="leading-relaxed mb-3">{paragraph}</p>
+                            ))}
+                          </div>
                         )}
-                        {org.linkedinUrl && (
-                          <a href={org.linkedinUrl} target="_blank" rel="noopener noreferrer"
-                             className="w-10 h-10 rounded-xl border border-border bg-card flex items-center justify-center hover:border-primary/30 hover:bg-primary/5 transition-colors">
-                            <Linkedin className="w-4 h-4 text-pmo-violet" />
-                          </a>
-                        )}
-                        {org.facebookUrl && (
-                          <a href={org.facebookUrl} target="_blank" rel="noopener noreferrer"
-                             className="w-10 h-10 rounded-xl border border-border bg-card flex items-center justify-center hover:border-primary/30 hover:bg-primary/5 transition-colors">
-                            <Facebook className="w-4 h-4 text-pmo-violet" />
-                          </a>
-                        )}
-                        {org.instagramUrl && (
-                          <a href={org.instagramUrl} target="_blank" rel="noopener noreferrer"
-                             className="w-10 h-10 rounded-xl border border-border bg-card flex items-center justify-center hover:border-primary/30 hover:bg-primary/5 transition-colors">
-                            <Instagram className="w-4 h-4 text-pmo-violet" />
-                          </a>
-                        )}
+
+                        {/* Social links */}
+                        <div className="flex flex-wrap items-center gap-3 mt-6">
+                          {org.websiteUrl && (
+                            <a href={org.websiteUrl} target="_blank" rel="noopener noreferrer"
+                               className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium hover:border-primary/30 hover:bg-primary/5 transition-colors">
+                              <Globe className="w-4 h-4 text-pmo-violet" />
+                              {t.website}
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </a>
+                          )}
+                          {org.linkedinUrl && (
+                            <a href={org.linkedinUrl} target="_blank" rel="noopener noreferrer"
+                               className="w-10 h-10 rounded-xl border border-border bg-card flex items-center justify-center hover:border-primary/30 hover:bg-primary/5 transition-colors">
+                              <Linkedin className="w-4 h-4 text-pmo-violet" />
+                            </a>
+                          )}
+                          {org.facebookUrl && (
+                            <a href={org.facebookUrl} target="_blank" rel="noopener noreferrer"
+                               className="w-10 h-10 rounded-xl border border-border bg-card flex items-center justify-center hover:border-primary/30 hover:bg-primary/5 transition-colors">
+                              <Facebook className="w-4 h-4 text-pmo-violet" />
+                            </a>
+                          )}
+                          {org.instagramUrl && (
+                            <a href={org.instagramUrl} target="_blank" rel="noopener noreferrer"
+                               className="w-10 h-10 rounded-xl border border-border bg-card flex items-center justify-center hover:border-primary/30 hover:bg-primary/5 transition-colors">
+                              <Instagram className="w-4 h-4 text-pmo-violet" />
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

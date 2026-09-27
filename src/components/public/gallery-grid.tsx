@@ -21,7 +21,7 @@ function Card({ item, className }: { item: GalleryItem; className?: string }) {
   )
 }
 
-const CARD_WIDTH = "w-[84%] sm:w-[70%] lg:w-[52%] xl:w-[46%]"
+const CARD_WIDTH = "w-[78%] sm:w-[64%] lg:w-[46%] xl:w-[40%]"
 
 // Centers a card within its horizontal scroll track only — unlike
 // Element.scrollIntoView(), this never touches the page's own vertical
