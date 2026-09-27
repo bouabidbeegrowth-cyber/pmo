@@ -1475,22 +1475,6 @@ async function main() {
 
   await db.galleryItem.create({
     data: {
-      id: "cmt2k2lz8000a7vtgwrgm0r3f",
-      eventId: "cmsvxyfck00017vycwelfl2u3",
-      type: "IMAGE",
-      imageUrl: "/uploads/e7750f25-6887-42a7-8e79-e8edcb28459a.webp",
-      videoUrl: null,
-      thumbnail: null,
-      captionFr: "",
-      captionEn: "",
-      isActive: true,
-      showOnHomepage: false,
-      displayOrder: 2,
-    },
-  })
-
-  await db.galleryItem.create({
-    data: {
       id: "cmt2k2og4000c7vtguxfm70mh",
       eventId: "cmsvxyfck00017vycwelfl2u3",
       type: "IMAGE",
@@ -1681,7 +1665,7 @@ async function main() {
       mapUrl: "https://maps.app.goo.gl/c6SoreJBxKqndf4J9",
       heroImageDesktop: null,
       heroImageMobile: null,
-      heroLogo: "/uploads/77786f3f-66e1-46f1-91ee-bb87ebc6db39.webp",
+      heroLogo: "/uploads/277b76cf-2a4c-4c4b-8a1e-ed5083cb5054.webp",
       ogImage: null,
       registrationEnabled: false,
       status: "UPCOMING",
@@ -2782,14 +2766,14 @@ async function main() {
       alt: null,
     } }).catch(() => {})
   await db.mediaAsset.create({ data: {
-      id: "cmtvfal6n000b7v8gsoz8dc5o",
-      filename: "77786f3f-66e1-46f1-91ee-bb87ebc6db39.webp",
-      originalName: "logo-dark-bg.png",
+      id: "cmuj093oq00007vmojbhstlga",
+      filename: "277b76cf-2a4c-4c4b-8a1e-ed5083cb5054.webp",
+      originalName: "logo.webp",
       mimeType: "image/webp",
-      size: 18490,
-      url: "/uploads/77786f3f-66e1-46f1-91ee-bb87ebc6db39.webp",
-      width: 755,
-      height: 580,
+      size: 3616,
+      url: "/uploads/277b76cf-2a4c-4c4b-8a1e-ed5083cb5054.webp",
+      width: 96,
+      height: 96,
       alt: null,
     } }).catch(() => {})
   await db.mediaAsset.create({ data: {
@@ -2823,17 +2807,6 @@ async function main() {
       url: "/uploads/25c053be-def4-4661-9023-9ea17b223211.webp",
       width: 1086,
       height: 1448,
-      alt: null,
-    } }).catch(() => {})
-  await db.mediaAsset.create({ data: {
-      id: "cmu4smkr800017vz43ljnfrhk",
-      filename: "e7750f25-6887-42a7-8e79-e8edcb28459a.webp",
-      originalName: "050A0047-2.jpg",
-      mimeType: "image/webp",
-      size: 84838,
-      url: "/uploads/e7750f25-6887-42a7-8e79-e8edcb28459a.webp",
-      width: 6000,
-      height: 4000,
       alt: null,
     } }).catch(() => {})
   await db.mediaAsset.create({ data: {
